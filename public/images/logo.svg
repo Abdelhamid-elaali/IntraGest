@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle -->
+    <circle cx="256" cy="256" r="248" fill="#2563eb" fill-opacity="0.1"/>
+    
+    <!-- Building Icon -->
+    <path d="M256 96L96 192V416H416V192L256 96Z" fill="#2563eb"/>
+    
+    <!-- Windows -->
+    <rect x="144" y="240" width="64" height="64" rx="4" fill="#16a34a"/>
+    <rect x="224" y="240" width="64" height="64" rx="4" fill="#16a34a"/>
+    <rect x="304" y="240" width="64" height="64" rx="4" fill="#16a34a"/>
+    <rect x="144" y="320" width="64" height="64" rx="4" fill="#16a34a"/>
+    <rect x="224" y="320" width="64" height="64" rx="4" fill="#16a34a"/>
+    <rect x="304" y="320" width="64" height="64" rx="4" fill="#16a34a"/>
+    
+    <!-- Door -->
+    <rect x="224" y="416" width="64" height="96" rx="4" fill="#2563eb"/>
+    
+    <!-- Roof Detail -->
+    <path d="M256 96L216 160H296L256 96Z" fill="#16a34a"/>
+</svg>
