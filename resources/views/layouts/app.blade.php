@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full" x-data="{ darkMode: localStorage.getItem('darkMode') === 'true' }" :class="{ 'dark': darkMode }">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full" x-data :class="{ 'dark': $store.darkMode.on }">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,30 +15,82 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- Dark mode script -->
-    <script>
-        if (localStorage.getItem('darkMode') === 'true' || 
-            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
-    </script>
-
     <!-- Alpine.js -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-sans antialiased h-full transition-colors duration-200 bg-gray-50 dark:bg-gray-900">
     <div class="min-h-full">
         <!-- Top Navigation Bar -->
-        <nav class="bg-blue-600 dark:bg-blue-800 shadow-lg fixed w-full z-10">
+        <nav class="bg-gray-100 dark:bg-blue-800 shadow-lg fixed w-full z-10">
             <div class="w-full mx-auto px-4">
                 <div class="flex justify-between h-16">
-                    <div class="flex">
+                    <div class="flex items-center">
                         <!-- Logo -->
                         <div class="flex-shrink-0 flex items-center">
                             <a href="{{ route('dashboard') }}" class="flex items-center space-x-2">
                                 <img src="{{ asset('images/logo.jpg') }}" alt="Logo" class="h-10 w-10">
-                                <span class="text-white text-xl font-bold">IntraGest</span>
+                                <span class="text-black text-xl font-bold">IntraGest</span>
                             </a>
+                        </div>
+                    </div>
+
+                    <!-- Center Search Bar -->
+                    <div class="flex-1 flex items-center justify-center px-6 lg:px-8" x-data="search">
+                        <div class="w-full max-w-lg lg:max-w-xl relative">
+                            <label for="search" class="sr-only">Search</label>
+                            <div class="relative text-black">
+                                <div class="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </div>
+                                <input
+                                    id="search"
+                                    name="search"
+                                    class="block w-full border-2 border-black dark:border-blue-700 bg-gray-300 dark:bg-gray-300 border-transparent rounded-lg py-2 pl-10 pr-3 text-sm placeholder-black font-semibold text-white focus:outline-none focus:bg-white focus:text-gray-900 focus:placeholder-gray-400 focus:ring-2 focus:ring-offset-2 focus:ring-offset-blue-600 focus:ring-white sm:text-sm transition-colors duration-200"
+                                    placeholder="Search sections (Press '/' to focus)"
+                                    type="search"
+                                    x-model="query"
+                                    @focus="showResults = true"
+                                    @click.away="showResults = false"
+                                    @keydown.escape="showResults = false"
+                                    @keydown.window="
+                                        if (event.key === '/' && document.activeElement !== $el) {
+                                            event.preventDefault();
+                                            $el.focus();
+                                        }
+                                    "
+                                >
+                            </div>
+
+                            <!-- Search Results Dropdown -->
+                            <div
+                                x-show="showResults && query.length > 0"
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 translate-y-1"
+                                x-transition:enter-end="opacity-100 translate-y-0"
+                                x-transition:leave="transition ease-in duration-150"
+                                x-transition:leave-start="opacity-100 translate-y-0"
+                                x-transition:leave-end="opacity-0 translate-y-1"
+                                class="absolute z-50 mt-2 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg max-h-96 overflow-y-auto"
+                                style="display: none;"
+                            >
+                                <ul class="py-2">
+                                    <template x-for="section in filteredSections" :key="section.route">
+                                        <li>
+                                            <a :href="section.route"
+                                               class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700"
+                                               @click="showResults = false">
+                                                <span x-html="getIcon(section.icon)" class="mr-3"></span>
+                                                <span x-text="section.name"></span>
+                                            </a>
+                                        </li>
+                                    </template>
+                                    <li x-show="filteredSections.length === 0" class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                        No results found
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
 
@@ -46,9 +98,9 @@
                     <div class="flex items-center space-x-4">
                         <!-- Notifications Dropdown -->
                         <div x-data="{ open: false }" @click.away="open = false" class="relative">
-                            <button @click="open = !open" class="relative p-1 text-white hover:text-blue-100 focus:outline-none">
+                            <button @click="open = !open" class="p-2 rounded-[20px] bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-gray-600 transition-colors duration-200">
                                 <span class="sr-only">View notifications</span>
-                                <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
                                 <!-- Notification Badge -->
@@ -90,15 +142,28 @@
                                 @endif
                             </div>
                         </div>
+                        <div class="flex items-center space-x-4">
+                            <button
+                                @click="$store.darkMode.toggle()"
+                                class="p-2 rounded-[20px] bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
+                            >
+                                <svg x-show="!$store.darkMode.on" class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                                </svg>
+                            <svg x-show="$store.darkMode.on" class="w-5 h-5 text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                </button>
+            </div>
 
                         <!-- Profile Dropdown -->
                         <div x-data="{ open: false }" @click.away="open = false" class="relative">
-                            <button @click="open = !open" class="flex items-center space-x-3 text-white hover:text-blue-100 focus:outline-none">
+                            <button @click="open = !open" class="flex items-center space-x-3 text-black hover:text-blue-400 focus:outline-none">
                                 <div class="flex items-center space-x-3">
-                                    <img class="h-8 w-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}" alt="{{ Auth::user()->name }}">
+                                    <img class="h-10 w-10 p-1 rounded-[25px] bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-gray-600 transition-colors duration-200 object-cover" src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name=' . urlencode(Auth::user()->name) }}" alt="{{ Auth::user()->name }}">
                                     <div class="text-sm">
-                                        <span class="block text-sm font-medium text-gray-100">{{ Auth::user()->name }}</span>
-                                        <span class="block text-xs text-blue-200">{{ Auth::user()->primaryRole()?->name ?? 'User' }}</span>
+                                        <span class="block text-sm font-medium text-black">{{ Auth::user()->name }}</span>
+                                        <span class="block text-xs text-blue-500">{{ Auth::user()->primaryRole()?->name ?? 'User' }}</span>
                                     </div>
                                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
@@ -135,6 +200,7 @@
                     </div>
                 </div>
             </div>
+
         </nav>
 
         <!-- Left Sidebar -->
@@ -208,21 +274,25 @@
                         </button>
                     </form>
 
-                    <div class="mt-4 px-4 py-3 flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Dark Mode</span>
-                        <button type="button" 
-                            x-data="darkMode = localStorage.getItem('darkMode') === 'true'"
-                            @click="darkMode = !darkMode; localStorage.setItem('darkMode', darkMode); document.documentElement.classList.toggle('dark')"
-                            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" 
-                            :class="{ 'bg-blue-600': darkMode, 'bg-gray-200': !darkMode }" 
-                            role="switch" 
-                            :aria-checked="darkMode">
-                            <span class="sr-only">Toggle dark mode</span>
-                            <span aria-hidden="true" 
-                                class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out" 
-                                :class="{ 'translate-x-5': darkMode, 'translate-x-0': !darkMode }">
-                            </span>
-                        </button>
+                    <div class="absolute bottom-0 left-0 w-full px-6 border-t border-gray-200 dark:border-gray-700 py-4">
+                    <div class="flex items-center justify-between">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Dark Mode</span>
+                            <button
+                                @click="$store.darkMode.toggle()"
+                                type="button"
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" 
+                                :class="$store.darkMode.on ? 'bg-blue-600' : 'bg-gray-200'"
+                                role="switch"
+                                :aria-checked="$store.darkMode.on"
+                            >
+                                <span class="sr-only">Toggle dark mode</span>
+                                <span
+                                    aria-hidden="true"
+                                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                    :class="$store.darkMode.on ? 'translate-x-5' : 'translate-x-0'"
+                                ></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </nav>

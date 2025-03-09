@@ -3,7 +3,7 @@
 @section('content')
 <div class="container mx-auto px-4 py-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Room Management</h1>
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Room Management</h1>
         @can('create', App\Models\Room::class)
         <a href="{{ route('rooms.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
             Add New Room

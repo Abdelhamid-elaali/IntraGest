@@ -1,25 +1,34 @@
 import './bootstrap';
-import Alpine from 'alpinejs/dist/module.esm.js';
+import './search';
+
+import Alpine from 'alpinejs';
 
 // Dark mode functionality
 document.addEventListener('alpine:init', () => {
-    Alpine.data('darkMode', () => ({
-        dark: localStorage.getItem('darkMode') === 'true',
-        init() {
-            if (this.dark) {
-                document.documentElement.classList.add('dark');
-            }
-        },
+    Alpine.store('darkMode', {
+        on: localStorage.getItem('darkMode') === 'true',
         toggle() {
-            this.dark = !this.dark;
-            localStorage.setItem('darkMode', this.dark);
-            if (this.dark) {
+            this.on = !this.on;
+            localStorage.setItem('darkMode', this.on);
+            this.updateClasses();
+        },
+        updateClasses() {
+            if (this.on) {
                 document.documentElement.classList.add('dark');
             } else {
                 document.documentElement.classList.remove('dark');
             }
+        },
+        init() {
+            this.updateClasses();
+            // Listen for changes from settings page
+            window.addEventListener('dark-mode-changed', (event) => {
+                this.on = event.detail;
+                localStorage.setItem('darkMode', this.on);
+                this.updateClasses();
+            });
         }
-    }));
+    });
 });
 
 window.Alpine = Alpine;

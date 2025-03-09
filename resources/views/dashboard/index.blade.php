@@ -157,11 +157,11 @@
     </div>
 
     <!-- Weekly Absences Chart -->
-    <div class="bg-white rounded-lg p-6">
+    <div class="bg-white rounded-lg p-4 dark:bg-gray-800 dark:text-white">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-semibold">Weekly Absences</h2>
+            <h2 class="text-lg font-semibold dark:text-white">Weekly Absences</h2>
         </div>
-        <canvas id="absencesChart" class="w-full h-64"></canvas>
+        <canvas id="absencesChart" class="w-full h-64 dark:bg-gray-800 dark:text-white"></canvas>
     </div>
 </div>
 
