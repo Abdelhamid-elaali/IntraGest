@@ -15,7 +15,7 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Total Students</div>
-                <div class="text-2xl font-bold">2,453</div>
+                <div class="text-2xl font-bold">{{ $stats['total_students'] }}</div>
             </div>
         </div>
 
@@ -28,33 +28,33 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Recent Payments</div>
-                <div class="text-2xl font-bold">$5,600</div>
+                <div class="text-2xl font-bold">${{ number_format($stats['recent_payments'] ?? 0) }}</div>
             </div>
         </div>
 
         <!-- Available Rooms -->
         <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
-            <div class="p-3 bg-pink-50 rounded-lg">
-                <svg class="w-8 h-8 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            <div class="p-3 bg-green-50 rounded-lg">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
             <div>
                 <div class="text-sm text-gray-500">Available Rooms</div>
-                <div class="text-2xl font-bold">25</div>
+                <div class="text-2xl font-bold">{{ $stats['available_rooms'] }}</div>
             </div>
         </div>
 
-        <!-- Active Staff -->
+        <!-- Total Rooms -->
         <div class="bg-white rounded-lg p-6 flex items-center space-x-4">
             <div class="p-3 bg-cyan-50 rounded-lg">
                 <svg class="w-8 h-8 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
             </div>
             <div>
-                <div class="text-sm text-gray-500">Active Staff</div>
-                <div class="text-2xl font-bold">57/920</div>
+                <div class="text-sm text-gray-500">Total Rooms</div>
+                <div class="text-2xl font-bold">{{ $stats['total_rooms'] }}</div>
             </div>
         </div>
     </div>
@@ -62,168 +62,190 @@
     <!-- Recent Stock Transactions & Statistics -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Recent Stock Transactions -->
-        <div class="bg-white rounded-lg p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-semibold">Recent Stock Transactions</h2>
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-green-50 rounded-lg">
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                    </div>
+                    <h2 class="text-lg font-semibold text-gray-900">Recent Stock Transactions</h2>
+                </div>
             </div>
-            <div class="space-y-4">
-                <!-- Transaction Item -->
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-2 bg-blue-100 rounded-lg">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
+            <div class="p-6 space-y-3">
+                @forelse($recentTransactions as $transaction)
+                    <div class="flex items-center justify-between p-4 {{ $transaction->type === 'in' ? 'bg-gradient-to-br from-green-50 to-green-100/50' : 'bg-gradient-to-br from-red-50 to-red-100/50' }} rounded-lg group hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-1.5 {{ $transaction->type === 'in' ? 'bg-green-100' : 'bg-red-100' }} rounded group-hover:scale-110 transition-transform duration-200">
+                                @if($transaction->type === 'in')
+                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m0-16l-4 4m4-4l4 4" />
+                                    </svg>
+                                @else
+                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20V4m0 16l-4-4m4 4l4-4" />
+                                    </svg>
+                                @endif
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">{{ $transaction->item_name }}</p>
+                                <p class="text-sm text-gray-500">{{ $transaction->created_at->format('M d, Y') }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <div class="font-medium">Spotify Subscription</div>
-                            <div class="text-sm text-gray-500">Jan 25, 2024</div>
-                        </div>
-                    </div>
-                    <div class="text-green-500 font-medium">+$350</div>
-                </div>
-
-                <!-- Transaction Item -->
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-2 bg-purple-100 rounded-lg">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="font-medium">Mobile Service</div>
-                            <div class="text-sm text-gray-500">Jan 24, 2024</div>
-                        </div>
-                    </div>
-                    <div class="text-red-500 font-medium">-$150</div>
-                </div>
-
-                <!-- Transaction Item -->
-                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                    <div class="flex items-center space-x-4">
-                        <div class="p-2 bg-pink-100 rounded-lg">
-                            <svg class="w-6 h-6 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="font-medium">Emily Wilson</div>
-                            <div class="text-sm text-gray-500">Jan 23, 2024</div>
+                        <div class="text-right">
+                            <p class="text-lg font-bold {{ $transaction->type === 'in' ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $transaction->type === 'in' ? '+' : '-' }}{{ $transaction->quantity }}
+                            </p>
+                            <p class="text-sm font-medium {{ $transaction->type === 'in' ? 'text-green-500' : 'text-red-500' }}">
+                                {{ $transaction->type === 'in' ? 'Received' : 'Used' }}
+                            </p>
                         </div>
                     </div>
-                    <div class="text-green-500 font-medium">+$980</div>
-                </div>
+                @empty
+                    <div class="flex flex-col items-center justify-center py-6 text-center">
+                        <div class="p-3 bg-gray-100 rounded-full mb-3">
+                            <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                            </svg>
+                        </div>
+                        <p class="text-gray-500 font-medium">No recent transactions</p>
+                        <p class="text-gray-400 text-sm">Transactions will appear here when available</p>
+                    </div>
+                @endforelse
             </div>
         </div>
 
         <!-- Stock Expenses Statistics -->
-        <div class="bg-white rounded-lg p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-lg font-semibold">Stock Expenses Statistics</h2>
-                <button class="text-sm text-blue-600 hover:text-blue-800">Weekly ↓</button>
-            </div>
-            <div class="flex space-x-8">
-                <!-- Pie Chart -->
-                <div class="flex-1">
-                    <canvas id="expensesChart" class="w-full h-64"></canvas>
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="flex items-center justify-between p-6 border-b border-gray-100">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-blue-50 rounded-lg">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-lg font-semibold text-gray-900">Stock Expenses Statistics</h2>
                 </div>
-                <!-- Legend -->
-                <div class="space-y-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-4 h-4 rounded-full bg-blue-500"></div>
-                        <div class="text-sm">
-                            <div class="font-medium">Supplies</div>
-                            <div class="text-gray-500">63%</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-4 h-4 rounded-full bg-cyan-400"></div>
-                        <div class="text-sm">
-                            <div class="font-medium">Services</div>
-                            <div class="text-gray-500">35%</div>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <div class="w-4 h-4 rounded-full bg-pink-400"></div>
-                        <div class="text-sm">
-                            <div class="font-medium">Other</div>
-                            <div class="text-gray-500">28%</div>
+                <div class="relative" x-data="{ open: false }" @click.away="open = false">
+                    <button 
+                        @click="open = !open"
+                        class="inline-flex items-center justify-center px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 transition-all duration-200"
+                    >
+                        <svg class="w-4 h-4 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <span>Weekly</span>
+                        <svg class="w-4 h-4 text-gray-400 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div 
+                        x-show="open"
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        class="absolute right-0 mt-2 w-40 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                    >
+                        <div class="py-1" role="menu" aria-orientation="vertical">
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Weekly</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Monthly</a>
+                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Yearly</a>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Weekly Absences Chart -->
-    <div class="bg-white rounded-lg p-4 dark:bg-gray-800 dark:text-white">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-lg font-semibold dark:text-white">Weekly Absences</h2>
+            <div class="p-6">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-medium text-gray-600">Supplies</p>
+                            <div class="p-1.5 bg-blue-100 rounded">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900">{{ $expenseStats['supplies'] }}%</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-50 to-purple-100/50 p-4 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-medium text-gray-600">Services</p>
+                            <div class="p-1.5 bg-purple-100 rounded">
+                                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900">{{ $expenseStats['services'] }}%</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-pink-50 to-pink-100/50 p-4 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-medium text-gray-600">Other</p>
+                            <div class="p-1.5 bg-pink-100 rounded">
+                                <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p class="text-2xl font-bold text-gray-900">{{ $expenseStats['other'] }}%</p>
+                    </div>
+                </div>
+            </div>
         </div>
-        <canvas id="absencesChart" class="w-full h-64 dark:bg-gray-800 dark:text-white"></canvas>
     </div>
 </div>
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Expenses Pie Chart
-    new Chart(document.getElementById('expensesChart'), {
+    // Expenses Chart
+    const expensesCtx = document.getElementById('expensesChart').getContext('2d');
+    const expensesChart = new Chart(expensesCtx, {
         type: 'pie',
         data: {
             labels: ['Supplies', 'Services', 'Other'],
             datasets: [{
-                data: [63, 35, 28],
-                backgroundColor: ['#3b82f6', '#22d3ee', '#f472b6'],
+                data: [{{ $expenseStats['supplies'] }}, {{ $expenseStats['services'] }}, {{ $expenseStats['other'] }}],
+                backgroundColor: ['#3B82F6', '#06B6D4', '#EC4899'],
+                borderWidth: 0
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
-                    display: false
+                    position: 'right'
                 }
             }
         }
     });
 
-    // Weekly Absences Chart
-    new Chart(document.getElementById('absencesChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-            datasets: [{
-                label: 'Students',
-                data: [15, 12, 18, 14, 10, 15, 12],
-                backgroundColor: '#3b82f6',
-                borderRadius: 4,
-            }, {
-                label: 'Staff',
-                data: [8, 9, 12, 8, 7, 10, 8],
-                backgroundColor: '#22d3ee',
-                borderRadius: 4,
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    grid: {
-                        display: true,
-                        color: '#f3f4f6'
-                    }
-                },
-                x: {
-                    grid: {
-                        display: false
+    // Time range selector for expenses
+    document.getElementById('timeRange').addEventListener('change', function(e) {
+        fetch(`/api/expenses-stats?range=${e.target.value}`)
+            .then(response => response.json())
+            .then(data => {
+                expensesChart.data.datasets[0].data = [data.supplies, data.services, data.other];
+                expensesChart.update();
+            });
+    });
+
+
                     }
                 }
             },
             plugins: {
                 legend: {
-                    position: 'bottom'
+                    display: true,
+                    position: 'top'
                 }
             }
         }

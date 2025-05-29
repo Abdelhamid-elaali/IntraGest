@@ -11,12 +11,20 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create admin role if it doesn't exist
-        $adminRole = Role::firstOrCreate(
-            ['slug' => 'super-admin'],
+        // Create director role if it doesn't exist
+        $directorRole = Role::firstOrCreate(
+            ['slug' => 'director'],
             [
-                'name' => 'Super Admin',
-                'is_super_admin' => true,
+                'name' => 'Director',
+                'permissions' => json_encode([
+                    'manage_rooms',
+                    'manage_users',
+                    'manage_payments',
+                    'manage_stocks',
+                    'manage_absences',
+                    'view_reports',
+                    'manage_settings'
+                ]),
                 'is_admin' => true
             ]
         );
@@ -35,7 +43,7 @@ class AdminSeeder extends Seeder
             ]
         );
 
-        // Assign admin role
-        $admin->assignRole($adminRole);
+        // Assign director role
+        $admin->assignRole($directorRole);
     }
 }

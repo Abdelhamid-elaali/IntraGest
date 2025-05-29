@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Models\Subject;
 use App\Models\Room;
 use App\Models\Grade;
-use App\Models\SubjectEnrollment;
 use App\Models\AcademicTerm;
+use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -28,44 +27,26 @@ class DashboardController extends Controller
             'total_students' => User::whereHas('roles', function($q) {
                 $q->where('name', 'student');
             })->count(),
-            'active_subjects' => Subject::active()->count(),
             'available_rooms' => Room::available()->count(),
-            'active_staff' => User::whereHas('roles', function($q) {
-                $q->whereIn('name', ['teacher', 'admin', 'staff']);
-            })->count()
+            'total_rooms' => Room::count(),
+            'recent_payments' => Payment::whereMonth('created_at', now()->month)->sum('amount')
         ];
 
-        // Get recent activities
+        // Initialize recent activities collection
         $recentActivities = collect();
 
-        // Recent enrollments
-        $recentEnrollments = SubjectEnrollment::with(['student', 'subject'])
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(function ($enrollment) {
-                return [
-                    'type' => 'enrollment',
-                    'description' => "New enrollment in {$enrollment->subject->name}",
-                    'user' => $enrollment->student->name,
-                    'time' => $enrollment->created_at,
-                    'status' => $enrollment->status
-                ];
-            });
-        $recentActivities = $recentActivities->concat($recentEnrollments);
-
         // Recent grades
-        $recentGrades = Grade::with(['student', 'subject'])
+        $recentGrades = Grade::with('student')
             ->latest()
             ->take(5)
             ->get()
             ->map(function ($grade) {
                 return [
                     'type' => 'grade',
-                    'description' => "Grade submitted for {$grade->subject->name}",
+                    'description' => "Grade recorded for {$grade->student->name}",
                     'user' => $grade->student->name,
                     'time' => $grade->created_at,
-                    'status' => $grade->isPassingGrade() ? 'passed' : 'failed'
+                    'status' => $grade->is_final ? 'final' : 'pending'
                 ];
             });
         $recentActivities = $recentActivities->concat($recentGrades);
@@ -82,15 +63,46 @@ class DashboardController extends Controller
 
             $performanceMetrics = [
                 'average_grade' => Grade::where('academic_term_id', $currentTerm->id)
-                    ->avg('score'),
+                    ->avg('score') ?? 0,
                 'passing_rate' => Grade::where('academic_term_id', $currentTerm->id)
                     ->where('score', '>=', 60)
                     ->count() / max(1, Grade::where('academic_term_id', $currentTerm->id)
                     ->count()) * 100,
-                'enrollment_rate' => SubjectEnrollment::where('academic_term_id', $currentTerm->id)
-                    ->count() / max(1, $studentCount) * 100
+                'room_occupancy_rate' => Room::whereHas('currentAllocation')
+                    ->count() / max(1, Room::count()) * 100
             ];
         }
+
+        // Get recent stock transactions
+        $recentTransactions = DB::table('stock_transactions as st')
+            ->join('stocks as s', 'st.stock_id', '=', 's.id')
+            ->join('users as u', 'st.user_id', '=', 'u.id')
+            ->select('st.*', 's.name as stock_name', 'u.name as user_name')
+            ->orderBy('st.created_at', 'desc')
+            ->take(5)
+            ->get();
+
+        // Calculate stock expenses statistics
+        $stockStats = DB::table('stock_transactions as st')
+            ->join('stocks as s', 'st.stock_id', '=', 's.id')
+            ->select(
+                DB::raw('SUM(CASE WHEN st.type = "in" THEN (st.quantity * s.unit_price) WHEN st.type = "out" THEN -(st.quantity * s.unit_price) ELSE 0 END) as total_amount'),
+                DB::raw('SUM(CASE WHEN st.type = "in" THEN (st.quantity * s.unit_price) WHEN st.type = "out" THEN -(st.quantity * s.unit_price) ELSE 0 END) as supplies_total'),
+                DB::raw('0 as services_total'),
+                DB::raw('0 as other_total')
+            )
+            ->where('st.created_at', '>=', now()->subWeek())
+            ->first();
+
+        // Calculate percentages
+        $total = max($stockStats->total_amount, 1); // Avoid division by zero
+        $expenseStats = [
+            'supplies' => round(($stockStats->supplies_total / $total) * 100),
+            'services' => round(($stockStats->services_total / $total) * 100),
+            'other' => round(($stockStats->other_total / $total) * 100)
+        ];
+
+
 
         // Get system notifications
         $notifications = [
@@ -115,6 +127,8 @@ class DashboardController extends Controller
             'stats',
             'recentActivities',
             'performanceMetrics',
+            'recentTransactions',
+            'expenseStats',
             'notifications',
             'currentTerm'
         ));

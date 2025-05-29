@@ -2,8 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\SubjectController;
-use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\AcademicTermController;
@@ -11,6 +9,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsenceController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\StockStatisticsController;
 use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SettingsController;
@@ -140,7 +139,5 @@ Route::middleware(['auth'])->group(function () {
 
 // API Routes for Dynamic Data
 Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
-    Route::get('subjects/search', [SubjectController::class, 'search'])->name('subjects.search');
-    Route::get('subjects/{subject}/prerequisites', [SubjectController::class, 'prerequisites'])->name('subjects.prerequisites');
-    Route::get('enrollments/validate', [EnrollmentController::class, 'validateSelection'])->name('enrollments.validate');
+    Route::get('expenses-stats', [StockStatisticsController::class, 'getExpenseStats'])->name('expenses.stats');
 });

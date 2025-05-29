@@ -34,13 +34,6 @@ class GradePolicy
             return $grade->student_id === $user->id;
         }
 
-        // Teachers can view grades for their subjects
-        if ($user->hasRole('teacher')) {
-            return $user->teachingSubjects()
-                       ->where('id', $grade->subject_id)
-                       ->exists();
-        }
-
         // Admins and staff can view all grades
         return $user->hasAnyRole(['admin', 'staff']);
     }
@@ -69,12 +62,7 @@ class GradePolicy
             return false;
         }
 
-        // Teachers can update grades for their subjects
-        if ($user->hasRole('teacher')) {
-            return $user->teachingSubjects()
-                       ->where('id', $grade->subject_id)
-                       ->exists();
-        }
+
 
         // Admins and staff can update any grade
         return $user->hasAnyRole(['admin', 'staff']);
@@ -90,12 +78,7 @@ class GradePolicy
             return false;
         }
 
-        // Teachers can delete grades for their subjects
-        if ($user->hasRole('teacher')) {
-            return $user->teachingSubjects()
-                       ->where('id', $grade->subject_id)
-                       ->exists();
-        }
+
 
         // Only admins can delete grades
         return $user->hasRole('admin');
@@ -106,12 +89,7 @@ class GradePolicy
      */
     public function finalize(User $user, Grade $grade): bool
     {
-        // Teachers can finalize grades for their subjects
-        if ($user->hasRole('teacher')) {
-            return $user->teachingSubjects()
-                       ->where('id', $grade->subject_id)
-                       ->exists();
-        }
+
 
         // Admins and staff can finalize any grade
         return $user->hasAnyRole(['admin', 'staff']);

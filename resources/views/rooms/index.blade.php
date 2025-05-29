@@ -12,22 +12,18 @@
     </div>
 
     <!-- Room Status Overview -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white rounded-lg shadow p-4">
             <h3 class="text-lg font-semibold text-gray-700">Total Rooms</h3>
             <p class="text-3xl font-bold text-blue-600">{{ $rooms->count() }}</p>
         </div>
         <div class="bg-white rounded-lg shadow p-4">
             <h3 class="text-lg font-semibold text-gray-700">Available</h3>
-            <p class="text-3xl font-bold text-green-600">{{ $rooms->where('status', 'available')->count() }}</p>
+            <p class="text-3xl font-bold text-green-600">{{ $rooms->where('status', 'Available')->count() }}</p>
         </div>
         <div class="bg-white rounded-lg shadow p-4">
-            <h3 class="text-lg font-semibold text-gray-700">Occupied</h3>
-            <p class="text-3xl font-bold text-orange-600">{{ $rooms->where('status', 'occupied')->count() }}</p>
-        </div>
-        <div class="bg-white rounded-lg shadow p-4">
-            <h3 class="text-lg font-semibold text-gray-700">Under Maintenance</h3>
-            <p class="text-3xl font-bold text-red-600">{{ $rooms->where('status', 'maintenance')->count() }}</p>
+            <h3 class="text-lg font-semibold text-gray-700">Unavailable</h3>
+            <p class="text-3xl font-bold text-red-600">{{ $rooms->where('status', 'Unavailable')->count() }}</p>
         </div>
     </div>
 
@@ -35,14 +31,20 @@
     <div class="bg-white rounded-lg shadow p-4 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700">Type</label>
-                <select id="type-filter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">All Types</option>
-                    <option value="single">Single</option>
-                    <option value="double">Double</option>
-                    <option value="triple">Triple</option>
-                    <option value="quad">Quad</option>
-                    <option value="suite">Suite</option>
+                <label class="block text-sm font-medium text-gray-700">Pavilion</label>
+                <select id="pavilion-filter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">All Pavilions</option>
+                    <option value="Girls">Girls</option>
+                    <option value="Boys">Boys</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Floor</label>
+                <select id="floor-filter" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">All Floors</option>
+                    @foreach($rooms->pluck('floor')->unique()->sort() as $floor)
+                        <option value="{{ $floor }}">Floor {{ $floor }}</option>
+                    @endforeach
                 </select>
             </div>
             <div>
@@ -74,7 +76,45 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Room N°</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Étage</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pavillon</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type d'hébergement</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre de stagiaires</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @foreach($rooms as $room)
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $room['room_number'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $room['floor'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $room['pavilion'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $room['accommodation_type'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $room['capacity'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $room['availability_color'] === 'green' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $room['status'] }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $room['description'] }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div class="flex space-x-2">
+                                <a href="{{ route('rooms.edit', $room['id']) }}" class="text-indigo-600 hover:text-indigo-900">Edit</a>
+                                <form action="{{ route('rooms.destroy', $room['id']) }}" method="POST" class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-600 hover:text-red-900 ml-2" onclick="return confirm('Are you sure?')">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Occupancy</th>

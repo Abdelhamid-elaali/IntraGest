@@ -20,12 +20,15 @@ class RoomController extends Controller
                 return [
                     'id' => $room->id,
                     'room_number' => $room->room_number,
-                    'type' => $room->type,
+                    'floor' => $room->floor,
+                    'pavilion' => $room->pavilion,
+                    'accommodation_type' => $room->accommodation_type,
                     'capacity' => $room->capacity,
                     'status' => $room->status,
+                    'description' => $room->description,
+                    'maintenance_status' => $room->maintenance_status,
                     'occupancy' => $room->current_occupants_count,
-                    'price' => $room->price_per_month,
-                    'amenities' => $room->amenities,
+                    'availability_color' => $room->status === 'Available' ? 'green' : 'red',
                     'current_allocation' => $room->currentAllocation ? [
                         'student' => $room->currentAllocation->user->name,
                         'start_date' => $room->currentAllocation->start_date->format('Y-m-d'),
@@ -46,9 +49,12 @@ class RoomController extends Controller
     {
         $validated = $request->validate([
             'room_number' => ['required', 'string', 'unique:rooms,room_number'],
+            'floor' => ['required', 'integer', 'min:0'],
+            'pavilion' => ['required', Rule::in(['Girls', 'Boys'])],
+            'accommodation_type' => ['required', Rule::in(['Personal', 'Shared'])],
             'capacity' => ['required', 'integer', 'min:1'],
-            'type' => ['required', Rule::in(['single', 'double', 'triple', 'quad', 'suite'])],
-            'price_per_month' => ['required', 'numeric', 'min:0'],
+            'status' => ['required', Rule::in(['Available', 'Unavailable'])],
+            'description' => ['nullable', Rule::in(['Occupied - Reservable', 'Vacant - Trainees'])],
             'description' => ['nullable', 'string'],
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['string']

@@ -118,30 +118,6 @@
             @endif
 
             <!-- Teaching Information (for teachers) -->
-            @if($user->roles->contains('name', 'teacher'))
-                <div class="p-6 border-b border-gray-200">
-                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Teaching Information</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Department</label>
-                            <p class="mt-1 text-gray-900">{{ $user->department ?? 'Not assigned' }}</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Subjects Teaching</label>
-                            <p class="mt-1 text-gray-900">
-                                {{ $user->teachingSubjects()->count() }}
-                            </p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Total Students</label>
-                            <p class="mt-1 text-gray-900">
-                                {{ $user->teachingSubjects()->withCount('enrollments')->get()->sum('enrollments_count') }}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            @endif
-
             <!-- Account Security -->
             <div class="p-6">
                 <h2 class="text-xl font-semibold text-gray-900 mb-4">Account Security</h2>

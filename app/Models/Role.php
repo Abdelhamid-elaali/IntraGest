@@ -15,11 +15,13 @@ class Role extends Model
         'name',
         'slug',
         'description',
+        'permissions',
         'is_admin',
         'is_super_admin'
     ];
 
     protected $casts = [
+        'permissions' => 'array',
         'is_admin' => 'boolean',
         'is_super_admin' => 'boolean'
     ];

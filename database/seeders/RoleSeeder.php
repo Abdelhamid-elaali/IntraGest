@@ -15,13 +15,6 @@ class RoleSeeder extends Seeder
         // Define roles with their permissions
         $roles = [
             [
-                'name' => 'Director',
-                'slug' => 'director',
-                'description' => 'Manages the entire system with full access',
-                'is_super_admin' => true,
-                'is_admin' => true
-            ],
-            [
                 'name' => 'Boarding Manager',
                 'slug' => 'boarding-manager',
                 'description' => 'Manages complaints, rooms, and payments',

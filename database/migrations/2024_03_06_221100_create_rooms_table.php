@@ -13,13 +13,14 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
-            $table->string('room_number')->unique();
-            $table->integer('capacity');
-            $table->enum('type', ['single', 'double', 'triple', 'quad', 'suite']);
-            $table->enum('status', ['available', 'occupied', 'maintenance'])->default('available');
-            $table->text('description')->nullable();
-            $table->decimal('price_per_month', 10, 2);
-            $table->json('amenities')->nullable();
+            $table->string('room_number')->unique(); // Chambre N°
+            $table->integer('floor'); // Étage
+            $table->enum('pavilion', ['Girls', 'Boys']); // Pavillon
+            $table->enum('accommodation_type', ['Personal', 'Shared']); // Type d'hébergement
+            $table->integer('capacity'); // Nombre de stagiaires
+            $table->enum('status', ['Available', 'Unavailable'])->default('Available'); // Statut
+            $table->enum('description', ['Occupied - Reservable', 'Vacant - Trainees'])->nullable(); // Description
+            $table->enum('maintenance_status', ['operational', 'maintenance'])->default('operational'); // For maintenance tracking
             $table->timestamps();
         });
 

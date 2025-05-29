@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\User;
-use App\Models\Subject;
 use App\Models\AcademicTerm;
 
 class Grade extends Model
@@ -14,7 +13,7 @@ class Grade extends Model
 
     protected $fillable = [
         'student_id',
-        'subject_id',
+        'subject_name',
         'academic_term_id',
         'grader_id',
         'score',
@@ -39,11 +38,6 @@ class Grade extends Model
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
-    }
-
-    public function subject()
-    {
-        return $this->belongsTo(Subject::class);
     }
 
     public function academicTerm()
@@ -120,11 +114,6 @@ class Grade extends Model
     public function scopeForStudent($query, $studentId)
     {
         return $query->where('student_id', $studentId);
-    }
-
-    public function scopeForSubject($query, $subjectId)
-    {
-        return $query->where('subject_id', $subjectId);
     }
 
     public function scopeForTerm($query, $termId)

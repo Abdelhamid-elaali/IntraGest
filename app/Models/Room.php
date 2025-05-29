@@ -13,22 +13,23 @@ class Room extends Model
 
     protected $fillable = [
         'room_number',
+        'floor',
+        'pavilion',
+        'accommodation_type',
         'capacity',
-        'type',
         'status',
         'description',
-        'price_per_month',
-        'amenities'
+        'maintenance_status'
     ];
 
     protected $casts = [
-        'amenities' => 'array',
-        'price_per_month' => 'decimal:2'
+        'floor' => 'integer',
+        'capacity' => 'integer'
     ];
 
     protected $attributes = [
-        'status' => 'available',
-        'amenities' => '[]'
+        'status' => 'Available',
+        'maintenance_status' => 'operational'
     ];
 
     // Relationships

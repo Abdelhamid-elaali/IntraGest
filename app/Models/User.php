@@ -52,18 +52,6 @@ class User extends Authenticatable
         return $this->roles()->first();
     }
 
-    public function taughtSubjects(): BelongsToMany
-    {
-        return $this->belongsToMany(Subject::class, 'subject_teachers')
-                    ->withPivot('role')
-                    ->withTimestamps();
-    }
-
-    public function enrollments(): HasMany
-    {
-        return $this->hasMany(SubjectEnrollment::class, 'student_id');
-    }
-
     public function grades(): HasMany
     {
         return $this->hasMany(Grade::class, 'student_id');

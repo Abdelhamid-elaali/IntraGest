@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('grades', function (Blueprint $table) {
             $table->id();
             $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
+            $table->string('subject_name');
             $table->foreignId('academic_term_id')->constrained('academic_terms')->onDelete('cascade');
             $table->foreignId('grader_id')->nullable()->constrained('users')->onDelete('set null');
             $table->decimal('score', 5, 2);
@@ -29,7 +29,7 @@ return new class extends Migration
 
             // Create a shorter index name manually
             $table->unique(
-                ['student_id', 'subject_id', 'academic_term_id', 'assessment_type'],
+                ['student_id', 'subject_name', 'academic_term_id', 'assessment_type'],
                 'grades_composite_unique'
             );
         });
