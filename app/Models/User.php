@@ -33,7 +33,8 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
-        'status' => 'string'
+        'status' => 'string',
+        'settings' => 'array'
     ];
 
     protected $attributes = [
@@ -151,6 +152,23 @@ class User extends Authenticatable
     public function isIntern(): bool
     {
         return $this->hasRole('intern');
+    }
+    
+    public function hasPermission(string $permission): bool
+    {
+        // Super admins have all permissions
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+        
+        // Check if any of the user's roles have the permission
+        foreach ($this->roles as $role) {
+            if (isset($role->permissions) && is_array($role->permissions) && in_array($permission, $role->permissions)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     public function assignRole(string|Role|array $roles): void

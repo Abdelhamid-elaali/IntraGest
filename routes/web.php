@@ -13,6 +13,7 @@ use App\Http\Controllers\StockStatisticsController;
 use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\CriteriaController;
@@ -155,6 +156,11 @@ Route::middleware(['auth'])->group(function () {
     // Profile Management
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    
+    // Staff Management Routes (Only accessible to admins and directors)
+    Route::middleware(['auth'])->group(function () {
+        Route::resource('staff', StaffController::class);
+    });
     
     // Notification Routes
     Route::post('/profile/notifications/{id}/read', [ProfileController::class, 'markNotificationAsRead'])->name('profile.notifications.read');

@@ -17,15 +17,15 @@
     </div>
 
     @if(session('success'))
-        <div class="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded relative" role="alert">
-            <span class="block sm:inline">{{ session('success') }}</span>
-        </div>
+        <x-alert type="success" :auto-dismiss="true" :dismiss-after="4000" class="mb-4">
+            {{ session('success') }}
+        </x-alert>
     @endif
 
     @if(session('error'))
-        <div class="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded relative" role="alert">
-            <span class="block sm:inline">{{ session('error') }}</span>
-        </div>
+        <x-alert type="error" :auto-dismiss="true" :dismiss-after="4000" class="mb-4">
+            {{ session('error') }}
+        </x-alert>
     @endif
 
     <div class="bg-white shadow-md rounded-lg overflow-hidden">

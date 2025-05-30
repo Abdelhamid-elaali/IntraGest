@@ -14,7 +14,7 @@
                 </svg>
             </div>
             <div>
-                <div class="text-sm text-gray-500">Total Students</div>
+                <div class="text-sm text-gray-500">Total Trainees</div>
                 <div class="text-2xl font-bold">{{ $stats['total_students'] }}</div>
             </div>
         </div>

@@ -56,9 +56,9 @@
         </div>
 
         @if(session('success'))
-            <div class="mb-4 bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded relative" role="alert">
-                <span class="block sm:inline">{{ session('success') }}</span>
-            </div>
+            <x-alert type="success" :auto-dismiss="true" :dismiss-after="4000" class="mb-4">
+                {{ session('success') }}
+            </x-alert>
         @endif
 
         <div class="overflow-x-auto">
