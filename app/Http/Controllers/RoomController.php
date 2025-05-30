@@ -11,11 +11,35 @@ use Illuminate\Validation\Rule;
 
 class RoomController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $rooms = Room::withCount(['currentOccupants'])
-            ->with(['currentAllocation.user'])
-            ->get()
+        $query = Room::withCount(['currentOccupants'])
+            ->with(['currentAllocation.user']);
+            
+        // Apply filters if they exist
+        if ($request->filled('pavilion')) {
+            $query->where('pavilion', $request->pavilion);
+        }
+        
+        if ($request->filled('floor')) {
+            $query->where('floor', $request->floor);
+        }
+        
+        if ($request->filled('status')) {
+            if ($request->status === 'available') {
+                $query->where('status', 'Available');
+            } elseif ($request->status === 'occupied') {
+                $query->where('status', 'Unavailable');
+            } elseif ($request->status === 'maintenance') {
+                $query->where('maintenance_status', '!=', 'operational');
+            }
+        }
+        
+        if ($request->filled('accommodation_type')) {
+            $query->where('accommodation_type', $request->accommodation_type);
+        }
+        
+        $rooms = $query->get()
             ->map(function ($room) {
                 return [
                     'id' => $room->id,

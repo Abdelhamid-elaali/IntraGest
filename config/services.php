@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'brevo' => [
+        'key' => env('BREVO_API_KEY'),
+        'template_id' => env('BREVO_TEMPLATE_ID'),
+        'list_id' => env('BREVO_LIST_ID'),
+    ],
+
 ];

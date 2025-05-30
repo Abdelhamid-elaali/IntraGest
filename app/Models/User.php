@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Collection;
+use App\Notifications\ResetPasswordNotification;
 
 class User extends Authenticatable
 {
@@ -40,6 +41,17 @@ class User extends Authenticatable
     protected $attributes = [
         'status' => 'active'
     ];
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
 
     // Relationships
     public function roles(): BelongsToMany
