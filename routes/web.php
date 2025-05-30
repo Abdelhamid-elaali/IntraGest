@@ -80,6 +80,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('search', [HelpCenterController::class, 'search'])->name('search');
         Route::get('category/{slug}', [HelpCenterController::class, 'category'])->name('category');
         Route::get('article/{slug}', [HelpCenterController::class, 'show'])->name('show');
+        Route::get('contact', [HelpCenterController::class, 'contact'])->name('contact');
+        Route::post('contact', [HelpCenterController::class, 'submitContact'])->name('submit-contact');
     });
 
     // Profile Routes

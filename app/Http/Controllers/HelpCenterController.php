@@ -53,4 +53,24 @@ class HelpCenterController extends Controller
 
         return view('help-center.category', compact('category', 'articles'));
     }
+    
+    public function contact()
+    {
+        return view('help-center.contact');
+    }
+    
+    public function submitContact(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string',
+        ]);
+        
+        // In a real application, you would send this to an email service
+        // or save it to a database table for support staff to review
+        
+        return redirect()->route('help-center.contact')->with('success', 'Your message has been sent. Our support team will contact you soon.');
+    }
 }
