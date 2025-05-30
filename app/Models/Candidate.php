@@ -21,12 +21,24 @@ class Candidate extends Model
         'status',
         'notes',
         'application_date',
-        'user_id'
+        'user_id',
+        'name',
+        'academic_year',
+        'specialization',
+        'nationality',
+        'distance',
+        'income_level',
+        'training_level',
+        'has_disability',
+        'family_status',
+        'score'
     ];
 
     protected $casts = [
         'birth_date' => 'date',
-        'application_date' => 'date'
+        'application_date' => 'date',
+        'has_disability' => 'boolean',
+        'score' => 'float'
     ];
 
     // Relationships

@@ -4,8 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Models\Supplier;
 use App\Models\StockTransaction;
+use App\Models\Department;
+use Carbon\Carbon;
 
 class Stock extends Model
 {
@@ -13,19 +17,34 @@ class Stock extends Model
 
     protected $fillable = [
         'name',
+        'code',
         'category',
         'description',
         'quantity',
+        'maximum_quantity',
         'minimum_quantity',
-        'unit_price',
         'unit_type',
+        'unit_price',
         'expiry_date',
-        'supplier_id'
+        'supplier_id',
+        'department_id',
     ];
 
     protected $casts = [
-        'unit_price' => 'decimal:2',
-        'expiry_date' => 'date'
+        'entry_date' => 'date',
+        'expiry_date' => 'date',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'price_with_vat',
+        'stock_level_status',
+        'stock_percentage',
+        'stock_status',
     ];
 
     // Relationships
@@ -34,27 +53,91 @@ class Stock extends Model
         return $this->belongsTo(Supplier::class);
     }
 
+    // Department relationship is not implemented yet
+
     public function transactions()
     {
         return $this->hasMany(StockTransaction::class);
     }
 
     // Helper methods
+    /**
+     * Calculate the price including VAT (using default VAT rate)
+     */
+    protected function priceWithVat(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->unit_price * 1.20 // Using 20% VAT as default
+        );
+    }
+
+    /**
+     * Calculate the stock level percentage
+     */
+    protected function stockPercentage(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                if ($this->maximum_quantity <= 0) {
+                    return 0;
+                }
+
+                $percentage = ($this->quantity / $this->maximum_quantity) * 100;
+                return round(min($percentage, 100), 1);
+            }
+        );
+    }
+
+    /**
+     * Get the stock status (critical, low, normal)
+     */
+    protected function stockStatus(): Attribute
+    {
+        return Attribute::make(
+            get: function () {
+                $percentage = $this->stock_percentage;
+
+                if ($percentage <= 10) {
+                    return 'critical';
+                } elseif ($percentage <= 15) {
+                    return 'low';
+                } else {
+                    return 'normal';
+                }
+            }
+        );
+    }
+
+    /**
+     * Check if stock needs to be reordered
+     */
     public function needsRestock()
     {
         return $this->quantity <= $this->minimum_quantity;
     }
-
-    public function isExpired()
+    
+    /**
+     * Get the stock level status (red, yellow, green)
+     */
+    public function getStockLevelStatusAttribute()
     {
-        return $this->expiry_date && $this->expiry_date->isPast();
+        $percentage = $this->stock_percentage;
+        
+        if ($percentage <= 10) {
+            return 'red';
+        } elseif ($percentage <= 15) {
+            return 'yellow';
+        } else {
+            return 'green';
+        }
     }
-
-    public function isExpiringSoon($days = 7)
+    
+    /**
+     * Get the price including VAT (legacy method for backward compatibility)
+     */
+    public function getPriceWithVatAttribute()
     {
-        return $this->expiry_date && 
-               $this->expiry_date->isFuture() && 
-               $this->expiry_date->diffInDays(now()) <= $days;
+        return round($this->unit_price * 1.20, 2); // Using 20% VAT as default
     }
 
     public function addStock($quantity, $userId, $notes = null)
@@ -88,5 +171,62 @@ class Stock extends Model
     public function getTotalValue()
     {
         return $this->quantity * $this->unit_price;
+    }
+    
+    /**
+     * Get total value including VAT
+     */
+    public function getTotalValueWithVat()
+    {
+        return $this->quantity * $this->price_with_vat;
+    }
+    
+    /**
+     * Transfer stock to another department
+     */
+    public function transferToDepartment($departmentId, $quantity, $userId, $notes = null)
+    {
+        if ($this->quantity < $quantity) {
+            throw new \Exception('Insufficient stock quantity for transfer');
+        }
+        
+        // Decrease stock from current item
+        $this->decrement('quantity', $quantity);
+        
+        // Record the transaction
+        $this->transactions()->create([
+            'type' => 'transfer_out',
+            'quantity' => $quantity,
+            'unit_price' => $this->unit_price,
+            'user_id' => $userId,
+            'notes' => $notes ?? 'Stock transfer to department ID: ' . $departmentId,
+            'reference_number' => 'TRF-' . time() . '-' . rand(1000, 9999),
+        ]);
+        
+        return true;
+    }
+    
+    /**
+     * Scope for low stock items (below 15%)
+     */
+    public function scopeLowStock($query)
+    {
+        return $query->whereRaw('(quantity * 100.0) / NULLIF(maximum_quantity, 0) <= 15');
+    }
+    
+    /**
+     * Scope for critical stock items (below 10%)
+     */
+    public function scopeCriticalStock($query)
+    {
+        return $query->whereRaw('(quantity * 100.0) / NULLIF(maximum_quantity, 0) <= 10');
+    }
+    
+    /**
+     * Scope for items by category
+     */
+    public function scopeByCategory($query, $category)
+    {
+        return $query->where('category', $category);
     }
 }

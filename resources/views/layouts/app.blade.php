@@ -211,7 +211,7 @@
     <div
         x-data="initSidebar()"
         class="fixed left-0 top-12 bottom-6 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out z-10 overflow-y-auto shadow-sm h-full"
-        :class="isOpen ? 'w-64' : 'w-16'"
+        :class="isOpen ? 'w-56' : 'w-14'"
     >
         <!-- Toggle Button Section -->
         <div class="pt-16"></div>
@@ -231,59 +231,91 @@
                 </svg>
             </div>
         </button>
-        <nav class="py-2 px-2 space-y-1 relative">
-            <a href="{{ route('dashboard') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
-                <svg class="w-5 h-5 mr-3 {{ request()->routeIs('dashboard') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <nav class="py-1 px-1 space-y-1 relative">
+            <a href="{{ route('dashboard') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('dashboard') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                 </svg>
                 <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Dashboard</span>
             </a>
-
-            <a href="{{ route('absences.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('absences.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                <svg class="w-5 h-5 mr-3 {{ request()->routeIs('absences.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Absence Management</span>
-            </a>
-
-            <a href="{{ route('payments.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('payments.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                <svg class="w-5 h-5 mr-3 {{ request()->routeIs('payments.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('payments.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('payments.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('payments.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Payment Management</span>
             </a>
 
-            <a href="{{ route('rooms.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('rooms.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                <svg class="w-5 h-5 mr-3 {{ request()->routeIs('rooms.index') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('rooms.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('rooms.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('rooms.index') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
                 <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Room Management</span>
             </a>
 
-            <a href="{{ route('stocks.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('stocks.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                <svg class="w-5 h-5 mr-3 {{ request()->routeIs('stocks.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <a href="{{ route('stocks.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('stocks.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('stocks.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
                 </svg>
                 <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Stock Management</span>
             </a>
 
-            <a href="{{ route('help-center.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('help-center.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                <svg class="w-5 h-5 mr-3 {{ request()->routeIs('help-center.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <!-- Trainee Management Section -->
+            <div x-data="{open: {{ request()->routeIs('students.*') || request()->routeIs('candidates.*') || request()->routeIs('criteria.*') ? 'true' : 'false' }} }" class="mt-1">
+                <button @click="open = !open" class="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100">
+                    <svg class="w-6 h-6 mr-3 {{ request()->routeIs('students.*') || request()->routeIs('candidates.*') || request()->routeIs('criteria.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
+                    </svg>
+                    <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300 font-medium">Trainee Management</span>
+                    <svg :class="isOpen ? 'opacity-100 ml-auto transform transition-transform duration-200' : 'opacity-0'" :class="open ? 'rotate-90' : ''" class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+                
+                <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" class="pl-6 mt-1 space-y-1">
+                    <a href="{{ route('students.index') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('students.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('students.index') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                        <span :class="isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Trainee List</span>
+                    </a>
+                    <a href="{{ route('candidates.index') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('candidates.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('candidates.index') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                        </svg>
+                        <span :class="isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Candidates</span>
+                    </a>
+                    <a href="{{ route('candidates.accepted') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('candidates.accepted') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('candidates.accepted') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span :class="isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Accepted Candidates</span>
+                    </a>
+                    <a href="{{ route('criteria.index') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('criteria.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                        <svg class="w-5 h-5 {{ request()->routeIs('criteria.index') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                        </svg>
+                        <span :class="isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Acceptance Criteria</span>
+                    </a>
+                </div>
+            </div>
+
+            <a href="{{ route('help-center.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('help-center.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('help-center.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Help & Support</span>
             </a>
 
             <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-                <a href="{{ route('profile.show') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('profile.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('profile.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('profile.show') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('profile.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                    <svg class="w-6 h-6 mr-3 {{ request()->routeIs('profile.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                     <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Profile</span>
                 </a>
 
-                <a href="{{ route('settings.index') }}" class="flex items-center px-3 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('settings.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                    <svg class="w-5 h-5 mr-3 {{ request()->routeIs('settings.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('settings.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('settings.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                    <svg class="w-6 h-6 mr-3 {{ request()->routeIs('settings.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.9924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
@@ -292,8 +324,8 @@
 
                 <form method="POST" action="{{ route('logout') }}" class="mt-1">
                     @csrf
-                    <button type="submit" class="w-full flex items-center px-3 py-2 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 hover:text-red-900 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-red-100">
-                        <svg class="w-5 h-5 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <button type="submit" class="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 hover:text-red-900 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-red-100">
+                        <svg class="w-6 h-6 mr-3 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v6"></path>
                         </svg>
                         <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Logout</span>
@@ -307,9 +339,9 @@
 
 <!-- Main Content -->
 <div class="min-h-screen bg-gray-50 pt-16" x-data="initSidebar()">
-    <div class="transition-all duration-300 ease-in-out" :class="isOpen ? 'ml-64' : 'ml-16'">
-        <div class="p-6 pt-16">
-            <div class="bg-white rounded-lg shadow p-6 overflow-hidden">
+    <div class="transition-all duration-300 ease-in-out" :class="isOpen ? 'ml-56' : 'ml-14'">
+        <div class="p-12">
+            <div class="bg-white rounded-lg shadow p-12 overflow-hidden">
                 @yield('content')
             </div>
         </div>

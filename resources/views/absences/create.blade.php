@@ -21,7 +21,7 @@
     </div>
 
     <div class="bg-white shadow overflow-hidden sm:rounded-lg">
-        <form action="{{ route('absences.store') }}" method="POST" class="space-y-6 p-6">
+        <form action="{{ route('absences.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6 p-6">
             @csrf
 
             <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -45,20 +45,6 @@
                     </div>
                 </div>
 
-                <!-- Date -->
-                <div class="sm:col-span-3">
-                    <label for="date" class="block text-sm font-medium text-gray-700">
-                        Date
-                    </label>
-                    <div class="mt-1">
-                        <input type="date" name="date" id="date" value="{{ old('date') }}" required
-                            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
-                        @error('date')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                </div>
-
                 <!-- Type -->
                 <div class="sm:col-span-3">
                     <label for="type" class="block text-sm font-medium text-gray-700">
@@ -70,6 +56,8 @@
                             <option value="excused" {{ old('type') == 'excused' ? 'selected' : '' }}>Excused</option>
                             <option value="unexcused" {{ old('type') == 'unexcused' ? 'selected' : '' }}>Unexcused</option>
                             <option value="late" {{ old('type') == 'late' ? 'selected' : '' }}>Late</option>
+                            <option value="medical" {{ old('type') == 'medical' ? 'selected' : '' }}>Medical</option>
+                            <option value="family" {{ old('type') == 'family' ? 'selected' : '' }}>Family Emergency</option>
                         </select>
                         @error('type')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -77,16 +65,58 @@
                     </div>
                 </div>
 
+                <!-- Start Date -->
+                <div class="sm:col-span-3">
+                    <label for="start_date" class="block text-sm font-medium text-gray-700">
+                        Start Date
+                    </label>
+                    <div class="mt-1">
+                        <input type="date" name="start_date" id="start_date" value="{{ old('start_date') }}" required
+                            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        @error('start_date')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- End Date -->
+                <div class="sm:col-span-3">
+                    <label for="end_date" class="block text-sm font-medium text-gray-700">
+                        End Date
+                    </label>
+                    <div class="mt-1">
+                        <input type="date" name="end_date" id="end_date" value="{{ old('end_date') }}" required
+                            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        @error('end_date')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
                 <!-- Duration (for late type) -->
-                <div class="sm:col-span-3" x-data="{ showDuration: false }" x-init="showDuration = '{{ old('type') }}' === 'late'">
+                <div class="sm:col-span-3" id="duration-container" style="display: none;">
                     <label for="duration" class="block text-sm font-medium text-gray-700">
                         Duration (minutes)
                     </label>
                     <div class="mt-1">
                         <input type="number" name="duration" id="duration" min="1" value="{{ old('duration') }}"
-                            x-bind:required="showDuration"
                             class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
                         @error('duration')
+                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Supporting Documents -->
+                <div class="sm:col-span-6">
+                    <label for="supporting_documents" class="block text-sm font-medium text-gray-700">
+                        Supporting Documents
+                    </label>
+                    <div class="mt-1">
+                        <input type="file" name="supporting_documents[]" id="supporting_documents" multiple
+                            class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md">
+                        <p class="mt-1 text-sm text-gray-500">Upload any supporting documents (medical certificates, official letters, etc.)</p>
+                        @error('supporting_documents')
                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
@@ -123,15 +153,53 @@
 
 @push('scripts')
 <script>
-    document.getElementById('type').addEventListener('change', function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeField = document.getElementById('type');
+        const durationContainer = document.getElementById('duration-container');
         const durationField = document.getElementById('duration');
-        if (this.value === 'late') {
-            durationField.parentElement.parentElement.classList.remove('hidden');
+        const startDateField = document.getElementById('start_date');
+        const endDateField = document.getElementById('end_date');
+
+        // Initialize based on current value
+        if (typeField.value === 'late') {
+            durationContainer.style.display = 'block';
             durationField.required = true;
-        } else {
-            durationField.parentElement.parentElement.classList.add('hidden');
-            durationField.required = false;
         }
+
+        // Set default end date to match start date
+        if (startDateField.value && !endDateField.value) {
+            endDateField.value = startDateField.value;
+        }
+
+        // Handle type change
+        typeField.addEventListener('change', function() {
+            if (this.value === 'late') {
+                durationContainer.style.display = 'block';
+                durationField.required = true;
+            } else {
+                durationContainer.style.display = 'none';
+                durationField.required = false;
+            }
+        });
+
+        // Ensure end date is not before start date
+        startDateField.addEventListener('change', function() {
+            if (endDateField.value && new Date(endDateField.value) < new Date(this.value)) {
+                endDateField.value = this.value;
+            }
+        });
+
+        // Validate form before submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const startDate = new Date(startDateField.value);
+            const endDate = new Date(endDateField.value);
+
+            if (endDate < startDate) {
+                e.preventDefault();
+                alert('End date cannot be before start date');
+                return false;
+            }
+        });
     });
 </script>
 @endpush

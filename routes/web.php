@@ -13,6 +13,9 @@ use App\Http\Controllers\StockStatisticsController;
 use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\CriteriaController;
 
 // Authentication Routes (will be handled by Laravel Breeze/Fortify)
 require __DIR__.'/auth.php';
@@ -29,6 +32,11 @@ Route::middleware(['auth'])->group(function () {
 
     // Absence Management
     Route::resource('absences', AbsencesController::class);
+    Route::prefix('absences')->name('absences.')->group(function () {
+        Route::get('reports', [AbsencesController::class, 'reports'])->name('reports');
+        Route::post('{absence}/approve', [AbsencesController::class, 'approve'])->name('approve');
+        Route::post('{absence}/reject', [AbsencesController::class, 'reject'])->name('reject');
+    });
 
     // Payment Management
     Route::resource('payments', PaymentController::class);
@@ -36,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('{payment}/process', [PaymentController::class, 'process'])->name('process');
         Route::post('{payment}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
         Route::get('analytics', [PaymentController::class, 'analytics'])->name('analytics');
+        Route::post('{payment}/send-reminder', [PaymentController::class, 'sendReminder'])->name('send-reminder');
     });
 
     // Stock Management
@@ -45,6 +54,23 @@ Route::middleware(['auth'])->group(function () {
         Route::post('{stock}/remove', [StockController::class, 'removeStock'])->name('remove');
         Route::get('analytics', [StockController::class, 'analytics'])->name('analytics');
         Route::get('low-stock', [StockController::class, 'lowStock'])->name('low-stock');
+    });
+
+    // Intern Management
+    Route::resource('students', StudentController::class);
+    
+    Route::resource('criteria', CriteriaController::class);
+    Route::get('criteria-weights', [CriteriaController::class, 'weights'])->name('criteria.weights');
+    Route::put('criteria-weights', [CriteriaController::class, 'updateWeights'])->name('criteria.updateWeights');
+    
+    Route::prefix('candidates')->name('candidates.')->group(function () {
+        Route::get('/', [CandidateController::class, 'index'])->name('index');
+        Route::get('/create', [CandidateController::class, 'create'])->name('create');
+        Route::post('/', [CandidateController::class, 'store'])->name('store');
+        Route::get('/{candidate}/edit', [CandidateController::class, 'edit'])->name('edit');
+        Route::put('/{candidate}', [CandidateController::class, 'update'])->name('update');
+        Route::delete('/{candidate}', [CandidateController::class, 'destroy'])->name('destroy');
+        Route::get('/accepted', [CandidateController::class, 'accepted'])->name('accepted');
     });
 
     // Help Center
