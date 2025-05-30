@@ -9,7 +9,7 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-200">Room Management</h1>
             <p class="mt-1 text-sm text-gray-600">Manage room assignments and monitor occupancy</p>
         </div>
-        <a href="{{ route('rooms.create') }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center">
+        <a href="{{ route('rooms.create') }}" class="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 py-2.5 px-6 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200">
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
             </svg>
