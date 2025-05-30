@@ -6,7 +6,7 @@ use App\Http\Controllers\GradeController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AbsenceController;
+use App\Http\Controllers\AbsencesController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StockStatisticsController;
@@ -28,7 +28,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Absence Management
-    Route::resource('absences', AbsenceController::class);
+    Route::resource('absences', AbsencesController::class);
 
     // Payment Management
     Route::resource('payments', PaymentController::class);
