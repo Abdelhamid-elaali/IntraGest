@@ -280,6 +280,6 @@ class StockController extends Controller
             ->orderBy('expiry_date')
             ->get();
             
-        return view('stocks.analytics', compact('stockByCategory', 'stockMovement', 'topProducts', 'expiringProducts'));
+        return view('stocks.analytics-view', compact('stockByCategory', 'stockMovement', 'topProducts', 'expiringProducts'));
     }
 }

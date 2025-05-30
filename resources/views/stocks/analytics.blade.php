@@ -63,10 +63,10 @@
                                         <div class="text-sm text-gray-500">{{ $product->stock->code }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900">{{ $product->stock->main_category }}</div>
+                                        <div class="text-sm text-gray-900">{{ $product->stock->category }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $product->total_quantity }} {{ $product->stock->unit }}
+                                        {{ $product->total_quantity }} {{ $product->stock->unit_type }}
                                     </td>
                                 </tr>
                             @empty
@@ -105,7 +105,7 @@
                                         <div class="text-sm text-red-500">{{ $product->expiry_date->diffForHumans() }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $product->quantity }} {{ $product->unit }}
+                                        {{ $product->quantity }} {{ $product->unit_type }}
                                     </td>
                                 </tr>
                             @empty

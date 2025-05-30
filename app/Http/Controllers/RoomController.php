@@ -27,7 +27,7 @@ class RoomController extends Controller
                     'status' => $room->status,
                     'description' => $room->description,
                     'maintenance_status' => $room->maintenance_status,
-                    'occupancy' => $room->current_occupants_count,
+                    'occupancy' => $room->currentOccupants()->count(),
                     'availability_color' => $room->status === 'Available' ? 'green' : 'red',
                     'current_allocation' => $room->currentAllocation ? [
                         'student' => $room->currentAllocation->user->name,
@@ -51,13 +51,11 @@ class RoomController extends Controller
             'room_number' => ['required', 'string', 'unique:rooms,room_number'],
             'floor' => ['required', 'integer', 'min:0'],
             'pavilion' => ['required', Rule::in(['Girls', 'Boys'])],
-            'accommodation_type' => ['required', Rule::in(['Personal', 'Shared'])],
+            'accommodation_type' => ['required', Rule::in(['Staff', 'Intern'])],
             'capacity' => ['required', 'integer', 'min:1'],
             'status' => ['required', Rule::in(['Available', 'Unavailable'])],
-            'description' => ['nullable', Rule::in(['Occupied - Reservable', 'Vacant - Trainees'])],
-            'description' => ['nullable', 'string'],
-            'amenities' => ['nullable', 'array'],
-            'amenities.*' => ['string']
+            'description' => ['nullable', Rule::in(['Occupied - Bookable', 'Vacant - Interns'])],
+            'maintenance_status' => ['required', Rule::in(['operational', 'under_maintenance', 'needs_repair'])]
         ]);
 
         $room = Room::create($validated);
@@ -84,13 +82,13 @@ class RoomController extends Controller
     {
         $validated = $request->validate([
             'room_number' => ['required', 'string', Rule::unique('rooms')->ignore($room)],
+            'floor' => ['required', 'integer', 'min:0'],
+            'pavilion' => ['required', Rule::in(['Girls', 'Boys'])],
+            'accommodation_type' => ['required', Rule::in(['Staff', 'Intern'])],
             'capacity' => ['required', 'integer', 'min:1'],
-            'type' => ['required', Rule::in(['single', 'double', 'triple', 'quad', 'suite'])],
-            'status' => ['required', Rule::in(['available', 'occupied', 'maintenance'])],
-            'price_per_month' => ['required', 'numeric', 'min:0'],
-            'description' => ['nullable', 'string'],
-            'amenities' => ['nullable', 'array'],
-            'amenities.*' => ['string']
+            'status' => ['required', Rule::in(['Available', 'Unavailable'])],
+            'description' => ['nullable', Rule::in(['Occupied - Bookable', 'Vacant - Interns'])],
+            'maintenance_status' => ['required', Rule::in(['operational', 'under_maintenance', 'needs_repair'])]
         ]);
 
         $room->update($validated);
@@ -218,5 +216,47 @@ class RoomController extends Controller
 
         return redirect()->route('rooms.show', $room)
             ->with('success', 'Room marked for maintenance.');
+    }
+    
+    public function changeStatus(Request $request, Room $room)
+    {
+        $validated = $request->validate([
+            'status' => ['required', Rule::in(['Available', 'Unavailable'])],
+            'maintenance_status' => ['required', Rule::in(['operational', 'under_maintenance', 'needs_repair'])]
+        ]);
+        
+        $room->update($validated);
+        
+        return redirect()->route('rooms.index')
+            ->with('success', 'Room status updated successfully.');
+    }
+    
+    public function dashboard()
+    {
+        $totalRooms = Room::count();
+        $availableRooms = Room::where('status', 'Available')->count();
+        $occupiedRooms = Room::where('status', 'Unavailable')->count();
+        $maintenanceRooms = Room::where('maintenance_status', '!=', 'operational')->count();
+        
+        $roomsByPavilion = Room::select('pavilion', DB::raw('count(*) as total'))
+            ->groupBy('pavilion')
+            ->get();
+            
+        $roomsByFloor = Room::select('floor', DB::raw('count(*) as total'))
+            ->groupBy('floor')
+            ->orderBy('floor')
+            ->get();
+            
+        $occupancyRate = $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0;
+        
+        return view('rooms.dashboard', compact(
+            'totalRooms', 
+            'availableRooms', 
+            'occupiedRooms', 
+            'maintenanceRooms',
+            'roomsByPavilion',
+            'roomsByFloor',
+            'occupancyRate'
+        ));
     }
 }

@@ -54,7 +54,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('{stock}/add', [StockController::class, 'addStock'])->name('add');
         Route::post('{stock}/remove', [StockController::class, 'removeStock'])->name('remove');
         Route::get('analytics', [StockController::class, 'analytics'])->name('analytics');
-        Route::get('low-stock', [StockController::class, 'lowStock'])->name('low-stock');
+        Route::get('low-stock', [StockController::class, 'lowStock'])->name('low_stock');
     });
 
     // Intern Management
