@@ -3,116 +3,126 @@
 @section('title', 'Create Stock Category')
 
 @section('content')
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Create Stock Category</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('stock-categories.index') }}">Stock Categories</a></li>
-        <li class="breadcrumb-item active">Create</li>
-    </ol>
-    
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-plus me-1"></i>
-            New Stock Category
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-semibold text-gray-800">Create Stock Category</h2>
+        <a href="{{ route('stock-categories.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Categories
+        </a>
+    </div>
+
+    @if(session('error'))
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+            <p>{{ session('error') }}</p>
         </div>
-        <div class="card-body">
+    @endif
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="p-6">
             <form action="{{ route('stock-categories.store') }}" method="POST">
                 @csrf
                 
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Category Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Category Name <span class="text-red-500">*</span></label>
+                        <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Enter category name" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        @error('name')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    <!-- Parent Category -->
+                    <div>
+                        <label for="parent_id" class="block text-sm font-medium text-gray-700">Parent Category</label>
+                        <select name="parent_id" id="parent_id" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                            <option value="">None (Main Category)</option>
+                            @foreach($mainCategories as $parentCategory)
+                                <option value="{{ $parentCategory->id }}" {{ old('parent_id') == $parentCategory->id ? 'selected' : '' }}>
+                                    {{ $parentCategory->name }}
+                                </option>
                             @endforeach
-                        </ul>
+                        </select>
+                        @error('parent_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-1 text-xs text-gray-500">Leave empty to create a main category</p>
                     </div>
-                @endif
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="name" class="form-label">Category Name <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <label for="parent_id" class="form-label">Parent Category</label>
-                            <select class="form-select @error('parent_id') is-invalid @enderror" id="parent_id" name="parent_id">
-                                <option value="">None (Main Category)</option>
-                                @foreach($mainCategories as $parentCategory)
-                                    <option value="{{ $parentCategory->id }}" {{ old('parent_id') == $parentCategory->id ? 'selected' : '' }}>
-                                        {{ $parentCategory->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('parent_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                            <small class="form-text text-muted">Leave empty to create a main category</small>
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                            <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
-                                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            </select>
-                            @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+
+                    <!-- Description -->
+                    <div class="md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        <textarea name="description" id="description" rows="3" placeholder="Enter category description" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('description') }}</textarea>
+                        @error('description')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
-                    
-                    <div class="col-md-6">
-                        <div class="form-group mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" id="description" name="description" rows="3">{{ old('description') }}</textarea>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+
+                    <!-- Icon -->
+                    <div>
+                        <label for="icon" class="block text-sm font-medium text-gray-700">Icon</label>
+                        <input type="text" name="icon" id="icon" value="{{ old('icon') }}" placeholder="e.g. box, tag, folder" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        @error('icon')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <p class="mt-1 text-xs text-gray-500">Enter a FontAwesome icon name</p>
+                    </div>
+
+                    <!-- Color -->
+                    <div>
+                        <label for="color" class="block text-sm font-medium text-gray-700">Color</label>
+                        <div class="mt-1 flex items-center">
+                            <input type="color" name="color" id="color" value="{{ old('color', '#6c757d') }}" class="h-8 w-12 p-0 border-0 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 cursor-pointer">
+                            <span class="ml-2 px-3 py-1 text-sm rounded-md border border-gray-300 bg-gray-50" id="colorHexValue">#6c757d</span>
                         </div>
+                        @error('color')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                        <script>
+                            document.getElementById('color').addEventListener('input', function(e) {
+                                document.getElementById('colorHexValue').textContent = e.target.value;
+                            });
+                        </script>
+                    </div>
+
+                    <!-- Status -->
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status <span class="text-red-500">*</span></label>
+                        <select name="status" id="status" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
+                            <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                        </select>
+                        @error('status')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                         
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="icon" class="form-label">Icon</label>
-                                    <input type="text" class="form-control @error('icon') is-invalid @enderror" id="icon" name="icon" value="{{ old('icon') }}" placeholder="e.g. box, tag, folder">
-                                    @error('icon')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                    <small class="form-text text-muted">Enter a FontAwesome icon name</small>
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="color" class="form-label">Color</label>
-                                    <input type="color" class="form-control form-control-color @error('color') is-invalid @enderror" id="color" name="color" value="{{ old('color', '#6c757d') }}">
-                                    @error('color')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group mb-3">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="2">{{ old('notes') }}</textarea>
-                            @error('notes')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                    <!-- Notes -->
+                    <div class="md:col-span-2">
+                        <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                        <textarea name="notes" id="notes" rows="3" placeholder="Enter additional notes" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('notes') }}</textarea>
+                        @error('notes')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
                 </div>
                 
-                <div class="d-flex justify-content-end">
-                    <a href="{{ route('stock-categories.index') }}" class="btn btn-secondary me-2">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Create Category</button>
+                <div class="flex justify-end mt-6">
+                    <a href="{{ route('stock-categories.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition mr-3">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cancel
+                    </a>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Create Category
+                    </button>
                 </div>
             </form>
         </div>

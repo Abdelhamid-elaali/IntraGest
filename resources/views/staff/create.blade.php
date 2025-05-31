@@ -29,7 +29,7 @@
                     <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Enter staff member name" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -38,7 +38,7 @@
                     <!-- Email -->
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" name="email" id="email" value="{{ old('email') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="Enter email address" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('email')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -47,7 +47,7 @@
                     <!-- Password -->
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" name="password" id="password" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="password" name="password" id="password" placeholder="Enter password" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('password')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -56,13 +56,13 @@
                     <!-- Password Confirmation -->
                     <div>
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirm password" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                     </div>
 
                     <!-- Phone -->
                     <div>
                         <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
-                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" placeholder="Enter phone number" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('phone')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -71,7 +71,7 @@
                     <!-- City -->
                     <div>
                         <label for="city" class="block text-sm font-medium text-gray-700">City</label>
-                        <input type="text" name="city" id="city" value="{{ old('city') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <input type="text" name="city" id="city" value="{{ old('city') }}" placeholder="Enter city" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('city')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -80,7 +80,7 @@
                     <!-- Address -->
                     <div class="md:col-span-2">
                         <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
-                        <input type="text" name="address" id="address" value="{{ old('address') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <input type="text" name="address" id="address" value="{{ old('address') }}" placeholder="Enter full address" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('address')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror

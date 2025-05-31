@@ -253,22 +253,8 @@
                 </svg>
                 <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Dashboard</span>
             </a>
-            <a href="{{ route('payments.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('payments.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('payments.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Payment Management</span>
-            </a>
-
-            <a href="{{ route('rooms.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('rooms.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
-                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('rooms.index') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Room Management</span>
-            </a>
-
-            <!-- Stock Management Section -->
-            <div x-data="{open: {{ request()->routeIs('stocks.*') || request()->routeIs('stock-categories.*') || request()->routeIs('stock-orders.*') || request()->routeIs('suppliers.*') ? 'true' : 'false' }} }" class="mt-1">
+                <!-- Stock Management Section -->
+                <div x-data="{open: {{ request()->routeIs('stocks.*') || request()->routeIs('stock-categories.*') || request()->routeIs('stock-orders.*') || request()->routeIs('suppliers.*') ? 'true' : 'false' }} }" class="mt-1">
                 <button @click="open = !open" class="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100">
                     <svg class="w-6 h-6 mr-3 {{ request()->routeIs('stocks.*') || request()->routeIs('stock-categories.*') || request()->routeIs('stock-orders.*') || request()->routeIs('suppliers.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
@@ -318,9 +304,8 @@
                     </a>
                 </div>
             </div>
-
-            <!-- Trainee Management Section -->
-            <div x-data="{open: {{ request()->routeIs('students.*') || request()->routeIs('candidates.*') || request()->routeIs('criteria.*') ? 'true' : 'false' }} }" class="mt-1">
+                        <!-- Trainee Management Section -->
+                        <div x-data="{open: {{ request()->routeIs('students.*') || request()->routeIs('candidates.*') || request()->routeIs('criteria.*') ? 'true' : 'false' }} }" class="mt-1">
                 <button @click="open = !open" class="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100">
                     <svg class="w-6 h-6 mr-3 {{ request()->routeIs('students.*') || request()->routeIs('candidates.*') || request()->routeIs('criteria.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222"></path>
@@ -357,6 +342,21 @@
                         <span :class="isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Accepted Candidates</span>
                     </a>
                 </div>
+            <a href="{{ route('payments.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('payments.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('payments.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Payment Management</span>
+            </a>
+
+            <a href="{{ route('rooms.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('rooms.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('rooms.index') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+                <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Room Management</span>
+            </a>
+
+        
             </div>
 
             <a href="{{ route('help-center.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('help-center.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">

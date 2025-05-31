@@ -41,7 +41,7 @@
 
         <!-- Article Content -->
         <div class="prose max-w-none">
-            {!! nl2br(e($article->content)) !!}
+            {!! Illuminate\Support\Str::markdown($article->content) !!}
         </div>
 
         <!-- Related Articles -->

@@ -3,155 +3,163 @@
 @section('title', 'Add New Supplier')
 
 @section('content')
-<div class="container-fluid px-4">
-    <h1 class="mt-4">Add New Supplier</h1>
-    <ol class="breadcrumb mb-4">
-        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('suppliers.index') }}">Suppliers</a></li>
-        <li class="breadcrumb-item active">Add New Supplier</li>
-    </ol>
-    
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-building me-1"></i>
-            Supplier Information
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-semibold text-gray-800">Add New Supplier</h2>
+        <a href="{{ route('suppliers.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Suppliers
+        </a>
+    </div>
+
+    @if(session('error'))
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
+            <p>{{ session('error') }}</p>
         </div>
-        <div class="card-body">
+    @endif
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="p-6">
             <form action="{{ route('suppliers.store') }}" method="POST">
                 @csrf
                 
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="name" class="form-label">Supplier Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" required>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Supplier Name -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Supplier Name <span class="text-red-500">*</span></label>
+                        <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Enter supplier name" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div class="col-md-6">
-                        <label for="contact_person" class="form-label">Contact Person</label>
-                        <input type="text" class="form-control @error('contact_person') is-invalid @enderror" id="contact_person" name="contact_person" value="{{ old('contact_person') }}">
+
+                    <!-- Contact Person -->
+                    <div>
+                        <label for="contact_person" class="block text-sm font-medium text-gray-700">Contact Person</label>
+                        <input type="text" name="contact_person" id="contact_person" value="{{ old('contact_person') }}" placeholder="Enter contact person name" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('contact_person')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}">
+
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" name="email" id="email" value="{{ old('email') }}" placeholder="Enter email address" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div class="col-md-6">
-                        <label for="phone" class="form-label">Phone</label>
-                        <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}">
+
+                    <!-- Phone -->
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700">Phone</label>
+                        <input type="text" name="phone" id="phone" value="{{ old('phone') }}" placeholder="Enter phone number" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('phone')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label for="address" class="form-label">Address</label>
-                        <textarea class="form-control @error('address') is-invalid @enderror" id="address" name="address" rows="2">{{ old('address') }}</textarea>
+
+                    <!-- Address -->
+                    <div class="md:col-span-2">
+                        <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                        <textarea name="address" id="address" rows="2" placeholder="Enter complete address" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('address') }}</textarea>
                         @error('address')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="city" class="form-label">City</label>
-                        <input type="text" class="form-control @error('city') is-invalid @enderror" id="city" name="city" value="{{ old('city') }}">
+
+                    <!-- City -->
+                    <div>
+                        <label for="city" class="block text-sm font-medium text-gray-700">City</label>
+                        <input type="text" name="city" id="city" value="{{ old('city') }}" placeholder="Enter city" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('city')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div class="col-md-4">
-                        <label for="state" class="form-label">State/Province</label>
-                        <input type="text" class="form-control @error('state') is-invalid @enderror" id="state" name="state" value="{{ old('state') }}">
+
+                    <!-- State/Province -->
+                    <div>
+                        <label for="state" class="block text-sm font-medium text-gray-700">State/Province</label>
+                        <input type="text" name="state" id="state" value="{{ old('state') }}" placeholder="Enter state or province" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('state')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div class="col-md-4">
-                        <label for="postal_code" class="form-label">Postal Code</label>
-                        <input type="text" class="form-control @error('postal_code') is-invalid @enderror" id="postal_code" name="postal_code" value="{{ old('postal_code') }}">
+
+                    <!-- Postal Code -->
+                    <div>
+                        <label for="postal_code" class="block text-sm font-medium text-gray-700">Postal Code</label>
+                        <input type="text" name="postal_code" id="postal_code" value="{{ old('postal_code') }}" placeholder="Enter postal code" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('postal_code')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                </div>
                 
-                <div class="row mb-3">
-                    <div class="col-md-4">
-                        <label for="country" class="form-label">Country</label>
-                        <input type="text" class="form-control @error('country') is-invalid @enderror" id="country" name="country" value="{{ old('country') }}">
+                    <!-- Country -->
+                    <div>
+                        <label for="country" class="block text-sm font-medium text-gray-700">Country</label>
+                        <input type="text" name="country" id="country" value="{{ old('country') }}" placeholder="Enter country" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('country')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div class="col-md-4">
-                        <label for="tax_number" class="form-label">Tax Number</label>
-                        <input type="text" class="form-control @error('tax_number') is-invalid @enderror" id="tax_number" name="tax_number" value="{{ old('tax_number') }}">
+
+                    <!-- Tax Number -->
+                    <div>
+                        <label for="tax_number" class="block text-sm font-medium text-gray-700">Tax Number</label>
+                        <input type="text" name="tax_number" id="tax_number" value="{{ old('tax_number') }}" placeholder="Enter tax/VAT number" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('tax_number')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                    <div class="col-md-4">
-                        <label for="website" class="form-label">Website</label>
-                        <input type="url" class="form-control @error('website') is-invalid @enderror" id="website" name="website" value="{{ old('website') }}" placeholder="https://">
+
+                    <!-- Website -->
+                    <div>
+                        <label for="website" class="block text-sm font-medium text-gray-700">Website</label>
+                        <input type="url" name="website" id="website" value="{{ old('website') }}" placeholder="https://" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('website')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                        <select class="form-select @error('status') is-invalid @enderror" id="status" name="status" required>
+
+                    <!-- Status -->
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700">Status <span class="text-red-500">*</span></label>
+                        <select name="status" id="status" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm" required>
                             <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
                             <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
                         </select>
                         @error('status')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
-                </div>
-                
-                <div class="row mb-3">
-                    <div class="col-md-12">
-                        <label for="notes" class="form-label">Notes</label>
-                        <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="3">{{ old('notes') }}</textarea>
+
+                    <!-- Notes -->
+                    <div class="md:col-span-2">
+                        <label for="notes" class="block text-sm font-medium text-gray-700">Notes</label>
+                        <textarea name="notes" id="notes" rows="3" placeholder="Enter additional notes about this supplier" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('notes') }}</textarea>
                         @error('notes')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
                 
-                <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save me-1"></i> Save Supplier
-                    </button>
-                    <a href="{{ route('suppliers.index') }}" class="btn btn-secondary ms-2">
-                        <i class="fas fa-times me-1"></i> Cancel
+                <div class="flex justify-end mt-6">
+                    <a href="{{ route('suppliers.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition mr-3">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Cancel
                     </a>
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Save Supplier
+                    </button>
                 </div>
             </form>
         </div>

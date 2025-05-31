@@ -127,19 +127,19 @@
                     
                     <div>
                         <label for="current_password" class="block text-sm font-medium text-gray-700">Current Password</label>
-                        <input type="password" name="current_password" id="current_password" required
+                        <input type="password" name="current_password" id="current_password" placeholder="Enter your current password" required
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
                     <div>
                         <label for="password" class="block text-sm font-medium text-gray-700">New Password</label>
-                        <input type="password" name="password" id="password" required
+                        <input type="password" name="password" id="password" placeholder="Enter new password" required
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
 
                     <div>
                         <label for="password_confirmation" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" required
+                        <input type="password" name="password_confirmation" id="password_confirmation" placeholder="Confirm new password" required
                             class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     </div>
 

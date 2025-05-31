@@ -239,8 +239,6 @@
                 });
             });
         </script>
-            });
-        </script>
     </div>
 </div>
 @endsection

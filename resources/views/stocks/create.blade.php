@@ -29,7 +29,7 @@
                     <!-- Name -->
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Item Name</label>
-                        <input type="text" name="name" id="name" value="{{ old('name') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="text" name="name" id="name" value="{{ old('name') }}" placeholder="Enter item name" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('name')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -38,7 +38,7 @@
                     <!-- Category -->
                     <div>
                         <label for="category" class="block text-sm font-medium text-gray-700">Category</label>
-                        <input type="text" name="category" id="category" value="{{ old('category') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="text" name="category" id="category" value="{{ old('category') }}" placeholder="Enter category name" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('category')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -47,7 +47,7 @@
                     <!-- Description -->
                     <div class="md:col-span-2">
                         <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
-                        <textarea name="description" id="description" rows="3" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('description') }}</textarea>
+                        <textarea name="description" id="description" rows="3" placeholder="Enter item description" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">{{ old('description') }}</textarea>
                         @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -56,7 +56,7 @@
                     <!-- Quantity -->
                     <div>
                         <label for="quantity" class="block text-sm font-medium text-gray-700">Initial Quantity</label>
-                        <input type="number" name="quantity" id="quantity" value="{{ old('quantity', 0) }}" min="0" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="number" name="quantity" id="quantity" value="{{ old('quantity', 0) }}" min="0" placeholder="Enter initial quantity" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('quantity')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -85,7 +85,7 @@
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <span class="text-gray-500 sm:text-sm">$</span>
                             </div>
-                            <input type="number" name="unit_price" id="unit_price" value="{{ old('unit_price', 0) }}" min="0" step="0.01" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" required>
+                            <input type="number" name="unit_price" id="unit_price" value="{{ old('unit_price', 0) }}" min="0" step="0.01" placeholder="0.00" class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-12 sm:text-sm border-gray-300 rounded-md" required>
                         </div>
                         @error('unit_price')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -95,7 +95,7 @@
                     <!-- Minimum Quantity -->
                     <div>
                         <label for="minimum_quantity" class="block text-sm font-medium text-gray-700">Minimum Quantity (Alert Level)</label>
-                        <input type="number" name="minimum_quantity" id="minimum_quantity" value="{{ old('minimum_quantity', 10) }}" min="0" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="number" name="minimum_quantity" id="minimum_quantity" value="{{ old('minimum_quantity', 10) }}" min="0" placeholder="Enter minimum stock level" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('minimum_quantity')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -104,7 +104,7 @@
                     <!-- Maximum Quantity -->
                     <div>
                         <label for="maximum_quantity" class="block text-sm font-medium text-gray-700">Maximum Quantity (Capacity)</label>
-                        <input type="number" name="maximum_quantity" id="maximum_quantity" value="{{ old('maximum_quantity', 100) }}" min="1" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
+                        <input type="number" name="maximum_quantity" id="maximum_quantity" value="{{ old('maximum_quantity', 100) }}" min="1" placeholder="Enter maximum stock capacity" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" required>
                         @error('maximum_quantity')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
@@ -113,7 +113,7 @@
                     <!-- Expiry Date -->
                     <div>
                         <label for="expiry_date" class="block text-sm font-medium text-gray-700">Expiry Date (Optional)</label>
-                        <input type="date" name="expiry_date" id="expiry_date" value="{{ old('expiry_date') }}" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                        <input type="date" name="expiry_date" id="expiry_date" value="{{ old('expiry_date') }}" placeholder="YYYY-MM-DD" class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
                         @error('expiry_date')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
