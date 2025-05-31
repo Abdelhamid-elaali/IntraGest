@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Models\Supplier;
 use App\Models\StockTransaction;
 use App\Models\Department;
+use App\Models\StockCategory;
+use App\Models\StockOrderItem;
 use Carbon\Carbon;
 
 class Stock extends Model
@@ -28,6 +30,13 @@ class Stock extends Model
         'expiry_date',
         'supplier_id',
         'department_id',
+        'category_id',
+        'subcategory_id',
+        'location',
+        'barcode',
+        'image',
+        'vat_rate',
+        'status',
     ];
 
     protected $casts = [
@@ -53,11 +62,44 @@ class Stock extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    // Department relationship is not implemented yet
+    /**
+     * Get the department that this stock belongs to
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 
+    /**
+     * Get the category that this stock belongs to
+     */
+    public function category()
+    {
+        return $this->belongsTo(StockCategory::class, 'category_id');
+    }
+
+    /**
+     * Get the subcategory that this stock belongs to
+     */
+    public function subcategory()
+    {
+        return $this->belongsTo(StockCategory::class, 'subcategory_id');
+    }
+
+    /**
+     * Get the transactions for this stock
+     */
     public function transactions()
     {
         return $this->hasMany(StockTransaction::class);
+    }
+    
+    /**
+     * Get the order items for this stock
+     */
+    public function orderItems()
+    {
+        return $this->hasMany(StockOrderItem::class);
     }
 
     // Helper methods

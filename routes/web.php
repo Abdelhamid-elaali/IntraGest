@@ -10,6 +10,10 @@ use App\Http\Controllers\AbsencesController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StockStatisticsController;
+use App\Http\Controllers\StockAnalyticsController;
+use App\Http\Controllers\StockCategoryController;
+use App\Http\Controllers\StockOrderController;
+use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\HelpCenterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SettingsController;
@@ -44,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::post('{payment}/process', [PaymentController::class, 'process'])->name('process');
         Route::post('{payment}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
-        Route::get('analytics', [PaymentController::class, 'analytics'])->name('analytics');
+        Route::get('analytics', [PaymentController::class, 'analytics'])->name('payments-analytics');
         Route::post('{payment}/send-reminder', [PaymentController::class, 'sendReminder'])->name('send-reminder');
     });
 
@@ -53,8 +57,30 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('stocks')->name('stocks.')->group(function () {
         Route::post('{stock}/add', [StockController::class, 'addStock'])->name('add');
         Route::post('{stock}/remove', [StockController::class, 'removeStock'])->name('remove');
-        Route::get('analytics', [StockController::class, 'analytics'])->name('analytics');
         Route::get('low-stock', [StockController::class, 'lowStock'])->name('low_stock');
+    });
+    
+    // Direct routes for stock pages to avoid routing issues
+    Route::get('stocks/analytics', [StockAnalyticsController::class, 'index'])->name('stocks.analytics');
+    Route::get('stocks/low-stock', [StockController::class, 'lowStock'])->name('stocks.low_stock');
+    
+    // Stock Categories Management
+    Route::resource('stock-categories', StockCategoryController::class);
+    
+    // Stock Orders Management
+    Route::resource('stock-orders', StockOrderController::class);
+    Route::prefix('stock-orders')->name('stock-orders.')->group(function () {
+        Route::post('{order}/approve', [StockOrderController::class, 'approve'])->name('approve');
+        Route::post('{order}/deliver', [StockOrderController::class, 'deliver'])->name('deliver');
+        Route::post('{order}/cancel', [StockOrderController::class, 'cancel'])->name('cancel');
+        Route::post('{order}/update-payment', [StockOrderController::class, 'updatePaymentStatus'])->name('update-payment');
+    });
+    
+    // Suppliers Management
+    Route::resource('suppliers', SupplierController::class);
+    Route::prefix('suppliers')->name('suppliers.')->group(function () {
+        Route::get('{supplier}/orders', [SupplierController::class, 'orders'])->name('orders');
+        Route::get('{supplier}/stocks', [SupplierController::class, 'stocks'])->name('stocks');
     });
 
     // Intern Management

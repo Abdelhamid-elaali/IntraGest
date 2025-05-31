@@ -7,6 +7,12 @@
 @endsection
 
 @section('content')
+@if(isset($error))
+<div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+    <strong class="font-bold">Error!</strong>
+    <span class="block sm:inline">{{ $error }}</span>
+</div>
+@endif
 <div class="bg-white shadow-sm rounded-lg">
     <div class="p-6 border-b border-gray-200">
         <div class="flex justify-between items-center mb-6">

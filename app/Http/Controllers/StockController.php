@@ -240,46 +240,5 @@ class StockController extends Controller
         return view('stocks.low_stock', compact('criticalStocks', 'lowStocks'));
     }
     
-    /**
-     * Display stock analytics
-     */
-    public function analytics()
-    {
-        // Get stock value by category
-        $stockByCategory = Stock::select('category', DB::raw('SUM(quantity * unit_price) as total_value'))
-            ->groupBy('category')
-            ->get();
-            
-        // Get stock movement trends (last 30 days)
-        $startDate = Carbon::now()->subDays(30);
-        $endDate = Carbon::now();
-        
-        $stockMovement = StockTransaction::select(
-                DB::raw('DATE(transaction_date) as date'),
-                DB::raw('SUM(CASE WHEN type = "in" THEN quantity ELSE 0 END) as stock_in'),
-                DB::raw('SUM(CASE WHEN type = "out" OR type = "transfer_out" THEN quantity ELSE 0 END) as stock_out')
-            )
-            ->whereBetween('transaction_date', [$startDate, $endDate])
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
-            
-        // Get top moving products
-        $topProducts = StockTransaction::select('stock_id', DB::raw('SUM(quantity) as total_quantity'))
-            ->where('type', 'out')
-            ->groupBy('stock_id')
-            ->orderByDesc('total_quantity')
-            ->limit(10)
-            ->with('stock')
-            ->get();
-            
-        // Get expiring products (next 30 days)
-        $expiringProducts = Stock::where('expiry_date', '<=', Carbon::now()->addDays(30))
-            ->where('expiry_date', '>=', Carbon::now())
-            ->where('quantity', '>', 0)
-            ->orderBy('expiry_date')
-            ->get();
-            
-        return view('stocks.analytics-view', compact('stockByCategory', 'stockMovement', 'topProducts', 'expiringProducts'));
-    }
+    // Analytics method removed and moved to a dedicated controller
 }
