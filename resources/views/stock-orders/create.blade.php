@@ -107,18 +107,13 @@
                         @error('notes')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('supplier_id')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                
-                                <div id="supplierDetails" class="mt-4">
-                                    <div class="alert alert-info">
-                                        <i class="fas fa-info-circle me-1"></i> Select a supplier to view their details
-                                    </div>
+                    </div>
+                </div>
+                
+                <div id="supplierDetails" class="mt-4">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-1"></i> Select a supplier to view their details
+                    </div>
                     </div>
                 </div>
                 
@@ -237,14 +232,14 @@
                     </div>
                 </div>
                 
-                <div class="flex justify-end mt-6">
-                    <a href="{{ route('stock-orders.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition mr-3">
+                <div class="flex justify-end mt-6 mb-6">
+                    <a href="{{ route('stock-orders.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150 mr-3">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                         Cancel
                     </a>
-                    <button type="submit" id="submitOrder" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
+                    <button type="submit" id="submitOrder" class="inline-flex items-center px-4 py-2 mr-3 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>

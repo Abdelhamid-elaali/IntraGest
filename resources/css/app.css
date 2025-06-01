@@ -28,7 +28,7 @@
     }
 
     a {
-        @apply text-primary-600 hover:text-primary-700;
+        @apply text-black hover:text-gray-900;
     }
 }
 

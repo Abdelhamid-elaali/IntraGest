@@ -6,12 +6,6 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <h2 class="text-2xl font-semibold text-gray-800">Create Stock Category</h2>
-        <a href="{{ route('stock-categories.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition">
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Back to Categories
-        </a>
     </div>
 
     @if(session('error'))
@@ -111,7 +105,7 @@
                 </div>
                 
                 <div class="flex justify-end mt-6">
-                    <a href="{{ route('stock-categories.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition mr-3">
+                    <a href="{{ route('stock-categories.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-300 active:bg-gray-300 focus:outline-none focus:border-gray-300 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150 mr-3">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -125,38 +119,6 @@
                     </button>
                 </div>
             </form>
-        </div>
-    </div>
-    
-    <div class="card mb-4">
-        <div class="card-header">
-            <i class="fas fa-info-circle me-1"></i>
-            Category Information
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5>Main Categories vs Subcategories</h5>
-                    <p>
-                        <strong>Main Categories</strong> are top-level categories that can contain subcategories and stock items.
-                        They are useful for broad classification of your inventory.
-                    </p>
-                    <p>
-                        <strong>Subcategories</strong> belong to a main category and help you organize your stock items more specifically.
-                        They allow for a hierarchical organization of your inventory.
-                    </p>
-                </div>
-                <div class="col-md-6">
-                    <h5>Icon and Color</h5>
-                    <p>
-                        You can assign an icon and color to categories to make them more visually distinguishable.
-                        For icons, use FontAwesome icon names (without the "fa-" prefix).
-                    </p>
-                    <p>
-                        Examples: <i class="fas fa-box"></i> box, <i class="fas fa-tag"></i> tag, <i class="fas fa-folder"></i> folder
-                    </p>
-                </div>
-            </div>
         </div>
     </div>
 </div>
