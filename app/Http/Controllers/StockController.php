@@ -162,40 +162,73 @@ class StockController extends Controller
 
     public function addStock(Request $request, Stock $stock)
     {
-        $validated = $request->validate([
-            'quantity' => 'required|integer|min:1',
-            'unit_price' => 'required|numeric|min:0',
-            'expiry_date' => 'nullable|date|after:today',
-            'notes' => 'nullable|string',
-            'reference_number' => 'nullable|string',
-        ]);
-
-        // Create transaction record
-        $transaction = StockTransaction::create([
-            'stock_id' => $stock->id,
-            'type' => 'in',
-            'quantity' => $validated['quantity'],
-            'unit_price' => $validated['unit_price'],
-            'user_id' => auth()->id(),
-            'notes' => $validated['notes'] ?? 'Stock addition',
-            'reference_number' => $validated['reference_number'] ?? ('IN-' . time() . '-' . rand(1000, 9999)),
-            'transaction_date' => now(),
-        ]);
-
-        // Update stock quantity and price
-        $stock->increment('quantity', $validated['quantity']);
+        // Check if this is a simple add from low stock page or detailed add
+        $isSimpleAdd = !$request->has('unit_price');
         
-        // Update unit price only if it's different
-        if ($stock->unit_price != $validated['unit_price']) {
-            $stock->update(['unit_price' => $validated['unit_price']]);
-        }
-        
-        // Update expiry date if provided
-        if (isset($validated['expiry_date'])) {
-            $stock->update(['expiry_date' => $validated['expiry_date']]);
-        }
+        if ($isSimpleAdd) {
+            // Simple validation for low stock page form
+            $validated = $request->validate([
+                'quantity' => 'required|integer|min:1',
+                'notes' => 'nullable|string|max:255',
+            ]);
+            
+            try {
+                // Create transaction record
+                $transaction = StockTransaction::create([
+                    'stock_id' => $stock->id,
+                    'type' => 'in',
+                    'quantity' => $validated['quantity'],
+                    'unit_price' => $stock->unit_price, // Use existing price
+                    'user_id' => auth()->id(),
+                    'notes' => $validated['notes'] ?? 'Stock added from low stock alert',
+                    'reference_number' => 'LOWADD-' . time() . '-' . rand(1000, 9999),
+                    'transaction_date' => now(),
+                ]);
+                
+                // Update stock quantity
+                $stock->increment('quantity', $validated['quantity']);
+                
+                return redirect()->back()->with('success', 'Stock updated successfully.');
+            } catch (\Exception $e) {
+                return redirect()->back()->with('error', 'Error updating stock: ' . $e->getMessage());
+            }
+        } else {
+            // Detailed validation for regular stock addition
+            $validated = $request->validate([
+                'quantity' => 'required|integer|min:1',
+                'unit_price' => 'required|numeric|min:0',
+                'expiry_date' => 'nullable|date|after:today',
+                'notes' => 'nullable|string',
+                'reference_number' => 'nullable|string',
+            ]);
 
-        return redirect()->route('stocks.show', $stock)->with('success', 'Stock added successfully.');
+            // Create transaction record
+            $transaction = StockTransaction::create([
+                'stock_id' => $stock->id,
+                'type' => 'in',
+                'quantity' => $validated['quantity'],
+                'unit_price' => $validated['unit_price'],
+                'user_id' => auth()->id(),
+                'notes' => $validated['notes'] ?? 'Stock addition',
+                'reference_number' => $validated['reference_number'] ?? ('IN-' . time() . '-' . rand(1000, 9999)),
+                'transaction_date' => now(),
+            ]);
+
+            // Update stock quantity and price
+            $stock->increment('quantity', $validated['quantity']);
+            
+            // Update unit price only if it's different
+            if ($stock->unit_price != $validated['unit_price']) {
+                $stock->update(['unit_price' => $validated['unit_price']]);
+            }
+            
+            // Update expiry date if provided
+            if (isset($validated['expiry_date'])) {
+                $stock->update(['expiry_date' => $validated['expiry_date']]);
+            }
+
+            return redirect()->route('stocks.show', $stock)->with('success', 'Stock added successfully.');
+        }
     }
 
     public function removeStock(Request $request, Stock $stock)

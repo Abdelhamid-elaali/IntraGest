@@ -28,9 +28,29 @@
                 }
             }
         }
+        
+        function markAllAsRead() {
+            fetch('{{ route("notifications.mark-all-as-read") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Refresh the page to show updated notification count
+                    window.location.reload();
+                }
+            })
+            .catch(error => {
+                console.error('Error marking notifications as read:', error);
+            });
+        }
     </script>
 </head>
-<body class="font-sans antialiased h-full transition-colors duration-200 bg-gray-50">
+<body class="font-sans antialiased h-full transition-colors duration-200 bg-gray-50" data-user-id="{{ auth()->id() }}" x-data="{ notificationsOpen: false }">
     <div class="min-h-full">
         <!-- Top Navigation Bar -->
         <nav class="bg-gray-100 shadow-sm fixed w-full z-20">
@@ -108,50 +128,73 @@
 
                     <!-- Right Side Navigation -->
                     <div class="flex items-center space-x-4">
-                        <!-- Notifications Dropdown -->
-                        <div x-data="{ open: false }" @click.away="open = false" class="relative">
-                            <button @click="open = !open" class="p-2 rounded-[20px] bg-gray-200 dark:bg-gray-700 hover:bg-blue-400 dark:hover:bg-gray-600 transition-colors duration-200">
-                                <span class="sr-only">View notifications</span>
-                                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                                </svg>
-                                <!-- Notification Badge -->
-                                @if(auth()->user()->unreadNotifications->count() > 0)
-                                    <span class="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-                                @endif
-                            </button>
+                        <!-- Notification Dropdown -->
+                        <div class="ml-3 relative">
+                            <div>
+                                <button id="notification-dropdown-button" type="button" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" @click="notificationsOpen = !notificationsOpen">
+                                    <span class="sr-only">View notifications</span>
+                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                    </svg>
+                                    <span id="notification-count" class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full {{ auth()->user()->unreadNotifications->count() > 0 ? '' : 'hidden' }}">
+                                        {{ auth()->user()->unreadNotifications->count() }}
+                                    </span>
+                                </button>
+                            </div>
 
-                            <!-- Notifications Panel -->
-                            <div x-show="open"
-                                x-transition:enter="transition ease-out duration-100"
-                                x-transition:enter-start="transform opacity-0 scale-95"
-                                x-transition:enter-end="transform opacity-100 scale-100"
-                                x-transition:leave="transition ease-in duration-75"
-                                x-transition:leave-start="transform opacity-100 scale-100"
-                                x-transition:leave-end="transform opacity-0 scale-95"
-                                class="absolute right-0 mt-2 w-80 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 dark:bg-gray-800"
-                                role="menu"
-                                style="display: none;">
-                                <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-200">Notifications</h3>
+                            <div id="notification-dropdown" x-show="notificationsOpen" @click.away="notificationsOpen = false" class="origin-top-right absolute right-0 mt-2 w-80 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-50" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95">
+                                <div class="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                                    <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
+                                    @if(auth()->user()->unreadNotifications->count() > 0)
+                                        <button data-action="mark-all-as-read" class="text-xs text-blue-600 hover:text-blue-800">
+                                            Mark all as read
+                                        </button>
+                                    @endif
                                 </div>
-                                <div class="max-h-64 overflow-y-auto">
-                                    @forelse(auth()->user()->notifications()->take(5)->get() as $notification)
-                                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700 {{ $notification->read_at ? 'opacity-75' : '' }}">
-                                            <p class="font-medium">{{ $notification->data['title'] ?? 'Notification' }}</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ $notification->created_at->diffForHumans() }}</p>
-                                        </a>
-                                    @empty
-                                        <div class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">
+                                
+                                <div id="notification-list" class="max-h-60 overflow-y-auto">
+                                    @if(auth()->user()->notifications->count() > 0)
+                                        @foreach(auth()->user()->notifications->take(5) as $notification)
+                                            <div class="notification-item p-4 border-b border-gray-200 {{ $notification->read_at ? 'bg-white' : 'bg-blue-50' }}" data-id="{{ $notification->id }}">
+                                                <div class="flex items-start">
+                                                    <div class="flex-1 min-w-0">
+                                                        <p class="text-sm font-medium text-gray-900">
+                                                            {{ $notification->data['title'] ?? 'Notification' }}
+                                                        </p>
+                                                        <p class="text-sm text-gray-500 truncate">
+                                                            {{ $notification->data['message'] ?? '' }}
+                                                        </p>
+                                                        <p class="text-xs text-gray-400 mt-1">
+                                                            {{ $notification->created_at->diffForHumans() }}
+                                                        </p>
+                                                    </div>
+                                                    @if(!$notification->read_at)
+                                                        <button data-action="mark-as-read" data-id="{{ $notification->id }}" class="text-xs text-blue-600 hover:text-blue-800">
+                                                            Mark as read
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                        <div class="border-t border-gray-200">
+                                            <a href="{{ route('notifications.index') }}" class="block text-center text-sm text-blue-600 hover:text-blue-800 p-2">
+                                                View all notifications
+                                            </a>
+                                            <a href="{{ route('notifications.dashboard') }}" class="block text-center text-sm text-blue-600 hover:text-blue-800 p-2 border-t border-gray-200">
+                                                <div class="flex items-center justify-center">
+                                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                                    </svg>
+                                                    Notification Dashboard
+                                                </div>
+                                            </a>
+                                        </div>
+                                    @else
+                                        <div id="empty-notifications" class="px-4 py-6 text-center text-gray-500">
                                             No notifications
                                         </div>
-                                    @endforelse
+                                    @endif
                                 </div>
-                                @if(auth()->user()->notifications->count() > 5)
-                                    <a href="{{ route('notifications.index') }}" class="block px-4 py-2 text-xs text-center text-blue-600 hover:text-blue-800 border-t border-gray-100 dark:border-gray-700">
-                                        View all notifications
-                                    </a>
-                                @endif
                             </div>
                         </div>
 
@@ -253,6 +296,7 @@
                 </svg>
                 <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Dashboard</span>
             </a>
+
                 <!-- Stock Management Section -->
                 <div x-data="{open: {{ request()->routeIs('stocks.*') || request()->routeIs('stock-categories.*') || request()->routeIs('stock-orders.*') || request()->routeIs('suppliers.*') ? 'true' : 'false' }} }" class="mt-1">
                 <button @click="open = !open" class="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100">
@@ -405,7 +449,7 @@
             </a>
 
             <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-
+                        
                 @if(auth()->user()->isDirector() || auth()->user()->isSuperAdmin() || auth()->user()->isAdmin())
                 <a href="{{ route('staff.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('staff.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
                     <svg class="w-6 h-6 mr-3 {{ request()->routeIs('staff.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -428,6 +472,12 @@
                     </svg>
                     <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Profile</span>
                 </a>
+                <a href="{{ route('notifications.dashboard') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('notifications.dashboard') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                <svg class="w-6 h-6 mr-3 {{ request()->routeIs('notifications.dashboard') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                </svg>
+                <span :class="isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Notifications</span>
+            </a>
                 <form method="POST" action="{{ route('logout') }}" class="mt-1">
                     @csrf
                     <button type="submit" class="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md text-red-600 hover:bg-red-50 hover:text-red-900 dark:text-red-400 dark:hover:bg-red-600 dark:hover:text-red-100">
@@ -446,10 +496,8 @@
 <!-- Main Content -->
 <div class="min-h-screen bg-gray-50 pt-16" x-data="initSidebar()">
     <div class="transition-all duration-300 ease-in-out" :class="isOpen ? 'ml-60' : 'ml-20'">
-        <div class="p-6" style="padding-left: 80px;">
-            <div class="bg-white rounded-lg shadow p-12 overflow-hidden">
-                @yield('content')
-            </div>
+        <div class="p-6">
+            @yield('content')
         </div>
     </div>
 </div>

@@ -64,16 +64,16 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Stock Management
+    // Direct routes for stock pages - placing these BEFORE the resource route to avoid conflicts
+    Route::get('stocks/analytics', [StockAnalyticsController::class, 'index'])->name('stocks.analytics');
+    Route::get('stocks/low-stock', [StockController::class, 'lowStock'])->name('stocks.low_stock');
+    
+    // Stock resource and other routes
     Route::resource('stocks', StockController::class);
     Route::prefix('stocks')->name('stocks.')->group(function () {
         Route::post('{stock}/add', [StockController::class, 'addStock'])->name('add');
         Route::post('{stock}/remove', [StockController::class, 'removeStock'])->name('remove');
-        Route::get('low-stock', [StockController::class, 'lowStock'])->name('low_stock');
     });
-    
-    // Direct routes for stock pages to avoid routing issues
-    Route::get('stocks/analytics', [StockAnalyticsController::class, 'index'])->name('stocks.analytics');
-    Route::get('stocks/low-stock', [StockController::class, 'lowStock'])->name('stocks.low_stock');
     
     // Stock Categories Management
     Route::resource('stock-categories', StockCategoryController::class);
@@ -202,6 +202,19 @@ Route::middleware(['auth'])->group(function () {
     });
     
     // Notification Routes
+    Route::prefix('notifications')->name('notifications.')->middleware(['auth'])->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/dashboard', [NotificationController::class, 'dashboard'])->name('dashboard');
+        Route::post('/mark-as-read', [NotificationController::class, 'markAsRead'])->name('mark-as-read');
+        Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');
+        
+        // Manual check routes
+        Route::get('/check-stock', [NotificationController::class, 'checkStockLevels'])->name('check-stock');
+        Route::get('/check-payments', [NotificationController::class, 'checkPayments'])->name('check-payments');
+        Route::get('/check-absences', [NotificationController::class, 'checkAbsences'])->name('check-absences');
+    });
+    
+    // Profile notification routes
     Route::post('/profile/notifications/{id}/read', [ProfileController::class, 'markNotificationAsRead'])->name('profile.notifications.read');
     Route::post('/profile/notifications/read-all', [ProfileController::class, 'markAllNotificationsAsRead'])->name('profile.notifications.readAll');
     Route::delete('/profile/notifications/{id}', [ProfileController::class, 'deleteNotification'])->name('profile.notifications.delete');
@@ -211,4 +224,5 @@ Route::middleware(['auth'])->group(function () {
 // API Routes for Dynamic Data
 Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
     Route::get('expenses-stats', [StockStatisticsController::class, 'getExpenseStats'])->name('expenses.stats');
+    Route::get('notifications/recent', [NotificationController::class, 'getRecentNotifications'])->name('notifications.recent');
 });
