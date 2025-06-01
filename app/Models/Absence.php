@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\User;
 use App\Models\Student;
+use App\Models\AbsenceType;
 use Carbon\Carbon;
 
 class Absence extends Model
@@ -18,6 +19,7 @@ class Absence extends Model
         'start_date',
         'end_date',
         'type',
+        'absence_type_id',
         'reason',
         'status',
         'supporting_documents',
@@ -38,6 +40,11 @@ class Absence extends Model
     public function student()
     {
         return $this->belongsTo(Student::class);
+    }
+    
+    public function absenceType()
+    {
+        return $this->belongsTo(AbsenceType::class);
     }
     
     public function user()

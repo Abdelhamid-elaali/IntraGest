@@ -37,10 +37,21 @@ Route::middleware(['auth'])->group(function () {
 
     // Absence Management
     Route::resource('absences', AbsencesController::class);
+    Route::resource('absence-types', 'App\Http\Controllers\AbsenceTypeController');
+    
+    // Absence Reports - Only register index route, not the full resource
+    Route::get('absence-reports', 'App\Http\Controllers\AbsenceReportController@index')->name('absence-reports.index');
+    
     Route::prefix('absences')->name('absences.')->group(function () {
         Route::get('reports', [AbsencesController::class, 'reports'])->name('reports');
         Route::post('{absence}/approve', [AbsencesController::class, 'approve'])->name('approve');
         Route::post('{absence}/reject', [AbsencesController::class, 'reject'])->name('reject');
+    });
+    
+    Route::prefix('absence-reports')->name('absence-reports.')->group(function () {
+        Route::get('monthly', 'App\Http\Controllers\AbsenceReportController@monthly')->name('monthly');
+        Route::get('by-type', 'App\Http\Controllers\AbsenceReportController@byType')->name('by-type');
+        Route::get('by-student', 'App\Http\Controllers\AbsenceReportController@byStudent')->name('by-student');
     });
 
     // Payment Management
