@@ -8,7 +8,11 @@
         <div class="flex justify-between items-center mb-6">
             <div>
                 <h2 class="text-2xl font-semibold text-gray-800">Notifications</h2>
-                <p class="mt-1 text-sm text-gray-600">View and manage your notifications</p>
+                @if(isset($isStockManager) && $isStockManager)
+                    <p class="mt-1 text-sm text-gray-600">View and manage your stock-related notifications</p>
+                @else
+                    <p class="mt-1 text-sm text-gray-600">View and manage your notifications</p>
+                @endif
             </div>
             <div class="flex space-x-2">
                 @if($notifications->where('read_at', null)->count() > 0)
@@ -25,11 +29,16 @@
                 <div class="flex-1 min-w-[200px]">
                     <label for="type" class="block text-sm font-medium text-gray-700 mb-1">Notification Type</label>
                     <select id="type" name="type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md">
-                        <option value="">All Types</option>
-                        <option value="stock" {{ request('type') === 'stock' ? 'selected' : '' }}>Stock Alerts</option>
-                        <option value="payment" {{ request('type') === 'payment' ? 'selected' : '' }}>Payment Reminders</option>
-                        <option value="absence" {{ request('type') === 'absence' ? 'selected' : '' }}>Absence Alerts</option>
-                        <option value="room" {{ request('type') === 'room' ? 'selected' : '' }}>Room Status</option>
+                        @if(isset($isStockManager) && $isStockManager)
+                            <option value="">All Stock Alerts</option>
+                            <option value="stock" {{ request('type') === 'stock' ? 'selected' : '' }}>Stock Alerts</option>
+                        @else
+                            <option value="">All Types</option>
+                            <option value="stock" {{ request('type') === 'stock' ? 'selected' : '' }}>Stock Alerts</option>
+                            <option value="payment" {{ request('type') === 'payment' ? 'selected' : '' }}>Payment Reminders</option>
+                            <option value="absence" {{ request('type') === 'absence' ? 'selected' : '' }}>Absence Alerts</option>
+                            <option value="room" {{ request('type') === 'room' ? 'selected' : '' }}>Room Status</option>
+                        @endif
                     </select>
                 </div>
                 <div class="flex-1 min-w-[200px]">
@@ -67,7 +76,7 @@
 
         <div class="space-y-4">
             @forelse($notifications as $notification)
-                <div id="notification-{{ $notification->id }}" class="p-4 rounded-lg border {{ $notification->read_at ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-200' }}">
+                <div id="notification-{{ $notification->id }}" class="notification-item p-4 rounded-lg border {{ $notification->read_at ? 'bg-gray-50 border-gray-200' : 'bg-blue-50 border-blue-200' }} {{ (isset($notification->data['type']) && $notification->data['type'] === 'stock') || (isset($notification->data['notification_type']) && $notification->data['notification_type'] === 'stock') ? 'stock-notification' : '' }}">
                     <div class="flex justify-between items-start">
                         <div class="flex-grow">
                             <h3 class="text-sm font-medium {{ $notification->read_at ? 'text-gray-900' : 'text-blue-900' }}">

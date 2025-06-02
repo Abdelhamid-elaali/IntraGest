@@ -187,9 +187,35 @@ function markAsRead(id, button) {
     .then(data => {
         if (data.success) {
             // Update UI
-            const notificationEl = button.closest('div.flex').parentElement;
-            notificationEl.classList.remove('bg-blue-50');
-            button.remove();
+            let notificationEl;
+            
+            // Handle different UI structures between dropdown and notifications page
+            if (button.closest('div.flex')) {
+                // Dropdown UI structure
+                notificationEl = button.closest('div.flex').parentElement;
+                notificationEl.classList.remove('bg-blue-50');
+                button.remove();
+            } else if (typeof id === 'string') {
+                // Notifications page structure (when called from onclick)
+                notificationEl = document.getElementById('notification-' + id);
+                if (notificationEl) {
+                    notificationEl.classList.remove('bg-blue-50', 'border-blue-200');
+                    notificationEl.classList.add('bg-gray-50', 'border-gray-200');
+                    
+                    // Find and remove the mark as read button
+                    const markButton = notificationEl.querySelector('button');
+                    if (markButton) markButton.remove();
+                    
+                    // Update text colors
+                    const title = notificationEl.querySelector('h3');
+                    const message = notificationEl.querySelector('p');
+                    const timestamp = notificationEl.querySelector('p + p');
+                    
+                    if (title) title.classList.replace('text-blue-900', 'text-gray-900');
+                    if (message) message.classList.replace('text-blue-600', 'text-gray-600');
+                    if (timestamp) timestamp.classList.replace('text-blue-500', 'text-gray-500');
+                }
+            }
             
             // Update count
             const countBadge = document.getElementById('notification-count');
@@ -206,41 +232,66 @@ function markAsRead(id, button) {
 
 /**
  * Mark all notifications as read
+ * For stock managers, only mark stock-related notifications as read
  */
 function markAllAsRead() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const markAllButton = document.querySelector('[data-action="mark-all-as-read"]');
+    const isStockManager = markAllButton ? markAllButton.getAttribute('data-stock-manager') === 'true' : false;
     
     fetch('/notifications/mark-all-as-read', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRF-TOKEN': csrfToken
-        }
+        },
+        body: JSON.stringify({ isStockManager: isStockManager })
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Update UI - remove all mark as read buttons and blue backgrounds
-            document.querySelectorAll('.mark-as-read').forEach(button => {
-                const notificationEl = button.closest('div.flex').parentElement;
-                notificationEl.classList.remove('bg-blue-50');
-                button.remove();
-            });
+            // If we're on the notifications page, we need to be selective about which notifications to update
+            if (window.location.pathname.includes('/notifications')) {
+                if (isStockManager) {
+                    // For stock managers, only update stock notifications
+                    document.querySelectorAll('.notification-item').forEach(item => {
+                        // Check if this is a stock notification
+                        const isStockNotification = item.classList.contains('stock-notification');
+                        if (isStockNotification) {
+                            item.classList.remove('bg-blue-50', 'border-blue-200');
+                            item.classList.add('bg-gray-50', 'border-gray-200');
+                            const markButton = item.querySelector('.mark-as-read');
+                            if (markButton) markButton.remove();
+                        }
+                    });
+                } else {
+                    // For other users, update all notifications
+                    document.querySelectorAll('.bg-blue-50').forEach(el => {
+                        el.classList.remove('bg-blue-50', 'border-blue-200');
+                        el.classList.add('bg-gray-50', 'border-gray-200');
+                    });
+                    
+                    document.querySelectorAll('.mark-as-read').forEach(button => {
+                        button.remove();
+                    });
+                }
+                
+                // Hide the mark all as read button on the notifications page
+                const pageMarkAllButton = document.querySelector('button[onclick="markAllAsRead()"]');
+                if (pageMarkAllButton) {
+                    pageMarkAllButton.remove();
+                }
+            } else {
+                // In the dropdown, update UI - remove all mark as read buttons and blue backgrounds
+                document.querySelectorAll('.mark-as-read').forEach(button => {
+                    const notificationEl = button.closest('div.flex').parentElement;
+                    notificationEl.classList.remove('bg-blue-50');
+                    button.remove();
+                });
+            }
             
             // Update count to zero
             updateNotificationCount(0);
-            
-            // If on notifications page, update all notifications
-            document.querySelectorAll('.bg-blue-50').forEach(el => {
-                el.classList.remove('bg-blue-50', 'border-blue-200');
-                el.classList.add('bg-gray-50', 'border-gray-200');
-            });
-            
-            // Hide the mark all as read button on the notifications page
-            const pageMarkAllButton = document.querySelector('button[onclick="markAllAsRead()"]');
-            if (pageMarkAllButton) {
-                pageMarkAllButton.remove();
-            }
         }
     })
     .catch(error => {

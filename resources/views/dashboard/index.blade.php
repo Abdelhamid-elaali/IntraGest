@@ -83,7 +83,6 @@
             </div>
         </div>
         <div class="p-4">
-            <h3 class="text-lg font-semibold mb-4">Recent Stock Transactions</h3>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead>
@@ -98,7 +97,7 @@
                     <tbody class="divide-y divide-gray-200">
                         <template x-if="recentTransactions.length === 0">
                             <tr>
-                                <td colspan="5" class="px-4 py-2 text-center text-sm text-gray-500">No recent transactions</td>
+                                <td colspan="5" class="px-4 py-4 text-center text-sm text-gray-500">No recent transactions</td>
                             </tr>
                         </template>
                         <template x-for="transaction in recentTransactions" :key="transaction.id">

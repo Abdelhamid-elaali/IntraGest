@@ -30,10 +30,24 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $query = auth()->user()->notifications();
+        $user = auth()->user();
+        
+        // Role-based filtering - Stock managers can only see stock-related notifications
+        if ($user->isStockManager() && !$user->isAdmin() && !$user->isSuperAdmin()) {
+            $query->where(function($q) {
+                $q->whereJsonContains('data->type', 'stock')
+                  ->orWhereJsonContains('data->notification_type', 'stock');
+            });
+        }
         
         // Filter by notification type
         if ($request->has('type') && $request->type) {
             $type = $request->type;
+            // For stock managers, ensure they can only filter within stock-related notifications
+            if ($user->isStockManager() && !$user->isAdmin() && !$user->isSuperAdmin() && $type !== 'stock') {
+                $type = 'stock';
+            }
+            
             $query->where(function($q) use ($type) {
                 $q->whereJsonContains('data->type', $type)
                   ->orWhereJsonContains('data->notification_type', $type);
@@ -64,7 +78,11 @@ class NotificationController extends Controller
         }
         
         $notifications = $query->paginate(10)->withQueryString();
-        return view('notifications.index', compact('notifications'));
+        
+        // Pass the user role information to the view for UI customization
+        $isStockManager = $user->isStockManager() && !$user->isAdmin() && !$user->isSuperAdmin();
+        
+        return view('notifications.index', compact('notifications', 'isStockManager'));
     }
 
     /**
@@ -74,6 +92,9 @@ class NotificationController extends Controller
      */
     public function dashboard()
     {
+        $user = auth()->user();
+        $isStockManager = $user->isStockManager() && !$user->isAdmin() && !$user->isSuperAdmin();
+        
         // Get counts for dashboard cards
         $criticalStockCount = Stock::whereRaw('quantity <= (maximum_quantity * 0.1)')->count();
         
@@ -88,15 +109,26 @@ class NotificationController extends Controller
             
         $availableRoomsCount = Room::where('status', 'available')->count();
         
-        // Get recent notifications
-        $notifications = auth()->user()->notifications()->latest()->take(5)->get();
+        // Get recent notifications with role-based filtering
+        $notificationsQuery = auth()->user()->notifications();
+        
+        // Stock managers can only see stock-related notifications
+        if ($isStockManager) {
+            $notificationsQuery->where(function($q) {
+                $q->whereJsonContains('data->type', 'stock')
+                  ->orWhereJsonContains('data->notification_type', 'stock');
+            });
+        }
+        
+        $notifications = $notificationsQuery->latest()->take(5)->get();
         
         return view('dashboard.notifications', compact(
             'criticalStockCount',
             'overduePaymentsCount',
             'unjustifiedAbsencesCount',
             'availableRoomsCount',
-            'notifications'
+            'notifications',
+            'isStockManager'
         ));
     }
 
@@ -116,16 +148,40 @@ class NotificationController extends Controller
 
     /**
      * Mark all notifications as read for the authenticated user.
+     * For stock managers, only mark stock-related notifications as read.
      *
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function markAllAsRead()
+    public function markAllAsRead(Request $request)
     {
-        auth()->user()->unreadNotifications->markAsRead();
+        $user = auth()->user();
+        $isStockManager = $request->input('isStockManager', false) || 
+                         ($user->isStockManager() && !$user->isAdmin() && !$user->isSuperAdmin());
+        
+        if ($isStockManager) {
+            // Only mark stock-related notifications as read for stock managers
+            $stockNotifications = $user->unreadNotifications()
+                ->where(function($q) {
+                    $q->whereJsonContains('data->type', 'stock')
+                      ->orWhereJsonContains('data->notification_type', 'stock');
+                })
+                ->get();
+            
+            foreach ($stockNotifications as $notification) {
+                $notification->markAsRead();
+            }
+            
+            $message = 'All stock notifications marked as read.';
+        } else {
+            // Mark all notifications as read for other users
+            $user->unreadNotifications->markAsRead();
+            $message = 'All notifications marked as read.';
+        }
         
         return response()->json([
             'success' => true,
-            'message' => 'All notifications marked as read.'
+            'message' => $message
         ]);
     }
     
@@ -137,8 +193,27 @@ class NotificationController extends Controller
     public function getRecentNotifications()
     {
         $user = auth()->user();
-        $notifications = $user->notifications()->latest()->take(5)->get();
-        $unreadCount = $user->unreadNotifications()->count();
+        $isStockManager = $user->isStockManager() && !$user->isAdmin() && !$user->isSuperAdmin();
+        
+        // Build the query for notifications
+        $notificationsQuery = $user->notifications();
+        $unreadQuery = $user->unreadNotifications();
+        
+        // Stock managers can only see stock-related notifications
+        if ($isStockManager) {
+            $notificationsQuery->where(function($q) {
+                $q->whereJsonContains('data->type', 'stock')
+                  ->orWhereJsonContains('data->notification_type', 'stock');
+            });
+            
+            $unreadQuery->where(function($q) {
+                $q->whereJsonContains('data->type', 'stock')
+                  ->orWhereJsonContains('data->notification_type', 'stock');
+            });
+        }
+        
+        $notifications = $notificationsQuery->latest()->take(5)->get();
+        $unreadCount = $unreadQuery->count();
         
         return response()->json([
             'notifications' => $notifications,
