@@ -6,7 +6,7 @@
     </div>
 
     <!-- Password Reset Form Card -->
-    <div class="bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
         <h3 class="text-xl font-semibold text-gray-900 mb-6 py-4 border-b-4 border-dotted border-blue-600">Reset Your Password</h3>
         
         <div class="mb-6 text-sm text-gray-600">
@@ -24,7 +24,7 @@
 
         <!-- Status Message -->
         @if (session('status'))
-            <div class="mb-6 p-4 rounded-lg bg-green-50 border border-green-200">
+            <div class="mb-2 p-2 rounded-lg bg-green-50 border border-green-200">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -91,7 +91,7 @@
     </div>
 
     <!-- Security Notice -->
-    <div class="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-100">
+    <div class="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-100">
         <div class="flex">
             <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -108,7 +108,7 @@
     </div>
 
     <!-- Footer -->
-    <div class="mt-6 text-center text-sm text-gray-600">
+    <div class="mt-2 text-center text-sm text-gray-600">
         &copy; {{ date('Y') }} IntraGest. All rights reserved.
     </div>
 </x-layouts.guest>

@@ -45,6 +45,13 @@ class Kernel extends ConsoleKernel
             ->name('check_absences')
             ->withoutOverlapping()
             ->appendOutputTo(storage_path('logs/absence-notifications.log'));
+            
+        // Update dashboard statistics every minute for real-time updates
+        $schedule->command('dashboard:update-stats')
+            ->everyMinute()
+            ->name('update_dashboard_stats')
+            ->withoutOverlapping()
+            ->appendOutputTo(storage_path('logs/dashboard-updates.log'));
     }
 
     /**

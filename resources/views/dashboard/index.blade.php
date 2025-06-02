@@ -3,7 +3,14 @@
 @section('title', 'Dashboard')
 
 @section('content')
-<div class="space-y-6">
+<!-- Hidden JSON data for Alpine.js initialization -->
+<div id="dashboard-stats" class="hidden">{{ json_encode($stats) }}</div>
+<div id="expense-stats" class="hidden">{{ json_encode($expenseStats) }}</div>
+<div id="recent-transactions" class="hidden">{{ json_encode($recentTransactions) }}</div>
+<div 
+    x-data="dashboard()" 
+    x-init="initDashboard()"
+    class="space-y-6">
     <!-- Stats Grid -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <!-- Total Students -->
@@ -15,7 +22,7 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Total Trainees</div>
-                <div class="text-2xl font-bold">{{ $stats['total_students'] }}</div>
+                <div class="text-2xl font-bold" x-text="stats.total_students">{{ $stats['total_students'] }}</div>
             </div>
         </div>
 
@@ -28,7 +35,7 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Recent Payments</div>
-                <div class="text-2xl font-bold">${{ number_format($stats['recent_payments'] ?? 0) }}</div>
+                <div class="text-2xl font-bold">$<span x-text="formatNumber(stats.recent_payments)">{{ number_format($stats['recent_payments'] ?? 0) }}</span></div>
             </div>
         </div>
 
@@ -41,7 +48,7 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Available Rooms</div>
-                <div class="text-2xl font-bold">{{ $stats['available_rooms'] }}</div>
+                <div class="text-2xl font-bold" x-text="stats.available_rooms">{{ $stats['available_rooms'] }}</div>
             </div>
         </div>
 
@@ -54,15 +61,15 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Total Rooms</div>
-                <div class="text-2xl font-bold">{{ $stats['total_rooms'] }}</div>
+                <div class="text-2xl font-bold" x-text="stats.total_rooms">{{ $stats['total_rooms'] }}</div>
             </div>
         </div>
     </div>
 
 <!-- Main Content Grid -->
-<div class="grid grid-cols-2 lg:grid-cols-2  gap-6 mt-6 h-screen">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <!-- Recent Stock Transactions -->
-    <div class="bg-white rounded-lg shadow lg:col-span-2 mb-0 max-h-[calc(100vh-100px)] overflow-auto">
+    <div class="bg-white rounded-lg shadow lg:col-span-1 mb-0 max-h-[calc(100vh-100px)] overflow-auto">
         <div class="p-2 border-b border-gray-100">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
@@ -73,86 +80,69 @@
                     </div>
                     <h3 class="text-lg font-semibold text-gray-900">Recent Stock Transactions</h3>
                 </div>
-                <a href="{{ route('stocks.index') }}" class="text-sm font-medium text-blue-600 hover:text-blue-800 flex items-center">
-                    View All
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
             </div>
         </div>
         <div class="p-4">
-            @if($recentTransactions->isEmpty())
-                <div class="text-center py-6 bg-gray-50 rounded-lg">
-                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <h3 class="mt-2 text-sm font-medium text-gray-900">No recent transactions</h3>
-                    <p class="mt-1 text-sm text-gray-500">Transactions will appear here when available</p>
-                    <div class="mt-4">
-                    <form action="{{ route('stocks.create') }}" method="GET">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                        </svg>
-                        Add Items
-                    </button>
-                </form>
-                    </div>
-                </div>
-            @else
-                <div class="overflow-hidden">
-                    <div class="flow-root">
-                        <ul class="-my-5 divide-y divide-gray-200">
-                            @foreach($recentTransactions as $transaction)
-                                <li class="py-4">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="flex-shrink-0">
-                                            <div class="relative">
-                                                <div class="h-10 w-10 rounded-full bg-gradient-to-br {{ $transaction->type == 'in' ? 'from-green-50 to-green-100' : 'from-red-50 to-red-100' }} flex items-center justify-center">
-                                                    <svg class="h-5 w-5 {{ $transaction->type == 'in' ? 'text-green-600' : 'text-red-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        @if($transaction->type == 'in')
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                                        @else
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                                                        @endif
-                                                    </svg>
-                                                </div>
-                                                <span class="absolute -top-1 -right-1 h-4 w-4 rounded-full {{ $transaction->type == 'in' ? 'bg-green-500' : 'bg-red-500' }} flex items-center justify-center">
-                                                    <span class="text-white text-xs font-bold">{{ $transaction->type == 'in' ? '+' : '-' }}</span>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div class="min-w-0 flex-1">
-                                            <p class="truncate text-sm font-medium text-gray-900">
-                                                {{ $transaction->stock_name }}
-                                            </p>
-                                            <div class="flex items-center space-x-1 text-xs text-gray-500">
-                                                <span>{{ $transaction->quantity }} units</span>
-                                                <span>•</span>
-                                                <span>{{ $transaction->user_name }}</span>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm text-gray-500">
-                                                {{ date('M d', strtotime($transaction->created_at)) }}
-                                            </div>
-                                            <div class="text-xs text-gray-400">
-                                                {{ date('h:i A', strtotime($transaction->created_at)) }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </li>
-                            @endforeach
-                        </ul>
-                    </div>
-                    <div class="mt-4">
-                        <a href="{{ route('stocks.index') }}" class="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                            View all transactions
-                        </a>
-                    </div>
-                </div>
-            @endif
+            <h3 class="text-lg font-semibold mb-4">Recent Stock Transactions</h3>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <template x-if="recentTransactions.length === 0">
+                            <tr>
+                                <td colspan="5" class="px-4 py-2 text-center text-sm text-gray-500">No recent transactions</td>
+                            </tr>
+                        </template>
+                        <template x-for="transaction in recentTransactions" :key="transaction.id">
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap" x-text="transaction.stock_name"></td>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                          :class="transaction.type === 'in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                          x-text="transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)">
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap" x-text="transaction.quantity"></td>
+                                <td class="px-4 py-2 whitespace-nowrap" x-text="formatDate(transaction.created_at)"></td>
+                                <td class="px-4 py-2 whitespace-nowrap" x-text="transaction.user_name"></td>
+                            </tr>
+                        </template>
+                        <!-- Fallback for initial page load -->
+                        <template x-if="recentTransactions.length === 0">
+                            @forelse($recentTransactions as $transaction)
+                            <tr>
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->stock_name }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $transaction->type === 'in' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ ucfirst($transaction->type) }}
+                                    </span>
+                                </td>
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->quantity }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap">{{ date('M d, Y', strtotime($transaction->created_at)) }}</td>
+                                <td class="px-4 py-2 whitespace-nowrap">{{ $transaction->user_name }}</td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="5" class="px-4 py-2 text-center text-sm text-gray-500">No recent transactions</td>
+                            </tr>
+                            @endforelse
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4">
+                <a href="{{ route('stocks.index') }}" class="w-full flex justify-center items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    View all transactions
+                </a>
+            </div>
         </div>
     </div>
 
@@ -195,9 +185,9 @@
                         <span class="text-sm text-gray-600">Supplies</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">0%</span>
+                        <span class="text-sm text-gray-600" x-text="expenseStats.supplies + '%'">{{ $expenseStats['supplies'] }}%</span>
                         <div class="w-24 bg-gray-200 rounded-full h-2">
-                            <div class="bg-blue-500 h-2 rounded-full" style="width: 0%"></div>
+                            <div class="bg-blue-500 h-2 rounded-full" x-bind:style="'width: ' + expenseStats.supplies + '%'"></div>
                         </div>
                     </div>
                 </div>
@@ -207,9 +197,9 @@
                         <span class="text-sm text-gray-600">Services</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">0%</span>
+                        <span class="text-sm text-gray-600" x-text="expenseStats.services + '%'">{{ $expenseStats['services'] }}%</span>
                         <div class="w-24 bg-gray-200 rounded-full h-2">
-                            <div class="bg-purple-500 h-2 rounded-full" style="width: 0%"></div>
+                            <div class="bg-purple-500 h-2 rounded-full" x-bind:style="'width: ' + expenseStats.services + '%'"></div>
                         </div>
                     </div>
                 </div>
@@ -219,9 +209,9 @@
                         <span class="text-sm text-gray-600">Other</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600">0%</span>
+                        <span class="text-sm text-gray-600" x-text="expenseStats.other + '%'">{{ $expenseStats['other'] }}%</span>
                         <div class="w-24 bg-gray-200 rounded-full h-2">
-                            <div class="bg-pink-500 h-2 rounded-full" style="width: 0%"></div> 
+                            <div class="bg-pink-500 h-2 rounded-full" x-bind:style="'width: ' + expenseStats.other + '%'"></div> 
                         </div>
                     </div>
                 </div>
@@ -233,27 +223,28 @@
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Expenses Chart
-    const expensesCtx = document.getElementById('expensesChart').getContext('2d');
-    const expensesChart = new Chart(expensesCtx, {
-        type: 'pie',
-        data: {
-            labels: ['Supplies', 'Services', 'Other'],
-            datasets: [{
-                data: [{{ $expenseStats['supplies'] }}, {{ $expenseStats['services'] }}, {{ $expenseStats['other'] }}],
-                backgroundColor: ['#3B82F6', '#06B6D4', '#EC4899'],
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'right'
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('expensesChart').getContext('2d');
+        window.expensesChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Supplies', 'Services', 'Other'],
+                datasets: [{
+                    data: [{{ $expenseStats['supplies'] }}, {{ $expenseStats['services'] }}, {{ $expenseStats['other'] }}],
+                    backgroundColor: ['#3B82F6', '#06B6D4', '#EC4899'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
                 }
             }
-        }
+        });
     });
 
     // Time range selector for expenses
@@ -261,8 +252,18 @@
         fetch(`/api/expenses-stats?range=${e.target.value}`)
             .then(response => response.json())
             .then(data => {
-                expensesChart.data.datasets[0].data = [data.supplies, data.services, data.other];
-                expensesChart.update();
+                window.expensesChart.data.datasets[0].data = [data.supplies, data.services, data.other];
+                window.expensesChart.update();
+                
+                // Also update the Alpine.js data
+                const dashboard = Alpine.store('dashboard');
+                if (dashboard) {
+                    dashboard.expenseStats = {
+                        supplies: data.supplies,
+                        services: data.services,
+                        other: data.other
+                    };
+                }
             });
     });
 
