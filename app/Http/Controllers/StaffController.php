@@ -157,6 +157,16 @@ class StaffController extends Controller
     }
 
     /**
+     * Display the specified staff member.
+     */
+    public function show(User $staff)
+    {
+        $this->checkAuthorization();
+        
+        return view('staff.show', compact('staff'));
+    }
+
+    /**
      * Remove the specified staff member from storage.
      */
     public function destroy(User $staff)

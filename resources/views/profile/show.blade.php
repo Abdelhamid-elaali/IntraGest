@@ -28,9 +28,9 @@
         </div>
 
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-md shadow-sm mt-4 mb-4">
+            <x-alert type="success" :auto-dismiss="true" :dismiss-after="4000" class="mb-4">
                 {{ session('success') }}
-            </div>
+            </x-alert>
         @endif
 
         <div class="bg-white shadow-lg rounded-b-lg overflow-hidden">
