@@ -60,7 +60,7 @@
     </div>
 
 <!-- Main Content Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 h-screen">
+<div class="grid grid-cols-2 lg:grid-cols-2  gap-6 mt-6 h-screen">
     <!-- Recent Stock Transactions -->
     <div class="bg-white rounded-lg shadow lg:col-span-2 mb-0 max-h-[calc(100vh-100px)] overflow-auto">
         <div class="p-2 border-b border-gray-100">
