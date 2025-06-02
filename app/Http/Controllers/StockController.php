@@ -26,7 +26,7 @@ class StockController extends Controller
             $query->where('supplier_id', $request->supplier_id);
         }
         
-        // Department filtering is not implemented yet
+        // Department filtering removed
         
         if ($request->filled('status')) {
             if ($request->status === 'low') {

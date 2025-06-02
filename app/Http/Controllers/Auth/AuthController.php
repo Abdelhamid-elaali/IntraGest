@@ -23,6 +23,11 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
+            // Redirect Stock Manager users to the low stock page
+            if (auth()->user()->isStockManager()) {
+                return redirect()->route('stocks.low_stock');
+            }
+
             return redirect()->intended('dashboard');
         }
 

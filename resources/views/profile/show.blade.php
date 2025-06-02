@@ -93,28 +93,14 @@
                             <label class="block text-sm font-medium text-gray-600">Student ID</label>
                             <p class="mt-1 text-gray-900">{{ $user->student_id }}</p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Current Term</label>
-                            <p class="mt-1 text-gray-900">
-                                @if($currentTerm = \App\Models\AcademicTerm::where('is_current', true)->first())
-                                    {{ $currentTerm->name }}
-                                @else
-                                    No active term
-                                @endif
-                            </p>
-                        </div>
+                        <!-- Current Term section removed -->
                         <div>
                             <label class="block text-sm font-medium text-gray-600">Enrolled Subjects</label>
                             <p class="mt-1 text-gray-900">
                                 {{ $user->enrollments()->where('status', 'approved')->count() }}
                             </p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-600">Overall GPA</label>
-                            <p class="mt-1 text-gray-900">
-                                {{ number_format($user->grades()->avg('score'), 2) }}
-                            </p>
-                        </div>
+                        <!-- Overall GPA section removed -->
                     </div>
                 </div>
             @endif

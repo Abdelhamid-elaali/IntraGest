@@ -65,15 +65,7 @@ class User extends Authenticatable
         return $this->roles()->first();
     }
 
-    public function grades(): HasMany
-    {
-        return $this->hasMany(Grade::class, 'student_id');
-    }
-
-    public function gradesGiven(): HasMany
-    {
-        return $this->hasMany(Grade::class, 'grader_id');
-    }
+    // Grade relationship removed
 
     public function complaints(): HasMany
     {

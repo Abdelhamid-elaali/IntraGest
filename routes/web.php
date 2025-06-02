@@ -2,9 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\GradeController;
 use App\Http\Controllers\RoomController;
-use App\Http\Controllers\AcademicTermController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AbsencesController;
 use App\Http\Controllers\PaymentController;
@@ -156,20 +154,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('term/{term}', [EnrollmentController::class, 'termEnrollments'])->name('term');
     });
 
-    // Grade Management Routes
-    Route::prefix('grades')->name('grades.')->group(function () {
-        Route::get('/', [GradeController::class, 'index'])->name('index');
-        Route::get('/create', [GradeController::class, 'create'])->name('create');
-        Route::post('/', [GradeController::class, 'store'])->name('store');
-        Route::get('/{grade}', [GradeController::class, 'show'])->name('show');
-        Route::get('/{grade}/edit', [GradeController::class, 'edit'])->name('edit');
-        Route::put('/{grade}', [GradeController::class, 'update'])->name('update');
-        Route::delete('/{grade}', [GradeController::class, 'destroy'])->name('destroy');
-        
-        Route::get('/student/{student}', [GradeController::class, 'showStudent'])->name('student');
-        Route::get('/subject/{subject}', [GradeController::class, 'showSubject'])->name('subject');
-        Route::get('/analytics', [GradeController::class, 'analytics'])->name('analytics');
-    });
+    // Grade Management Routes - Removed
 
     // Room Management Routes
     Route::resource('rooms', RoomController::class);
@@ -178,13 +163,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/rooms/{room}/maintenance', [RoomController::class, 'maintenance'])->name('rooms.maintenance');
     Route::get('/available-rooms', [RoomController::class, 'getAvailableRooms'])->name('rooms.available');
 
-    // Academic Terms Management
-    Route::resource('terms', AcademicTermController::class);
-    Route::post('/terms/{term}/set-current', [AcademicTermController::class, 'setCurrent'])->name('terms.setCurrent');
-    Route::get('/terms/{term}/subjects', [AcademicTermController::class, 'getSubjects'])->name('terms.subjects');
-    Route::get('/terms/{term}/enrollments', [AcademicTermController::class, 'getEnrollments'])->name('terms.enrollments');
-    Route::get('/terms/{term}/grades', [AcademicTermController::class, 'getGrades'])->name('terms.grades');
-    Route::get('/terms/{term}/analytics', [AcademicTermController::class, 'analytics'])->name('terms.analytics');
+    // Academic Terms Management - Removed
 
     // Settings Routes
     Route::middleware(['auth'])->group(function () {

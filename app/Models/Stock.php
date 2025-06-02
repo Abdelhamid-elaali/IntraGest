@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Models\Supplier;
 use App\Models\StockTransaction;
-use App\Models\Department;
 use App\Models\StockCategory;
 use App\Models\StockOrderItem;
 use Carbon\Carbon;
@@ -29,7 +28,6 @@ class Stock extends Model
         'unit_price',
         'expiry_date',
         'supplier_id',
-        'department_id',
         'category_id',
         'subcategory_id',
         'location',
@@ -62,13 +60,7 @@ class Stock extends Model
         return $this->belongsTo(Supplier::class);
     }
 
-    /**
-     * Get the department that this stock belongs to
-     */
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
-    }
+    // Department relationship removed
 
     /**
      * Get the category that this stock belongs to
@@ -223,30 +215,7 @@ class Stock extends Model
         return $this->quantity * $this->price_with_vat;
     }
     
-    /**
-     * Transfer stock to another department
-     */
-    public function transferToDepartment($departmentId, $quantity, $userId, $notes = null)
-    {
-        if ($this->quantity < $quantity) {
-            throw new \Exception('Insufficient stock quantity for transfer');
-        }
-        
-        // Decrease stock from current item
-        $this->decrement('quantity', $quantity);
-        
-        // Record the transaction
-        $this->transactions()->create([
-            'type' => 'transfer_out',
-            'quantity' => $quantity,
-            'unit_price' => $this->unit_price,
-            'user_id' => $userId,
-            'notes' => $notes ?? 'Stock transfer to department ID: ' . $departmentId,
-            'reference_number' => 'TRF-' . time() . '-' . rand(1000, 9999),
-        ]);
-        
-        return true;
-    }
+    // Department transfer method removed
     
     /**
      * Scope for low stock items (below 15%)

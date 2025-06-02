@@ -45,13 +45,6 @@ class RoleSeeder extends Seeder
                 'is_admin' => false
             ],
             [
-                'name' => 'Cook',
-                'slug' => 'cook',
-                'description' => 'Manages meals and attendance',
-                'is_super_admin' => false,
-                'is_admin' => false
-            ],
-            [
                 'name' => 'Intern',
                 'slug' => 'intern',
                 'description' => 'Can submit requests and complaints',
@@ -60,27 +53,78 @@ class RoleSeeder extends Seeder
             ]
         ];
 
-        // Create roles
+        // Create roles if they don't exist
         foreach ($roles as $roleData) {
-            Role::create($roleData);
+            Role::firstOrCreate(
+                ['slug' => $roleData['slug']],
+                $roleData
+            );
         }
 
         // Create initial director (super admin) user
+        $directorEmail = 'director@intragest.com';
+        // Delete existing director user if exists to avoid any issues
+        User::where('email', $directorEmail)->delete();
+        
         $director = User::create([
             'name' => 'Director',
-            'email' => 'director@intragest.com',
+            'email' => $directorEmail,
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
             'status' => 'active'
         ]);
-        $director->roles()->attach(Role::where('slug', 'director')->first());
+        
+        $directorRole = Role::where('slug', 'director')->first();
+        if ($directorRole) {
+            // Make sure to detach any existing roles first
+            $director->roles()->detach();
+            // Then attach the director role
+            $director->roles()->attach($directorRole->id);
+            $this->command->info("Director user created with email: {$directorEmail} and password: password");
+        }
 
         // Create initial boarding manager (admin) user
+        $boardingEmail = 'boarding@intragest.com';
+        // Delete existing boarding manager user if exists to avoid any issues
+        User::where('email', $boardingEmail)->delete();
+        
         $boardingManager = User::create([
             'name' => 'Boarding Manager',
-            'email' => 'boarding@intragest.com',
+            'email' => $boardingEmail,
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
             'status' => 'active'
         ]);
-        $boardingManager->roles()->attach(Role::where('slug', 'boarding-manager')->first());
+        
+        $boardingRole = Role::where('slug', 'boarding-manager')->first();
+        if ($boardingRole) {
+            // Make sure to detach any existing roles first
+            $boardingManager->roles()->detach();
+            // Then attach the boarding manager role
+            $boardingManager->roles()->attach($boardingRole->id);
+            $this->command->info("Boarding Manager user created with email: {$boardingEmail} and password: password");
+        }
+        
+        // Create stock manager user
+        $stockManagerEmail = 'stock@intragest.com';
+        // Delete existing stock manager user if exists to avoid any issues
+        User::where('email', $stockManagerEmail)->delete();
+        
+        $stockManager = User::create([
+            'name' => 'Stock Manager',
+            'email' => $stockManagerEmail,
+            'password' => Hash::make('password'),
+            'email_verified_at' => now(),
+            'status' => 'active'
+        ]);
+        
+        $stockManagerRole = Role::where('slug', 'stock-manager')->first();
+        if ($stockManagerRole) {
+            // Make sure to detach any existing roles first
+            $stockManager->roles()->detach();
+            // Then attach the stock manager role
+            $stockManager->roles()->attach($stockManagerRole->id);
+            $this->command->info("Stock Manager user created with email: {$stockManagerEmail} and password: password");
+        }
     }
 }
