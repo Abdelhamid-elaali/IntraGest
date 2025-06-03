@@ -18,6 +18,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CandidateController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CriteriaController;
 
 // Authentication Routes (will be handled by Laravel Breeze/Fortify)
@@ -104,11 +105,22 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [CandidateController::class, 'index'])->name('index');
         Route::get('/create', [CandidateController::class, 'create'])->name('create');
         Route::post('/', [CandidateController::class, 'store'])->name('store');
+        Route::get('/{candidate}', [CandidateController::class, 'show'])->name('show');
         Route::get('/{candidate}/edit', [CandidateController::class, 'edit'])->name('edit');
         Route::put('/{candidate}', [CandidateController::class, 'update'])->name('update');
         Route::delete('/{candidate}', [CandidateController::class, 'destroy'])->name('destroy');
-        Route::get('/accepted', [CandidateController::class, 'accepted'])->name('accepted');
+        Route::post('/bulk-accept', [CandidateController::class, 'bulkAccept'])->name('bulk-accept');
+        Route::post('/bulk-destroy', [CandidateController::class, 'bulkDestroy'])->name('bulk-destroy');
+        Route::get('/accepted/list', [CandidateController::class, 'accepted'])->name('accepted');
+        Route::post('/{candidate}/accept', [CandidateController::class, 'accept'])->name('accept');
+        Route::post('/{candidate}/convert', [CandidateController::class, 'convertToTrainee'])->name('convert');
+        Route::post('/{candidate}/reject', [CandidateController::class, 'reject'])->name('reject');
+        Route::delete('/documents/{document}', [CandidateController::class, 'deleteDocument'])->name('delete-document');
+        Route::get('/{candidate}/download-documents', [CandidateController::class, 'downloadDocuments'])->name('download-documents');
     });
+    
+    // Document download route
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('documents.download');
 
     // Help Center
     Route::prefix('help-center')->name('help-center.')->group(function () {
@@ -135,25 +147,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-as-read');
     });
 
-    // Subjects Management
-    Route::resource('subjects', SubjectController::class);
-    Route::prefix('subjects')->name('subjects.')->group(function () {
-        Route::post('{subject}/activate', [SubjectController::class, 'activate'])->name('activate');
-        Route::post('{subject}/deactivate', [SubjectController::class, 'deactivate'])->name('deactivate');
-        Route::get('{subject}/students', [SubjectController::class, 'students'])->name('students');
-        Route::get('{subject}/grades', [SubjectController::class, 'grades'])->name('grades');
-        Route::get('{subject}/analytics', [SubjectController::class, 'analytics'])->name('analytics');
-    });
-
-    // Enrollments Management
-    Route::resource('enrollments', EnrollmentController::class);
-    Route::prefix('enrollments')->name('enrollments.')->group(function () {
-        Route::post('{enrollment}/approve', [EnrollmentController::class, 'approve'])->name('approve');
-        Route::post('{enrollment}/reject', [EnrollmentController::class, 'reject'])->name('reject');
-        Route::post('{enrollment}/drop', [EnrollmentController::class, 'drop'])->name('drop');
-        Route::get('student/{student}', [EnrollmentController::class, 'studentEnrollments'])->name('student');
-        Route::get('term/{term}', [EnrollmentController::class, 'termEnrollments'])->name('term');
-    });
+    // Subject and Enrollment routes removed as they are not needed in this application
 
     // Grade Management Routes - Removed
 

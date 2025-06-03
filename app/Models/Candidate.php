@@ -22,7 +22,6 @@ class Candidate extends Model
         'notes',
         'application_date',
         'user_id',
-        'name',
         'academic_year',
         'specialization',
         'nationality',
@@ -38,13 +37,22 @@ class Candidate extends Model
         'birth_date' => 'date',
         'application_date' => 'date',
         'has_disability' => 'boolean',
-        'score' => 'float'
+        'score' => 'float',
+        'family_status' => 'array'
     ];
 
     // Relationships
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    
+    /**
+     * Get the documents for the candidate.
+     */
+    public function documents()
+    {
+        return $this->hasMany(CandidateDocument::class);
     }
 
     // Helper methods
@@ -71,5 +79,43 @@ class Candidate extends Model
     public function getAge()
     {
         return $this->birth_date->age;
+    }
+    
+    // Accessors for fields that don't exist in the database but are displayed in the view
+    public function getNameAttribute()
+    {
+        // Directly access the attributes array to bypass any potential overrides
+        $firstName = $this->getAttributeFromArray('first_name');
+        $lastName = $this->getAttributeFromArray('last_name');
+        
+        if (!empty($firstName) && !empty($lastName)) {
+            return $firstName . ' ' . $lastName;
+        } elseif (!empty($firstName)) {
+            return $firstName;
+        } elseif (!empty($lastName)) {
+            return $lastName;
+        } else {
+            return 'Unnamed Candidate';
+        }
+    }
+    
+    public function getDistanceAttribute()
+    {
+        return 'N/A'; // Default value since this field doesn't exist in the database
+    }
+    
+    public function getIncomeLevelAttribute()
+    {
+        return 'N/A'; // Default value since this field doesn't exist in the database
+    }
+    
+    public function getTrainingLevelAttribute()
+    {
+        return 'N/A'; // Default value since this field doesn't exist in the database
+    }
+    
+    public function getTotalScoreAttribute()
+    {
+        return 'N/A'; // Default value since this field doesn't exist in the database
     }
 }

@@ -12,16 +12,20 @@ class Student extends Model
 
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'phone',
         'address',
+        'place_of_residence',
         'date_of_birth',
         'enrollment_date',
         'status',
         'academic_year',
         'specialization',
+        'educational_level',
         'nationality',
-        'entry_date'
+        'cin'
     ];
 
     /**

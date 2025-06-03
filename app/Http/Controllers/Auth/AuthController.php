@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -24,7 +25,8 @@ class AuthController extends Controller
             $request->session()->regenerate();
 
             // Redirect Stock Manager users to the low stock page
-            if (auth()->user()->isStockManager()) {
+            $user = Auth::user();
+            if ($user && method_exists($user, 'isStockManager') && $user->isStockManager()) {
                 return redirect()->route('stocks.low_stock');
             }
 
@@ -32,7 +34,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Incorrect email or password. Please try again.',
         ])->onlyInput('email');
     }
 

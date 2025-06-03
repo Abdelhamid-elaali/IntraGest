@@ -37,33 +37,46 @@
                 @forelse($candidates as $candidate)
                 <tr>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-gray-900">{{ $candidate->name }}</div>
+                        <div class="text-sm font-medium text-gray-900">{{ $candidate->first_name }} {{ $candidate->last_name }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">{{ $candidate->distance }}</div>
+                        <div class="text-sm text-gray-500">{{ $candidate->distance ?? 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">{{ ucfirst($candidate->income_level) }}</div>
+                        <div class="text-sm text-gray-500">{{ $candidate->income_level ? ucfirst($candidate->income_level) : 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">{{ ucfirst($candidate->training_level) }}</div>
+                        <div class="text-sm text-gray-500">{{ $candidate->training_level ? ucfirst($candidate->training_level) : 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm font-medium text-green-600">{{ $candidate->total_score }}</div>
+                        <div class="text-sm font-medium text-green-600">{{ $candidate->score ?? 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">{{ $candidate->accepted_at->format('d/m/Y') }}</div>
+                        <div class="text-sm text-gray-500">{{ $candidate->updated_at->format('d/m/Y') }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
-                            <a href="{{ route('candidates.show', $candidate) }}" class="text-blue-600 hover:text-blue-900">View</a>
+                            <a href="{{ route('candidates.show', $candidate) }}" class="text-blue-600 hover:text-blue-900 p-1 rounded-full hover:bg-blue-100" title="View candidate details">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </a>
                             <form action="{{ route('candidates.convert', $candidate) }}" method="POST" class="inline">
                                 @csrf
-                                <button type="submit" class="text-green-600 hover:text-green-900">Convert to Trainee</button>
+                                <button type="submit" class="text-green-600 hover:text-green-900 p-1 rounded-full hover:bg-green-100" title="Convert to trainee">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </button>
                             </form>
                             <form action="{{ route('candidates.reject', $candidate) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to reject this candidate?');">
                                 @csrf
-                                <button type="submit" class="text-red-600 hover:text-red-900">Reject</button>
+                                <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100" title="Reject candidate">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
                             </form>
                         </div>
                     </td>

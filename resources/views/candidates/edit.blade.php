@@ -48,9 +48,26 @@
 
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="tel" name="phone" id="phone" value="{{ old('phone', $candidate->phone) }}" placeholder="Enter candidate's phone number" pattern="[0-9]*" inputmode="numeric" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
-                    <p class="text-xs text-gray-500 mt-1">You can only enter numbers</p>
+                    <input type="tel" name="phone" id="phone" value="{{ old('phone', $candidate->phone) }}" placeholder="Enter candidate's phone number" pattern="[0-9+]*" inputmode="tel" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9+]/g, '');" required>
+                    <p class="text-xs text-gray-500 mt-1">Only numbers and the plus (+) symbol are allowed</p>
                     @error('phone')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <div class="mt-2 flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <input id="gender-male" name="gender" type="radio" value="male" {{ old('gender', $candidate->gender) == 'male' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="gender-male" class="ml-2 block text-sm text-gray-700">Male</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="gender-female" name="gender" type="radio" value="female" {{ old('gender', $candidate->gender) == 'female' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="gender-female" class="ml-2 block text-sm text-gray-700">Female</label>
+                        </div>
+                    </div>
+                    @error('gender')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -67,6 +84,14 @@
                     <label for="place_of_residence" class="block text-sm font-medium text-gray-700 mb-1">Place of Residence</label>
                     <input type="text" name="place_of_residence" id="place_of_residence" value="{{ old('place_of_residence', isset($candidate->place_of_residence) ? $candidate->place_of_residence : '') }}" placeholder="Enter candidate's place of residence" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
                     @error('place_of_residence')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input type="text" name="city" id="city" value="{{ old('city', $candidate->city) }}" placeholder="Enter candidate's city" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    @error('city')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -339,18 +364,23 @@
                 <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4">Supporting Documents</h3>
                 <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
                     <div class="mb-4">
-                        <label for="supporting_documents" class="block text-sm font-medium text-gray-700 mb-2">Upload Documents</label>
-                        <div class="flex items-center justify-center w-full">
-                            <label for="supporting_documents" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition-all duration-200">
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                    </svg>
-                                    <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                    <p class="text-xs text-gray-500">PDF, PNG, JPG or DOCX (MAX. 10MB)</p>
+                        <label for="supporting_documents" class="block text-sm font-medium text-gray-700 mb-2">Upload Documents <span class="text-xs text-gray-500">(Maximum 5 files)</span></label>
+                        <div id="document-drop-area" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors duration-200">
+                            <div id="document-upload-prompt" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500">PDF, PNG, JPG, DOCX, XLS, ZIP (MAX. 10MB)</p>
+                            </div>
+                            <div id="document-preview-container" class="hidden w-full px-4 py-2">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h4 class="text-sm font-medium text-gray-700">Selected Files</h4>
+                                    <span id="file-count" class="text-xs text-gray-500">0/5 files</span>
                                 </div>
-                                <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple />
-                            </label>
+                                <div id="document-previews" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto"></div>
+                            </div>
+                            <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.zip" />
                         </div>
                         @error('supporting_documents')
                             <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
@@ -421,4 +451,7 @@
         </form>
     </div>
 </div>
+
+<!-- JavaScript for file upload preview -->
+<script src="{{ asset('js/candidates/file-upload.js') }}"></script>
 @endsection

@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
+
 @section('content')
-<div class="container">
+<div>
     <div class="mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Add New Trainee</h1>
         <p class="text-gray-600">Enter the details of the new trainee below.</p>
@@ -47,8 +48,8 @@
 
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" placeholder="Enter trainee's phone number" pattern="[0-9]*" inputmode="numeric" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
-                    <p class="text-xs text-gray-500 mt-1">You can only enter numbers</p>
+                    <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" placeholder="Enter trainee's phone number" pattern="[0-9+]*" inputmode="tel" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9+]/g, '');" required>
+                    <p class="text-xs text-gray-500 mt-1">Only numbers and the plus (+) symbol are allowed</p>
                     @error('phone')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -204,12 +205,33 @@
                 </div>
 
                 <div>
-                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address / Place of Residence</label>
-                    <input type="text" name="address" id="address" value="{{ old('address') }}" placeholder="Enter trainee's full address and place of residence" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                    <input type="hidden" name="place_of_residence" id="place_of_residence" value="{{ old('place_of_residence') }}">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <div class="mt-2 flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <input id="gender-male" name="gender" type="radio" value="male" {{ old('gender') == 'male' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="gender-male" class="ml-2 block text-sm text-gray-700">Male</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="gender-female" name="gender" type="radio" value="female" {{ old('gender') == 'female' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="gender-female" class="ml-2 block text-sm text-gray-700">Female</label>
+                        </div>
+                    </div>
+                    @error('gender')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <input type="text" name="address" id="address" value="{{ old('address') }}" placeholder="Enter trainee's full address" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
                     @error('address')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
+                </div>
+                
+                <div>
+                    <label for="place_of_residence" class="block text-sm font-medium text-gray-700 mb-1">Place of Residence</label>
+                    <input type="text" name="place_of_residence" id="place_of_residence" value="{{ old('place_of_residence') }}" placeholder="Enter trainee's place of residence" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
                     @error('place_of_residence')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -217,14 +239,12 @@
             </div>
 
             <div class="mt-8 flex justify-end space-x-3">
-                <form action="{{ route('students.index')}}" method="GET">
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-400 active:bg-gray-500 focus:outline-none focus:border-gray-500 focus:ring ring-gray-300 disabled:opacity-25 transition">
+                <a href="{{ route('students.index')}}" class="inline-flex items-center px-4 py-2 bg-gray-300 border border-transparent rounded-md font-semibold text-xs text-gray-800 uppercase tracking-widest hover:bg-gray-400 active:bg-gray-500 focus:outline-none focus:border-gray-500 focus:ring ring-gray-300 disabled:opacity-25 transition">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>    
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>    
                     Cancel
-                    </button>
-                </form>
+                </a>
                 <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>

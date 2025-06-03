@@ -37,17 +37,26 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'cin' => 'required|string|max:20',
             'academic_year' => 'required|string|max:255',
             'specialization' => 'required|string|max:255',
+            'educational_level' => 'required|string|max:255',
             'nationality' => 'required|string|max:255',
             'address' => 'required|string|max:255',
+            'place_of_residence' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|unique:students,email',
-            'entry_date' => 'required|date',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|in:male,female',
         ]);
-
-        Student::create($request->all());
+        
+        // Combine first_name and last_name into name field
+        $data = $request->all();
+        $data['name'] = $request->first_name . ' ' . $request->last_name;
+        
+        Student::create($data);
 
         return redirect()->route('students.index')
             ->with('success', 'Trainee added successfully.');
@@ -85,17 +94,26 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'cin' => 'required|string|max:20',
             'academic_year' => 'required|string|max:255',
             'specialization' => 'required|string|max:255',
+            'educational_level' => 'required|string|max:255',
             'nationality' => 'required|string|max:255',
             'address' => 'required|string|max:255',
+            'place_of_residence' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'email' => 'required|email|unique:students,email,' . $student->id,
-            'entry_date' => 'required|date',
+            'date_of_birth' => 'required|date',
+            'gender' => 'required|in:male,female',
         ]);
-
-        $student->update($request->all());
+        
+        // Combine first_name and last_name into name field
+        $data = $request->all();
+        $data['name'] = $request->first_name . ' ' . $request->last_name;
+        
+        $student->update($data);
 
         return redirect()->route('students.index')
             ->with('success', 'Trainee updated successfully.');

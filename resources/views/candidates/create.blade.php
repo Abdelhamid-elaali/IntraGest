@@ -8,7 +8,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-md p-6">
-        <form action="{{ route('candidates.store') }}" method="POST" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('candidates.store') }}" class="space-y-6" enctype="multipart/form-data" id="candidateForm">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -47,34 +47,59 @@
 
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                    <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" placeholder="Enter candidate's phone number" pattern="[0-9]*" inputmode="numeric" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
-                    <p class="text-xs text-gray-500 mt-1">You can only enter numbers</p>
+                    <input type="tel" name="phone" id="phone" value="{{ old('phone') }}" placeholder="Enter candidate's phone number" pattern="[0-9+]*" inputmode="tel" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9+]/g, '');" required>
+                    <p class="text-xs text-gray-500 mt-1">Only numbers and the plus (+) symbol are allowed</p>
                     @error('phone')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
-                    <input type="text" name="address" id="address" value="{{ old('address') }}" placeholder="Enter candidate's full address" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                    <input type="text" name="nationality" id="nationality" value="{{ old('nationality', 'Moroccan') }}" placeholder="Enter candidate's nationality" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    @error('nationality')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="distance" class="block text-sm font-medium text-gray-700 mb-1">Distance from Institute (km)</label>
+                    <input type="number" name="distance" id="distance" value="{{ old('distance') }}" placeholder="Enter distance in kilometers" min="0" step="0.1" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    @error('distance')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                    <div class="mt-2 flex items-center space-x-6">
+                        <div class="flex items-center">
+                            <input id="gender-male" name="gender" type="radio" value="male" {{ old('gender', 'male') == 'male' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" required>
+                            <label for="gender-male" class="ml-2 block text-sm text-gray-700">Male</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="gender-female" name="gender" type="radio" value="female" {{ old('gender') == 'female' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="gender-female" class="ml-2 block text-sm text-gray-700">Female</label>
+                        </div>
+                    </div>
+                    @error('gender')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address / Place of Residence</label>
+                    <input type="text" name="address" id="address" value="{{ old('address') }}" placeholder="Enter candidate's full address and place of residence" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    <p class="text-xs text-gray-500 mt-1">Include both address and place of residence information</p>
                     @error('address')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
-                    <label for="place_of_residence" class="block text-sm font-medium text-gray-700 mb-1">Place of Residence</label>
-                    <input type="text" name="place_of_residence" id="place_of_residence" value="{{ old('place_of_residence') }}" placeholder="Enter candidate's place of residence" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                    @error('place_of_residence')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Geographical Criteria -->
-                <div>
-                    <label for="distance" class="block text-sm font-medium text-gray-700 mb-1">Distance from Institution (km)</label>
-                    <input type="number" name="distance" id="distance" value="{{ old('distance') }}" min="0" step="0.1" placeholder="Enter distance in kilometers" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                    @error('distance')
+                    <label for="city" class="block text-sm font-medium text-gray-700 mb-1">City</label>
+                    <input type="text" name="city" id="city" value="{{ old('city') }}" placeholder="Enter candidate's city" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    @error('city')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
@@ -92,11 +117,29 @@
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                
+                <!-- Has Disability Field -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Has Disability</label>
+                    <div class="mt-1 space-y-2">
+                        <div class="flex items-center">
+                            <input id="has-disability-yes" name="has_disability" type="radio" value="1" {{ old('has_disability') == '1' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="has-disability-yes" class="ml-2 block text-sm text-gray-700">Yes</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="has-disability-no" name="has_disability" type="radio" value="0" {{ old('has_disability', '0') == '0' ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" required>
+                            <label for="has-disability-no" class="ml-2 block text-sm text-gray-700">No</label>
+                        </div>
+                    </div>
+                    @error('has_disability')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
 
                 <!-- Academic Criteria -->
                 <div>
                     <label for="training_level" class="block text-sm font-medium text-gray-700 mb-1">Academic Year</label>
-                    <select name="training_level" id="training_level" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    <select name="training_level" id="training_level" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required onchange="updateAcademicYear()">
                         <option value="">Select Academic Year</option>
                         <option value="first_year" {{ old('training_level') == 'first_year' ? 'selected' : '' }}>First Year</option>
                         <option value="second_year" {{ old('training_level') == 'second_year' ? 'selected' : '' }}>Second Year</option>
@@ -105,7 +148,11 @@
                     @error('training_level')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
+                    <!-- Hidden field for academic_year -->
+                    <input type="hidden" name="academic_year" id="academic_year" value="{{ old('academic_year') }}">
                 </div>
+
+                <!-- Specialization field removed to avoid duplication - using the detailed specialization field below -->
 
                 <div>
                     <label for="educational_level" class="block text-sm font-medium text-gray-700 mb-1">Educational Level</label>
@@ -242,6 +289,8 @@
                     @enderror
                 </div>
 
+                <!-- Disability status is already included above -->
+
                 <!-- Family Criteria -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-3">Family Status</label>
@@ -301,72 +350,90 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Parent or Guardian Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="guardian_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" name="guardian_name" id="guardian_name" value="{{ old('guardian_name') }}" placeholder="Enter parent or guardian's full name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                        @error('guardian_name')
+                        <label for="guardian_first_name" class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                        <input type="text" name="guardian_first_name" id="guardian_first_name" value="{{ old('guardian_first_name') }}" placeholder="Enter Parent's or Guardian's first name" class="w-full mb-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                        @error('guardian_first_name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+                    <div>
+                        <label for="guardian_last_name" class="block text-sm font-medium text-gray-700 mb-2">Family Name</label>
+                        <input type="text" name="guardian_last_name" id="guardian_last_name" value="{{ old('guardian_last_name') }}" placeholder="Enter Parent's or Guardian's Family name" class="w-full mb-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                        @error('guardian_last_name')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
                     
                     <div>
-                        <label for="guardian_dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                        <input type="date" name="guardian_dob" id="guardian_dob" value="{{ old('guardian_dob') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                        <label for="guardian_dob" class="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                        <input type="date" name="guardian_dob" id="guardian_dob" value="{{ old('guardian_dob') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring mb-2 focus:ring-blue-500 focus:ring-opacity-50" required>
                         @error('guardian_dob')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="guardian_profession" class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
-                        <input type="text" name="guardian_profession" id="guardian_profession" value="{{ old('guardian_profession') }}" placeholder="Enter parent or guardian's profession" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                        <label for="guardian_profession" class="block text-sm font-medium text-gray-700 mb-2">Profession</label>
+                        <input type="text" name="guardian_profession" id="guardian_profession" value="{{ old('guardian_profession') }}" placeholder="Enter parent or guardian's profession" class="w-full mb-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
                         @error('guardian_profession')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
                     <div>
-                        <label for="guardian_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input type="tel" name="guardian_phone" id="guardian_phone" value="{{ old('guardian_phone') }}" placeholder="Enter parent or guardian's phone number" pattern="[0-9]*" inputmode="numeric" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                        <label for="guardian_phone" class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
+                        <input type="tel" name="guardian_phone" id="guardian_phone" value="{{ old('guardian_phone') }}" placeholder="Enter parent or guardian's phone number" pattern="[0-9+]*" inputmode="tel" class="w-full mb-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9+]/g, '');" required>
                         <p class="text-xs text-gray-500 mt-1">You can only enter numbers</p>
                         @error('guardian_phone')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
-
                 </div>
 
                 <!-- Supporting Documents Section -->
                 <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4">Supporting Documents</h3>
                 <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
                     <div class="mb-4">
-                        <label for="supporting_documents" class="block text-sm font-medium text-gray-700 mb-2">Upload Documents</label>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="supporting_documents" class="block text-sm font-medium text-gray-700">Upload Documents (Max 5 files)</label>
+                            <span id="file-count" class="text-xs text-gray-500">0/5 files</span>
+                        </div>
                         <div class="flex items-center justify-center w-full">
-                            <label for="supporting_documents" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition-all duration-200">
-                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <label for="supporting_documents" id="document-drop-area" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-100 transition-all duration-200">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6" id="document-upload-prompt">
                                     <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                     </svg>
                                     <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                    <p class="text-xs text-gray-500">PDF, PNG, JPG or DOCX (MAX. 10MB)</p>
+                                    <p class="text-xs text-gray-500">PDF, DOC, DOCX, JPG, JPEG, PNG, TXT, XLS, XLSX, CSV, ZIP (MAX. 10MB)</p>
                                 </div>
-                                <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple />
+                                <!-- File preview container (hidden by default) -->
+                                <div id="document-preview-container" class="hidden w-full p-3">
+                                    <div id="document-previews" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+                                </div>
+                                <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt,.xls,.xlsx,.csv,.zip" onchange="handleFileSelect()" />
                             </label>
                         </div>
-                        @error('supporting_documents')
-                            <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                        @error('supporting_documents.*')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                     
                     <div class="mt-4">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Required Documents:</h4>
-                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                        <h4 class="font-medium text-sm text-gray-700 mb-2">Required Documents:</h4>
+                        <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
                             <li>CIN Copy</li>
                             <li>Proof of Residence</li>
                             <li>Income Proof</li>
                         </ul>
+                        <p class="text-xs text-gray-500 mt-2">You can submit your application without these documents, but they may be requested later.</p>
                     </div>
                 </div>
+                
+
+                <!-- JavaScript for file upload preview -->
+                <script src="{{ asset('js/candidates/file-upload.js') }}"></script>
             </div>
 
             <!-- Declaration of Truthfulness -->            
@@ -398,4 +465,23 @@
         </form>
     </div>
 </div>
+
+<script>
+    // Function to copy training_level value to academic_year field
+    function updateAcademicYear() {
+        const trainingLevel = document.getElementById('training_level').value;
+        document.getElementById('academic_year').value = trainingLevel;
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateAcademicYear();
+        
+        // Make sure the form has the academic year value before submission
+        document.getElementById('candidateForm').addEventListener('submit', function(e) {
+            updateAcademicYear();
+        });
+    });
+</script>
+
 @endsection
