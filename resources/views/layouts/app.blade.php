@@ -277,7 +277,7 @@
                                 </a>
                                 <a href="{{ route('help-center.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-700" role="menuitem">
                                     <svg class="mr-3 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <span>Help Center</span>
                                 </a>
@@ -398,11 +398,11 @@
                 <a href="{{ route('settings.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('settings.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
                     <svg class="w-6 h-6 mr-3 {{ request()->routeIs('settings.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.9924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Settings</span>
-                </a>
-                <a href="{{ route('profile.show') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('profile.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Settings</span>
+                    </a>
+                    <a href="{{ route('profile.show') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('profile.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
                     <svg class="w-6 h-6 mr-3 {{ request()->routeIs('profile.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
@@ -473,7 +473,7 @@
                     <svg class="w-6 h-6 mr-3 {{ request()->routeIs('absences.*') || request()->routeIs('absence-types.*') || request()->routeIs('absence-reports.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
-                    <span :class="$store.sidebar.isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300 font-medium">Absences Management</span>
+                    <span :class="$store.sidebar.isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300 font-medium">Absnes Management</span>
                     <svg :class="$store.sidebar.isOpen ? 'opacity-100 ml-auto transform transition-transform duration-200' : 'opacity-0'" :class="open ? 'rotate-90' : ''" class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                     </svg>
@@ -524,7 +524,7 @@
                 <span :class="$store.sidebar.isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300">Room Management</span>
             </a>
             @endif
-            
+
             @if(!auth()->user()->isStockManager())
             <a href="{{ route('help-center.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('help-center.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
                     <svg class="w-6 h-6 mr-3 {{ request()->routeIs('help-center.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -544,6 +544,64 @@
                 </a>
                 @endif
                 
+                @if(auth()->user()->hasRole('admin'))
+                    <!-- Testing Section -->
+                    <div x-data="{open: {{ request()->routeIs('test.*') ? 'true' : 'false' }} }" class="mt-1">
+                        <button @click="open = !open" class="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100 {{ request()->routeIs('test.*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                            <svg class="w-6 h-6 mr-3 {{ request()->routeIs('test.*') ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500' }} flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                              <path stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M6 4v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2m6-16v2m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v10m6-16v10m0 0a2 2 0 1 0 0 4m0-4a2 2 0 1 1 0 4m0 0v2"/>
+                            </svg>
+                            <span :class="$store.sidebar.isOpen ? 'opacity-100' : 'opacity-0 hidden'" class="transition-opacity duration-300 font-medium">Testing</span>
+                            <svg :class="$store.sidebar.isOpen ? 'opacity-100 ml-auto transform transition-transform duration-200' : 'opacity-0'" :class="open ? 'rotate-90' : ''" class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                        <div x-show="open" x-transition:enter="transition ease-out duration-100" x-transition:enter-start="transform opacity-0 scale-95" x-transition:enter-end="transform opacity-100 scale-100" x-transition:leave="transition ease-in duration-75" x-transition:leave-start="transform opacity-100 scale-100" x-transition:leave-end="transform opacity-0 scale-95" :class="$store.sidebar.isOpen ? 'pl-6' : 'pl-0'" class="mt-1 space-y-1">
+                            <a href="{{ route('test.index') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('test.index') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-5 h-5 {{ request()->routeIs('test.index') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17h6l3 3v-3h2V9h-2M4 4h11v8H9l-3 3v-3H4V4Z"/>
+                                </svg>
+                                <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Alert Testing Page</span>
+                            </a>
+                            <a href="{{ url('/test/error/401') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->is('test/error/401') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-5 h-5 {{ request()->is('test/error/401') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Error 401 Page</span>
+                            </a>
+                            <a href="{{ url('/test/error/402') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->is('test/error/402') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-5 h-5 {{ request()->is('test/error/402') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Error 402 Page</span>
+                            </a>
+                            <a href="{{ url('/test/error/403') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->is('test/error/403') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-5 h-5 {{ request()->is('test/error/403') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Error 403 Page</span>
+                            </a>
+                            <a href="{{ url('/test/error/404') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->is('test/error/404') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-5 h-5 {{ request()->is('test/error/404') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Error 404 Page</span>
+                            </a>
+                            <a href="{{ url('/test/error/500') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->is('test/error/500') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-5 h-5 {{ request()->is('test/error/500') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Error 500 Page</span>
+                            </a>
+                            <a href="{{ url('/test/error/503') }}" class="flex items-center px-2 py-1.5 text-xs font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->is('test/error/503') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                <svg class="w-5 h-5 {{ request()->is('test/error/503') ? 'text-blue-500' : 'text-gray-400' }} flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
+                                </svg>
+                                <span :class="$store.sidebar.isOpen ? 'opacity-100 ml-2' : 'opacity-0 hidden'" class="transition-opacity duration-300">Error 503 Page</span>
+                            </a>
+                        </div>
+                    </div>
+                @endif
                 @if(!auth()->user()->isStockManager())
                 <!-- Utility links for non-stock manager roles -->
                     <a href="{{ route('settings.index') }}" class="flex items-center px-2 py-2 text-sm font-medium rounded-md overflow-hidden whitespace-nowrap {{ request()->routeIs('settings.*') ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-700 dark:hover:text-gray-100' }}">
@@ -585,6 +643,17 @@
 <div class="min-h-screen bg-gray-50 pt-16 p-12">
     <div class="transition-all duration-300 ease-in-out" x-data x-bind:style="{ marginLeft: $store.sidebar.isOpen ? '14rem' : '3rem' }" id="main-content-wrapper">
         <div class="p-6">
+            @if(session('alert'))
+                <x-alert 
+                    type="{{ session('alert')['type'] }}" 
+                    :title="session('alert')['title'] ?? null"
+                    :auto-dismiss="true"
+                    :dismiss-after="4000"
+                    class="mb-4"
+                >
+                    {{ session('alert')['message'] }}
+                </x-alert>
+            @endif
             @yield('content')
         </div>
     </div>

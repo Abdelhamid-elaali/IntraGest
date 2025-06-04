@@ -20,6 +20,8 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\CandidateController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\CriteriaController;
+use App\Http\Controllers\TestController;
+use App\Http\Controllers\ErrorController;
 
 // Authentication Routes (will be handled by Laravel Breeze/Fortify)
 require __DIR__.'/auth.php';
@@ -34,6 +36,12 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/stats', [DashboardController::class, 'getUpdatedStats'])->name('dashboard.stats');
+
+    // Test Routes
+    Route::prefix('test')->name('test.')->group(function () {
+        Route::get('/', [TestController::class, 'index'])->name('index');
+        Route::get('/alert/{alertType}', [TestController::class, 'showAlert'])->name('alert.show');
+    });
 
     // Absence Management
     Route::resource('absences', AbsencesController::class);
@@ -200,3 +208,8 @@ Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
     Route::get('expenses-stats', [StockStatisticsController::class, 'getExpenseStats'])->name('expenses.stats');
     Route::get('notifications/recent', [NotificationController::class, 'getRecentNotifications'])->name('notifications.recent');
 });
+
+// Error Pages
+Route::get('/test/error/{code}', [ErrorController::class, 'show'])->name('test.error');
+
+Route::post('/candidates/bulk-convert', [App\Http\Controllers\CandidateController::class, 'bulkConvert'])->name('candidates.bulk-convert');

@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-start mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Trainee List</h1>
         <form action="{{ route('students.create') }}" method="GET">
             <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
@@ -20,10 +20,14 @@
     </x-alert>
     @endif
 
-    <div class="bg-white rounded-lg shadow overflow-hidden">
+    <form id="bulk-action-form" method="POST" action="#" class="bg-white rounded-lg shadow overflow-hidden">
+        @csrf
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
+                    <th scope="col" class="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <input type="checkbox" id="select-all" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 h-4 w-4" title="Select all trainees">
+                    </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Year</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
@@ -35,6 +39,9 @@
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse($students as $student)
                 <tr>
+                    <td class="px-2 py-4 whitespace-nowrap text-center">
+                        <input type="checkbox" name="selected[]" value="{{ $student->id }}" class="student-checkbox rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 h-4 w-4">
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm font-medium text-gray-900">{{ $student->name }}</div>
                     </td>
@@ -77,7 +84,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                    <td colspan="7" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
                         No trainees found. <a href="{{ route('students.create') }}" class="text-blue-600 hover:text-blue-900">Add one now</a>.
                     </td>
                 </tr>
@@ -88,6 +95,29 @@
         <div class="px-6 py-4 bg-gray-50">
             {{ $students->links() }}
         </div>
-    </div>
+    </form>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const studentCheckboxes = document.querySelectorAll('.student-checkbox');
+    // Select all functionality
+    selectAllCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+        studentCheckboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+    });
+    // Individual checkbox change
+    studentCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(studentCheckboxes).every(cb => cb.checked);
+            const someChecked = Array.from(studentCheckboxes).some(cb => cb.checked);
+            selectAllCheckbox.checked = allChecked;
+            selectAllCheckbox.indeterminate = someChecked && !allChecked;
+        });
+    });
+});
+</script>
 @endsection

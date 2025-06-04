@@ -369,97 +369,41 @@ class CandidateController extends Controller
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            // academic_year field removed - not in database
-            // specialization field removed - not in database
-            'nationality' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            // distance field removed - not in database
-            'phone' => 'required|string|max:20',
+            'cin' => 'required|string|max:255',
             'email' => 'required|email|unique:candidates,email,' . $candidate->id,
-            // income_level field removed - not in database
-            // training_level field removed - not in database
-            // has_disability field removed - not in database
-            // family_status field removed - not in database
-            // family_status.* field removed - not in database
-            'status' => 'required|string|in:pending,accepted,rejected',
+            'phone' => 'required|string|max:20',
             'gender' => 'required|in:male,female',
-            'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,txt,xls,xlsx,csv|max:10240',
-            'guardian_name' => 'nullable|string|max:255',
-            'guardian_profession' => 'nullable|string|max:255',
-            'guardian_phone' => 'nullable|string|max:20',
+            'address' => 'required|string|max:255',
+            'place_of_residence' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'distance' => 'required|numeric',
+            'income_level' => 'required|string',
+            'training_level' => 'required|string',
+            'educational_level' => 'required|string',
+            'specialization' => 'required|string',
+            'physical_condition' => 'required|string',
+            'family_status' => 'nullable|array',
+            'siblings_count' => 'required|integer',
+            'guardian_name' => 'required|string|max:255',
+            'guardian_dob' => 'required|date',
+            'guardian_profession' => 'required|string|max:255',
+            'guardian_phone' => 'required|string|max:20',
+            'declaration' => 'required',
+            'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx,zip|max:10240',
         ]);
 
-        // Recalculate score if criteria fields changed
-        // All score criteria fields have been removed from the database
-        // Setting a default score of 3 for all candidates
-        {
-            
-            // Score field removed as it doesn't exist in the database
-            // $score = $this->calculateScore($request);
-            // $request->merge(['score' => $score]);
+        $updateData = $request->except(['_token', '_method', 'supporting_documents', 'declaration']);
+        if (isset($updateData['family_status']) && is_array($updateData['family_status'])) {
+            $updateData['family_status'] = implode(',', $updateData['family_status']);
         }
 
-        $updateData = $request->all();
-        // Remove fields that don't exist in the database
-        if (isset($updateData['name'])) {
-            unset($updateData['name']);
-        }
-        if (isset($updateData['nationality'])) {
-            unset($updateData['nationality']);
-        }
-        if (isset($updateData['distance'])) {
-            unset($updateData['distance']);
-        }
-        if (isset($updateData['income_level'])) {
-            unset($updateData['income_level']);
-        }
-        if (isset($updateData['has_disability'])) {
-            unset($updateData['has_disability']);
-        }
-        if (isset($updateData['training_level'])) {
-            unset($updateData['training_level']);
-        }
-        if (isset($updateData['academic_year'])) {
-            unset($updateData['academic_year']);
-        }
-        if (isset($updateData['specialization'])) {
-            unset($updateData['specialization']);
-        }
-        if (isset($updateData['family_status'])) {
-            unset($updateData['family_status']);
-        }
-        if (isset($updateData['score'])) {
-            unset($updateData['score']);
-        }
-        
-        // Add default birth_date value since it's required in the database but missing in the form
-        if (!isset($updateData['birth_date'])) {
-            $updateData['birth_date'] = now()->format('Y-m-d');
-        }
-        
-        // Add default city value since it's required in the database but missing in the form
-        if (!isset($updateData['city'])) {
-            $updateData['city'] = 'Unknown';
-        }
-        
-        // Add default application_date value since it's required in the database but missing in the form
-        if (!isset($updateData['application_date'])) {
-            $updateData['application_date'] = now()->format('Y-m-d');
-        }
-        
-        // Update candidate data
         $candidate->update($updateData);
-        
+
         // Handle document uploads
         if ($request->hasFile('supporting_documents')) {
             foreach ($request->file('supporting_documents') as $file) {
-                // Generate a unique filename with original extension
                 $filename = $candidate->id . '_' . time() . '_' . $file->getClientOriginalName();
-                
-                // Store the file in the public storage
                 $path = $file->storeAs('candidates/documents', $filename, 'public');
-                
-                // Store document information using the CandidateDocument model
                 $candidate->documents()->create([
                     'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
                     'filename' => $filename,
@@ -467,19 +411,14 @@ class CandidateController extends Controller
                     'file_path' => $path,
                     'file_type' => $file->getClientMimeType(),
                     'file_size' => $file->getSize(),
-                    'document_type' => null, // You can add document type detection logic here if needed
+                    'document_type' => null,
                 ]);
             }
         }
 
-        // Redirect based on status
-        if ($candidate->status === 'accepted') {
-            return redirect()->route('candidates.accepted')
-                ->with('success', 'Candidate updated successfully.');
-        } else {
-            return redirect()->route('candidates.index')
-                ->with('success', 'Candidate updated successfully.');
-        }
+        // Redirect to Candidates List page with success message
+        return redirect()->route('candidates.index')
+            ->with('success', 'Candidate updated successfully.');
     }
 
     /**
@@ -596,4 +535,36 @@ public function downloadDocument(CandidateDocument $document)
             ->with('error', 'Document file not found.');
     }
 }
+
+    /**
+     * Bulk convert selected accepted candidates to trainees.
+     */
+    public function bulkConvert(Request $request)
+    {
+        $candidateIds = $request->input('selected', []);
+        if (empty($candidateIds)) {
+            return redirect()->back()->with('error', 'No candidates selected for conversion.');
+        }
+
+        $converted = 0;
+        foreach (Candidate::whereIn('id', $candidateIds)->where('status', 'accepted')->get() as $candidate) {
+            $student = new \App\Models\Student();
+            $student->first_name = $candidate->first_name;
+            $student->last_name = $candidate->last_name;
+            $student->email = $candidate->email;
+            $student->phone = $candidate->phone;
+            $student->address = $candidate->address;
+            $student->city = $candidate->city;
+            $student->birth_date = $candidate->birth_date;
+            if (isset($candidate->gender)) {
+                $student->gender = $candidate->gender;
+            }
+            $student->save();
+            $candidate->status = 'converted';
+            $candidate->save();
+            $converted++;
+        }
+
+        return redirect()->route('candidates.accepted')->with('success', $converted . ' candidates converted to trainees.');
+    }
 }

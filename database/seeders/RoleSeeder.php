@@ -23,6 +23,14 @@ class RoleSeeder extends Seeder
                 'permissions' => ['manage-staff', 'manage-users', 'manage-roles']
             ],
             [
+                'name' => 'Admin',
+                'slug' => 'admin',
+                'description' => 'Administrator with full access to all sections and functions',
+                'is_super_admin' => false,
+                'is_admin' => true,
+                'permissions' => ['full-access']
+            ],
+            [
                 'name' => 'Manager',
                 'slug' => 'manager',
                 'description' => 'Manages staff and operations',
@@ -125,6 +133,23 @@ class RoleSeeder extends Seeder
             // Then attach the stock manager role
             $stockManager->roles()->attach($stockManagerRole->id);
             $this->command->info("Stock Manager user created with email: {$stockManagerEmail} and password: password");
+        }
+
+        // Create initial admin user
+        $adminEmail = 'admin@intragest.com';
+        User::where('email', $adminEmail)->delete();
+        $admin = User::create([
+            'name' => 'Admin',
+            'email' => $adminEmail,
+            'password' => Hash::make('admin123'),
+            'email_verified_at' => now(),
+            'status' => 'active'
+        ]);
+        $adminRole = Role::where('slug', 'admin')->first();
+        if ($adminRole) {
+            $admin->roles()->detach();
+            $admin->roles()->attach($adminRole->id);
+            $this->command->info("Admin user created with email: {$adminEmail} and password: admin123");
         }
     }
 }
