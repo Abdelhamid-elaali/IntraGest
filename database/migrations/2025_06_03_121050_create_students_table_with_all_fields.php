@@ -47,6 +47,12 @@ return new class extends Migration
                 if (!Schema::hasColumn('students', 'place_of_residence')) {
                     $table->string('place_of_residence')->nullable()->after('address');
                 }
+                if (!Schema::hasColumn('students', 'academic_year')) {
+                    $table->string('academic_year')->nullable()->after('status');
+                }
+                if (!Schema::hasColumn('students', 'specialization')) {
+                    $table->string('specialization')->nullable()->after('academic_year');
+                }
                 if (!Schema::hasColumn('students', 'educational_level')) {
                     $table->string('educational_level')->nullable()->after('specialization');
                 }

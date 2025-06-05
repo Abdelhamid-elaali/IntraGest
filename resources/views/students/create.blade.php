@@ -15,7 +15,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                    <input type="text" name="first_name" id="first_name" value="{{ old('first_name') }}" placeholder="Enter trainee's first name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    <input type="text" name="first_name" id="first_name" value="{{ old('first_name') }}" placeholder="Enter trainee's first name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required pattern="^[a-zA-ZÀ-ÿ\s'-]+$" title="Only alphabetic characters, spaces, hyphens, and apostrophes are allowed">
                     @error('first_name')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -23,7 +23,7 @@
 
                 <div>
                     <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Family Name</label>
-                    <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}" placeholder="Enter trainee's family name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    <input type="text" name="last_name" id="last_name" value="{{ old('last_name') }}" placeholder="Enter trainee's family name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required pattern="^[a-zA-ZÀ-ÿ\s'-]+$" title="Only alphabetic characters, spaces, hyphens, and apostrophes are allowed">
                     @error('last_name')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -31,7 +31,7 @@
 
                 <div>
                     <label for="cin" class="block text-sm font-medium text-gray-700 mb-1">CIN ID</label>
-                    <input type="text" name="cin" id="cin" value="{{ old('cin') }}" placeholder="Enter trainee's CIN ID" pattern="[A-Za-z0-9]+" title="Only letters and numbers allowed" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    <input type="text" name="cin" id="cin" value="{{ old('cin') }}" placeholder="Enter trainee's CIN ID" pattern="^[A-Za-z]{1,2}[0-9]{1,9}$" title="CIN must start with 1 or 2 letters followed by 1 to 9 numbers (e.g., AB123456789)" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
                     <p class="text-xs text-gray-500 mt-1">Only letters and numbers are allowed, no symbols.</p>
                     @error('cin')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>

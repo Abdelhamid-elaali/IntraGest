@@ -29,8 +29,8 @@
                     'success' => 'bg-green-500 hover:bg-green-700 text-white',
                     'warning' => 'bg-yellow-500 hover:bg-yellow-700 text-gray-800',
                     'error' => 'bg-red-500 hover:bg-red-700 text-white',
-                    'primary' => 'bg-indigo-500 hover:bg-indigo-700 text-white',
-                    'secondary' => 'bg-gray-500 hover:bg-gray-700 text-white',
+                    'primary' => 'bg-purple-500 hover:bg-purple-700 text-white',
+                    'secondary' => 'bg-orange-500 hover:bg-orange-700 text-white',
                 ];
             @endphp
 

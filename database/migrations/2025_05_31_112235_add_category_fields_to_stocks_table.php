@@ -17,10 +17,9 @@ return new class extends Migration
             $table->foreignId('subcategory_id')->nullable()->after('category_id')->constrained('stock_categories')->onDelete('set null');
             
             // Add additional fields for enhanced stock management
-            $table->string('location')->nullable()->after('department_id');
+            $table->string('location')->nullable();
             $table->string('barcode')->nullable()->after('code');
             $table->string('image')->nullable()->after('description');
-            $table->decimal('vat_rate', 5, 2)->default(20.00)->after('unit_price'); // Default 20% VAT
             $table->enum('status', ['active', 'discontinued', 'pending'])->default('active')->after('expiry_date');
         });
     }
@@ -40,7 +39,6 @@ return new class extends Migration
                 'location',
                 'barcode',
                 'image',
-                'vat_rate',
                 'status'
             ]);
         });

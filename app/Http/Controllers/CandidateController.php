@@ -120,7 +120,7 @@ class CandidateController extends Controller
     public function index()
     {
         // Explicitly select the fields we need to ensure we're getting the correct data
-        $candidates = Candidate::select('id', 'first_name', 'last_name', 'email', 'phone', 'city', 'application_date', 'status')
+        $candidates = Candidate::select('id', 'first_name', 'last_name', 'email', 'phone', 'city', 'application_date', 'status', 'income_level')
             ->latest()
             ->paginate(10);
         return view('candidates.index', compact('candidates'));
@@ -133,7 +133,20 @@ class CandidateController extends Controller
      */
     public function accepted()
     {
-        $candidates = Candidate::where('status', 'accepted')->latest()->paginate(10);
+        $candidates = Candidate::select(
+            'id',
+            'first_name',
+            'last_name',
+            'distance',
+            'income_level',
+            'training_level',
+            'score',
+            'updated_at'
+        )
+        ->where('status', 'accepted')
+        ->latest()
+        ->paginate(10);
+
         return view('candidates.accepted', compact('candidates'));
     }
 
@@ -156,8 +169,8 @@ class CandidateController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
+            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
             // academic_year field removed - not in database
             // specialization field removed - not in database
             'nationality' => 'required|string|max:255',
@@ -175,6 +188,7 @@ class CandidateController extends Controller
             'guardian_name' => 'nullable|string|max:255',
             'guardian_profession' => 'nullable|string|max:255',
             'guardian_phone' => 'nullable|string|max:20',
+            'cin' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z]{1,2}[0-9]{1,9}$/'],
         ]);
 
         // Calculate score based on criteria
@@ -367,9 +381,9 @@ class CandidateController extends Controller
     public function update(Request $request, Candidate $candidate)
     {
         $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'cin' => 'required|string|max:255',
+            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
+            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
+            'cin' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z]{1,2}[0-9]{1,9}$/'],
             'email' => 'required|email|unique:candidates,email,' . $candidate->id,
             'phone' => 'required|string|max:20',
             'gender' => 'required|in:male,female',
@@ -468,11 +482,15 @@ class CandidateController extends Controller
         $student = new \App\Models\Student();
         $student->first_name = $candidate->first_name;
         $student->last_name = $candidate->last_name;
+        $student->name = $candidate->first_name . ' ' . $candidate->last_name;
         $student->email = $candidate->email;
         $student->phone = $candidate->phone;
         $student->address = $candidate->address;
-        $student->city = $candidate->city;
-        $student->birth_date = $candidate->birth_date;
+        $student->place_of_residence = $candidate->city; // Map city to place_of_residence
+        $student->date_of_birth = $candidate->birth_date;
+        $student->cin = $candidate->cin;
+        $student->enrollment_date = now();
+        $student->status = 'active';
         
         // Copy additional fields if they exist
         if (isset($candidate->gender)) {
@@ -551,14 +569,20 @@ public function downloadDocument(CandidateDocument $document)
             $student = new \App\Models\Student();
             $student->first_name = $candidate->first_name;
             $student->last_name = $candidate->last_name;
+            $student->name = $candidate->first_name . ' ' . $candidate->last_name;
             $student->email = $candidate->email;
             $student->phone = $candidate->phone;
             $student->address = $candidate->address;
-            $student->city = $candidate->city;
-            $student->birth_date = $candidate->birth_date;
+            $student->place_of_residence = $candidate->city; // Map city to place_of_residence
+            $student->date_of_birth = $candidate->birth_date;
+            $student->cin = $candidate->cin;
+            $student->enrollment_date = now();
+            $student->status = 'active';
+            
             if (isset($candidate->gender)) {
                 $student->gender = $candidate->gender;
             }
+            
             $student->save();
             $candidate->status = 'converted';
             $candidate->save();

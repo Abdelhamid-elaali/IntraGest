@@ -36,7 +36,7 @@
     </x-alert>
     @endif
 
-    <form id="bulk-action-form" method="POST" action="#" class="bg-white rounded-lg shadow overflow-hidden">
+    <form id="bulk-action-form" method="POST" action="{{ route('candidates.bulk-convert') }}" class="bg-white rounded-lg shadow overflow-hidden">
         @csrf
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -185,7 +185,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Bulk convert to trainee action
     bulkConvertButton.addEventListener('click', function() {
         if (confirm('Are you sure you want to convert the selected candidates to trainees?')) {
-            bulkActionForm.action = '{{ route("candidates.bulk-convert") }}';
             bulkActionForm.submit();
         }
     });

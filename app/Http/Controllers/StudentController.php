@@ -37,8 +37,8 @@ class StudentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
+            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
             'cin' => 'required|string|max:20',
             'academic_year' => 'required|string|max:255',
             'specialization' => 'required|string|max:255',
@@ -94,8 +94,8 @@ class StudentController extends Controller
     public function update(Request $request, Student $student)
     {
         $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
+            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
             'cin' => 'required|string|max:20',
             'academic_year' => 'required|string|max:255',
             'specialization' => 'required|string|max:255',
