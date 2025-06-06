@@ -73,6 +73,14 @@
                 </div>
 
                 <div>
+                    <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                    <input type="date" name="birth_date" id="birth_date" value="{{ old('birth_date', $candidate->birth_date ? $candidate->birth_date->format('Y-m-d') : '') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    @error('birth_date')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address</label>
                     <input type="text" name="address" id="address" value="{{ old('address', $candidate->address) }}" placeholder="Enter candidate's full address" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
                     @error('address')
@@ -274,7 +282,7 @@
                     <div class="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                         <div class="flex items-start">
                             <div class="flex items-center h-5">
-                                <input id="family_status_orphan" name="family_status[]" type="checkbox" value="orphan" {{ (is_array(old('family_status')) && in_array('orphan', old('family_status'))) || (old('family_status') === null && strpos($candidate->family_status ?? '', 'orphan') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input id="family_status_orphan" name="family_status[]" type="checkbox" value="orphan" {{ (is_array(old('family_status')) && in_array('orphan', old('family_status'))) || (old('family_status') === null && is_string($candidate->family_status) && strpos($candidate->family_status, 'orphan') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             </div>
                             <div class="ml-3 text-sm">
                                 <label for="family_status_orphan" class="font-medium text-gray-700">Orphan</label>
@@ -283,7 +291,7 @@
                         
                         <div class="flex items-start">
                             <div class="flex items-center h-5">
-                                <input id="family_status_single_parent" name="family_status[]" type="checkbox" value="single_parent" {{ (is_array(old('family_status')) && in_array('single_parent', old('family_status'))) || (old('family_status') === null && strpos($candidate->family_status ?? '', 'single_parent') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input id="family_status_single_parent" name="family_status[]" type="checkbox" value="single_parent" {{ (is_array(old('family_status')) && in_array('single_parent', old('family_status'))) || (old('family_status') === null && is_string($candidate->family_status) && strpos($candidate->family_status, 'single_parent') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             </div>
                             <div class="ml-3 text-sm">
                                 <label for="family_status_single_parent" class="font-medium text-gray-700">Living with a single parent</label>
@@ -292,7 +300,7 @@
                         
                         <div class="flex items-start">
                             <div class="flex items-center h-5">
-                                <input id="family_status_divorced_deceased" name="family_status[]" type="checkbox" value="divorced_deceased" {{ (is_array(old('family_status')) && in_array('divorced_deceased', old('family_status'))) || (old('family_status') === null && strpos($candidate->family_status ?? '', 'divorced_deceased') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input id="family_status_divorced_deceased" name="family_status[]" type="checkbox" value="divorced_deceased" {{ (is_array(old('family_status')) && in_array('divorced_deceased', old('family_status'))) || (old('family_status') === null && is_string($candidate->family_status) && strpos($candidate->family_status, 'divorced_deceased') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             </div>
                             <div class="ml-3 text-sm">
                                 <label for="family_status_divorced_deceased" class="font-medium text-gray-700">Parents divorced or deceased</label>
@@ -301,7 +309,7 @@
                         
                         <div class="flex items-start">
                             <div class="flex items-center h-5">
-                                <input id="family_status_social_services" name="family_status[]" type="checkbox" value="social_services" {{ (is_array(old('family_status')) && in_array('social_services', old('family_status'))) || (old('family_status') === null && strpos($candidate->family_status ?? '', 'social_services') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                <input id="family_status_social_services" name="family_status[]" type="checkbox" value="social_services" {{ (is_array(old('family_status')) && in_array('social_services', old('family_status'))) || (old('family_status') === null && is_string($candidate->family_status) && strpos($candidate->family_status, 'social_services') !== false) ? 'checked' : '' }} class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                             </div>
                             <div class="ml-3 text-sm">
                                 <label for="family_status_social_services" class="font-medium text-gray-700">Social services beneficiary</label>
@@ -327,99 +335,105 @@
                 <h3 class="text-lg font-medium text-gray-900 mb-4">Parent or Guardian Information</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label for="guardian_name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" name="guardian_name" id="guardian_name" value="{{ old('guardian_name', isset($candidate->guardian_name) ? $candidate->guardian_name : '') }}" placeholder="Enter parent or guardian's full name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                        @error('guardian_name')
+                        <label for="guardian_first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <input type="text" name="guardian_first_name" id="guardian_first_name" value="{{ old('guardian_first_name', $candidate->guardian_first_name) }}" placeholder="Enter Parent's or Guardian's first name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                        @error('guardian_first_name')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
+                    <div>
+                        <label for="guardian_last_name" class="block text-sm font-medium text-gray-700 mb-1">Family Name</label>
+                        <input type="text" name="guardian_last_name" id="guardian_last_name" value="{{ old('guardian_last_name', $candidate->guardian_last_name) }}" placeholder="Enter Parent's or Guardian's Family name" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
+                        @error('guardian_last_name')
+                            <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                     <div>
                         <label for="guardian_dob" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
-                        <input type="date" name="guardian_dob" id="guardian_dob" value="{{ old('guardian_dob', isset($candidate->guardian_dob) ? $candidate->guardian_dob : '') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                        <input type="date" name="guardian_dob" id="guardian_dob" value="{{ old('guardian_dob', $candidate->guardian_dob ? $candidate->guardian_dob->format('Y-m-d') : '') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
                         @error('guardian_dob')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="guardian_profession" class="block text-sm font-medium text-gray-700 mb-1">Profession</label>
-                        <input type="text" name="guardian_profession" id="guardian_profession" value="{{ old('guardian_profession', isset($candidate->guardian_profession) ? $candidate->guardian_profession : '') }}" placeholder="Enter parent or guardian's profession" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                        <input type="text" name="guardian_profession" id="guardian_profession" value="{{ old('guardian_profession', $candidate->guardian_profession) }}" placeholder="Enter parent or guardian's profession" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">
                         @error('guardian_profession')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
-
                     <div>
                         <label for="guardian_phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input type="tel" name="guardian_phone" id="guardian_phone" value="{{ old('guardian_phone', isset($candidate->guardian_phone) ? $candidate->guardian_phone : '') }}" placeholder="Enter parent or guardian's phone number" pattern="[0-9]*" inputmode="numeric" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                        <input type="tel" name="guardian_phone" id="guardian_phone" value="{{ old('guardian_phone', $candidate->guardian_phone) }}" placeholder="Enter parent or guardian's phone number" pattern="[0-9+]*" inputmode="tel" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" oninput="this.value = this.value.replace(/[^0-9+]/g, '');">
                         <p class="text-xs text-gray-500 mt-1">You can only enter numbers</p>
                         @error('guardian_phone')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
                     </div>
                 </div>
+            </div>
 
-                <!-- Supporting Documents Section -->
-                <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4">Supporting Documents</h3>
-                <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
-                    <div class="mb-4">
-                        <label for="supporting_documents" class="block text-sm font-medium text-gray-700 mb-2">Upload Documents <span class="text-xs text-gray-500">(Maximum 5 files)</span></label>
-                        <div id="document-drop-area" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors duration-200">
-                            <div id="document-upload-prompt" class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p class="text-xs text-gray-500">PDF, PNG, JPG, DOCX, XLS, ZIP (MAX. 10MB)</p>
-                            </div>
-                            <div id="document-preview-container" class="hidden w-full px-4 py-2">
-                                <div class="flex justify-between items-center mb-2">
-                                    <h4 class="text-sm font-medium text-gray-700">Selected Files</h4>
-                                    <span id="file-count" class="text-xs text-gray-500">0/5 files</span>
-                                </div>
-                                <div id="document-previews" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto"></div>
-                            </div>
-                            <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.zip" />
+            <!-- Supporting Documents Section -->
+            <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4">Supporting Documents</h3>
+            <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
+                <div class="mb-4">
+                    <label for="supporting_documents" class="block text-sm font-medium text-gray-700 mb-2">Upload Documents <span class="text-xs text-gray-500">(Maximum 5 files)</span></label>
+                    <div id="document-drop-area" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors duration-200">
+                        <div id="document-upload-prompt" class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                            <p class="text-xs text-gray-500">PDF, PNG, JPG, DOCX, XLS, ZIP (MAX. 10MB)</p>
                         </div>
-                        @error('supporting_documents')
-                            <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Required Documents:</h4>
-                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                            <li>CIN Copy</li>
-                            <li>Proof of Residence</li>
-                            <li>Income Proof</li>
-                        </ul>
-                    </div>
-
-                    @if(isset($candidate->documents) && count($candidate->documents) > 0)
-                    <div class="mt-6 pt-4 border-t border-gray-200">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Current Documents:</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            @foreach($candidate->documents as $document)
-                            <div class="flex items-center p-3 bg-white rounded-md border border-gray-200">
-                                <div class="flex-shrink-0 mr-3">
-                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $document->name }}</p>
-                                    <p class="text-xs text-gray-500">Uploaded: {{ $document->created_at->format('M d, Y') }}</p>
-                                </div>
-                                <div>
-                                    <a href="{{ route('documents.download', $document->id) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Download</a>
-                                </div>
+                        <div id="document-preview-container" class="hidden w-full px-4 py-2">
+                            <div class="flex justify-between items-center mb-2">
+                                <h4 class="text-sm font-medium text-gray-700">Selected Files</h4>
+                                <span id="file-count" class="text-xs text-gray-500">0/5 files</span>
                             </div>
-                            @endforeach
+                            <div id="document-previews" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto"></div>
                         </div>
+                        <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.zip" />
                     </div>
-                    @endif
+                    @error('supporting_documents')
+                        <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                    @enderror
                 </div>
+                
+                <div class="mt-4">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Required Documents:</h4>
+                    <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                        <li>CIN Copy</li>
+                        <li>Proof of Residence</li>
+                        <li>Income Proof</li>
+                    </ul>
+                </div>
+
+                @if(isset($candidate->documents) && count($candidate->documents) > 0)
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <h4 class="text-sm font-medium text-gray-700 mb-2">Current Documents:</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        @foreach($candidate->documents as $document)
+                        <div class="flex items-center p-3 bg-white rounded-md border border-gray-200">
+                            <div class="flex-shrink-0 mr-3">
+                                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-gray-900 truncate">{{ $document->name }}</p>
+                                <p class="text-xs text-gray-500">Uploaded: {{ $document->created_at->format('M d, Y') }}</p>
+                            </div>
+                            <div class="flex items-center">
+                                <a href="{{ route('documents.download', $document->id) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium mr-3">Download</a>
+                                <input type="checkbox" name="delete_documents[]" value="{{ $document->id }}" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
+                                <label class="sr-only">Delete {{ $document->name }}</label>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
             </div>
 
             <!-- Declaration of Truthfulness -->            

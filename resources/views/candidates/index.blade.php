@@ -2,6 +2,8 @@
 
 @section('content')
 <div class="container">
+    <div id="dynamic-alert-container" class="mb-4"></div> {{-- Container for dynamic alerts --}}
+
     <div class="flex justify-between items-start mb-6">
         <h1 class="text-2xl font-semibold text-gray-800">Candidates List</h1>
         <div class="flex flex-col items-end space-y-2">
@@ -114,15 +116,11 @@
                                 </svg>
                             </span>
                             @endif
-                            <form action="{{ route('candidates.destroy', $candidate) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this candidate?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100" title="Delete candidate">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                    </svg>
-                                </button>
-                            </form>
+                            <button type="button" onclick="deleteCandidateRow(event, '{{ $candidate->id }}')" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100" title="Delete candidate">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -287,6 +285,82 @@
                 alert('Failed to accept candidate. Please try again.');
             });
         };
+
+        // Function to delete candidate using form submission via JS
+        window.deleteCandidateRow = function(event, candidateId) {
+            event.preventDefault();
+
+            if (confirm('Are you sure you want to delete this candidate? This action cannot be undone.')) {
+                // Create a form dynamically
+                const form = document.createElement('form');
+                form.setAttribute('method', 'POST');
+                form.setAttribute('action', `{{ url('candidates') }}/${candidateId}`); // Use url() helper for full URL
+
+                // Add CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                const csrfInput = document.createElement('input');
+                csrfInput.setAttribute('type', 'hidden');
+                csrfInput.setAttribute('name', '_token');
+                csrfInput.setAttribute('value', csrfToken);
+                form.appendChild(csrfInput);
+
+                // Add method override for DELETE
+                const methodInput = document.createElement('input');
+                methodInput.setAttribute('type', 'hidden');
+                methodInput.setAttribute('name', '_method');
+                methodInput.setAttribute('value', 'DELETE');
+                form.appendChild(methodInput);
+
+                // Append the form to the body and submit
+                document.body.appendChild(form);
+                form.submit();
+
+                // Optional: Remove the form after submission
+                // document.body.removeChild(form);
+            }
+        };
+
+        // Helper function to display dynamic alerts
+        function displayAlert(type, message) {
+            const container = document.getElementById('dynamic-alert-container');
+            // Clear existing alerts
+            container.innerHTML = '';
+
+            const alertDiv = document.createElement('div');
+            alertDiv.classList.add(
+                'alert',
+                `alert-${type}`,
+                'px-4',
+                'py-3',
+                'rounded',
+                'relative',
+                'mb-4'
+            );
+            // Add specific Tailwind classes based on type
+            if (type === 'success') {
+                alertDiv.classList.add('bg-green-100', 'border', 'border-green-400', 'text-green-700');
+            } else if (type === 'danger') {
+                 alertDiv.classList.add('bg-red-100', 'border', 'border-red-400', 'text-red-700');
+            }
+
+            alertDiv.innerHTML = `
+                <strong class="font-bold">${type === 'success' ? 'Success!' : 'Error!'}</strong>
+                <span class="block sm:inline"> ${message}</span>
+                <span class="absolute top-0 bottom-0 right-0 px-4 py-3">
+                    <svg class="fill-current h-6 w-6 text-${type === 'success' ? 'green' : 'red'}-500" role="button" viewBox="0 0 20 20" onclick="this.parentElement.parentElement.remove()">
+                        <title>Close</title>
+                        <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15L6.342 6.342a1.2 1.2 0 0 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.15 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                    </svg>
+                </span>
+            `;
+
+            container.appendChild(alertDiv);
+
+            // Optional: Auto-dismiss after a few seconds
+            // setTimeout(() => {
+            //     alertDiv.remove();
+            // }, 5000); // 5 seconds
+        }
     });
     </script>
 </div>

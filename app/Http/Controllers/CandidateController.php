@@ -171,24 +171,28 @@ class CandidateController extends Controller
         $request->validate([
             'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
             'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
-            // academic_year field removed - not in database
-            // specialization field removed - not in database
-            'nationality' => 'required|string|max:255',
-            'address' => 'required|string|max:255',
-            // distance field removed - not in database
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|unique:candidates,email',
-            // income_level field removed - not in database
-            // training_level field removed - not in database
-            // has_disability field removed - not in database
-            // family_status field removed - not in database
-            // family_status.* field removed - not in database
-            'gender' => 'required|in:male,female',
-            'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,txt,xls,xlsx,csv|max:10240',
-            'guardian_name' => 'nullable|string|max:255',
-            'guardian_profession' => 'nullable|string|max:255',
-            'guardian_phone' => 'nullable|string|max:20',
             'cin' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z]{1,2}[0-9]{1,9}$/'],
+            'email' => 'required|email|unique:candidates,email',
+            'phone' => 'required|string|max:20|regex:/^[0-9+]*$/',
+            'gender' => 'required|in:male,female',
+            'birth_date' => 'required|date',
+            'address' => 'required|string|max:255',
+            'nationality' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'distance' => 'required|numeric',
+            'income_level' => 'required|string',
+            'training_level' => 'required|string',
+            'educational_level' => 'required|string',
+            'specialization' => 'required|string',
+            'physical_condition' => 'required|string',
+            'family_status' => 'nullable|array',
+            'siblings_count' => 'required|integer',
+            'guardian_first_name' => 'required|string|max:255',
+            'guardian_last_name' => 'required|string|max:255',
+            'guardian_dob' => 'required|date',
+            'guardian_profession' => 'required|string|max:255',
+            'guardian_phone' => 'nullable|string|max:20|regex:/^[0-9+]*$/',
+            'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,txt,xls,xlsx,csv|max:10240',
         ]);
 
         // Calculate score based on criteria
@@ -203,25 +207,25 @@ class CandidateController extends Controller
             unset($candidateData['nationality']);
         }
         if (isset($candidateData['distance'])) {
-            unset($candidateData['distance']);
+            // unset($candidateData['distance']);
         }
         if (isset($candidateData['income_level'])) {
-            unset($candidateData['income_level']);
+            // unset($candidateData['income_level']);
         }
         if (isset($candidateData['has_disability'])) {
             unset($candidateData['has_disability']);
         }
         if (isset($candidateData['training_level'])) {
-            unset($candidateData['training_level']);
+            // unset($candidateData['training_level']);
         }
         if (isset($candidateData['academic_year'])) {
             unset($candidateData['academic_year']);
         }
         if (isset($candidateData['specialization'])) {
-            unset($candidateData['specialization']);
+            // unset($candidateData['specialization']);
         }
         if (isset($candidateData['family_status'])) {
-            unset($candidateData['family_status']);
+            // unset($candidateData['family_status']);
         }
         if (isset($candidateData['guardian_name'])) {
             unset($candidateData['guardian_name']);
@@ -236,14 +240,20 @@ class CandidateController extends Controller
             unset($candidateData['supporting_documents']);
         }
         
-        // Remove score field as it doesn't exist in the database
-        // $candidateData['score'] = $score;
-        $candidateData['status'] = 'pending';
-        
-        // Add default birth_date value since it's required in the database but missing in the form
-        if (!isset($candidateData['birth_date'])) {
-            $candidateData['birth_date'] = now()->format('Y-m-d');
+        // Ensure birth_date and guardian_dob are properly formatted
+        if (isset($candidateData['birth_date'])) {
+            $candidateData['birth_date'] = date('Y-m-d', strtotime($candidateData['birth_date']));
         }
+        if (isset($candidateData['guardian_dob'])) {
+             $candidateData['guardian_dob'] = date('Y-m-d', strtotime($candidateData['guardian_dob']));
+        }
+        
+        // Implode family_status array if it exists
+        if (isset($candidateData['family_status']) && is_array($candidateData['family_status'])) {
+            $candidateData['family_status'] = implode(',', $candidateData['family_status']);
+        }
+        
+        $candidateData['status'] = 'pending';
         
         // Add default city value since it's required in the database but missing in the form
         if (!isset($candidateData['city'])) {
@@ -385,10 +395,10 @@ class CandidateController extends Controller
             'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
             'cin' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z]{1,2}[0-9]{1,9}$/'],
             'email' => 'required|email|unique:candidates,email,' . $candidate->id,
-            'phone' => 'required|string|max:20',
+            'phone' => 'required|string|max:20|regex:/^[0-9+]*$/',
             'gender' => 'required|in:male,female',
+            'birth_date' => 'required|date',
             'address' => 'required|string|max:255',
-            'place_of_residence' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'distance' => 'required|numeric',
             'income_level' => 'required|string',
@@ -398,20 +408,30 @@ class CandidateController extends Controller
             'physical_condition' => 'required|string',
             'family_status' => 'nullable|array',
             'siblings_count' => 'required|integer',
-            'guardian_name' => 'required|string|max:255',
+            'guardian_first_name' => 'required|string|max:255',
+            'guardian_last_name' => 'required|string|max:255',
             'guardian_dob' => 'required|date',
             'guardian_profession' => 'required|string|max:255',
-            'guardian_phone' => 'required|string|max:20',
+            'guardian_phone' => 'nullable|string|max:20|regex:/^[0-9+]*$/',
             'declaration' => 'required',
             'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx,zip|max:10240',
         ]);
 
-        $updateData = $request->except(['_token', '_method', 'supporting_documents', 'declaration']);
-        if (isset($updateData['family_status']) && is_array($updateData['family_status'])) {
-            $updateData['family_status'] = implode(',', $updateData['family_status']);
+        $candidateData = $request->except(['_token', '_method', 'supporting_documents', 'declaration']);
+        
+        // Ensure birth_date and guardian_dob are properly formatted
+        if (isset($candidateData['birth_date'])) {
+            $candidateData['birth_date'] = date('Y-m-d', strtotime($candidateData['birth_date']));
+        }
+        if (isset($candidateData['guardian_dob'])) {
+             $candidateData['guardian_dob'] = date('Y-m-d', strtotime($candidateData['guardian_dob']));
         }
 
-        $candidate->update($updateData);
+        if (isset($candidateData['family_status']) && is_array($candidateData['family_status'])) {
+            $candidateData['family_status'] = implode(',', $candidateData['family_status']);
+        }
+
+        $candidate->update($candidateData);
 
         // Handle document uploads
         if ($request->hasFile('supporting_documents')) {
@@ -430,6 +450,21 @@ class CandidateController extends Controller
             }
         }
 
+        // Handle document deletions
+        if ($request->has('delete_documents')) {
+            $documentIdsToDelete = $request->input('delete_documents');
+            $documentsToDelete = $candidate->documents()->whereIn('id', $documentIdsToDelete)->get();
+
+            foreach ($documentsToDelete as $document) {
+                // Delete the actual file from storage
+                if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
+                    Storage::disk('public')->delete($document->file_path);
+                }
+                // Delete the document record from the database
+                $document->delete();
+            }
+        }
+
         // Redirect to Candidates List page with success message
         return redirect()->route('candidates.index')
             ->with('success', 'Candidate updated successfully.');
@@ -443,6 +478,7 @@ class CandidateController extends Controller
      */
     public function destroy(Candidate $candidate)
     {
+        // dd($request->method(), $request->url()); // Temporary debug line
         $candidate->delete();
 
         return redirect()->route('candidates.index')

@@ -88,6 +88,14 @@
                 </div>
 
                 <div>
+                    <label for="birth_date" class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                    <input type="date" name="birth_date" id="birth_date" value="{{ old('birth_date') }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    @error('birth_date')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div>
                     <label for="address" class="block text-sm font-medium text-gray-700 mb-1">Address / Place of Residence</label>
                     <input type="text" name="address" id="address" value="{{ old('address') }}" placeholder="Enter candidate's full address and place of residence" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
                     <p class="text-xs text-gray-500 mt-1">Include both address and place of residence information</p>

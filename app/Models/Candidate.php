@@ -30,7 +30,13 @@ class Candidate extends Model
         'training_level',
         'has_disability',
         'family_status',
-        'score'
+        'score',
+        'siblings_count',
+        'guardian_first_name',
+        'guardian_last_name',
+        'guardian_dob',
+        'guardian_profession',
+        'guardian_phone',
     ];
 
     protected $casts = [
@@ -38,7 +44,9 @@ class Candidate extends Model
         'application_date' => 'date',
         'has_disability' => 'boolean',
         'score' => 'float',
-        'family_status' => 'array'
+        'family_status' => 'array',
+        'siblings_count' => 'integer',
+        'guardian_dob' => 'date',
     ];
 
     // Relationships
@@ -97,25 +105,5 @@ class Candidate extends Model
         } else {
             return 'Unnamed Candidate';
         }
-    }
-    
-    public function getDistanceAttribute()
-    {
-        return 'N/A'; // Default value since this field doesn't exist in the database
-    }
-    
-    public function getIncomeLevelAttribute()
-    {
-        return 'N/A'; // Default value since this field doesn't exist in the database
-    }
-    
-    public function getTrainingLevelAttribute()
-    {
-        return 'N/A'; // Default value since this field doesn't exist in the database
-    }
-    
-    public function getTotalScoreAttribute()
-    {
-        return 'N/A'; // Default value since this field doesn't exist in the database
     }
 }
