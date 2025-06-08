@@ -8,14 +8,20 @@
     </div>
 
     <div class="bg-white rounded-lg shadow-md p-6">
-        <form action="{{ url('/criteria/' . $criteria->id) }}" method="POST">
+        <form action="{{ route('criteria.update', $criteria->id) }}" method="POST">
             @csrf
             @method('PUT')
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Criterion Name</label>
-                    <input type="text" name="name" id="name" value="{{ old('name', $criteria->name) }}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    <input type="text" 
+                           name="name" 
+                           id="name" 
+                           value="{{ old('name', $criteria->name) }}" 
+                           placeholder="Enter criterion name"
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                           required>
                     @error('name')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -37,9 +43,17 @@
                 </div>
 
                 <div>
-                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight (%)</label>
-                    <input type="number" name="weight" id="weight" value="{{ old('weight', $criteria->weight) }}" min="1" max="100" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                    <p class="text-xs text-gray-500 mt-1">The importance of this criterion relative to others in the same category.</p>
+                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Score Points</label>
+                    <input type="number" 
+                           name="weight" 
+                           id="weight" 
+                           value="{{ old('weight', $criteria->weight) }}" 
+                           min="1" 
+                           max="100" 
+                           placeholder="Enter score points (1-100)"
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">The score points awarded for this criterion in the candidate selection process.</p>
                     @error('weight')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -47,7 +61,11 @@
 
                 <div>
                     <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea name="description" id="description" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">{{ old('description', $criteria->description) }}</textarea>
+                    <textarea name="description" 
+                              id="description" 
+                              rows="3" 
+                              placeholder="Enter a description for this criterion (optional)" 
+                              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50">{{ old('description', $criteria->description) }}</textarea>
                     @error('description')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -63,6 +81,11 @@
                 </button>
             </div>
         </form>
+    </div>
+    
+    <!-- Criteria Information -->
+    <div class="mt-8 mb-6">
+        <x-criteria-info />
     </div>
 </div>
 @endsection

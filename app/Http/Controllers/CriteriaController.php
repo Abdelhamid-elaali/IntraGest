@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Criteria;
+use App\Models\CategoryWeight;
 use Illuminate\Http\Request;
 
 class CriteriaController extends Controller
@@ -14,83 +15,34 @@ class CriteriaController extends Controller
      */
     public function index()
     {
-        // Sample criteria data - in a real application, this would come from the database
-        $geographicalCriteria = [
-            (object)[
-                'id' => 1,
-                'name' => 'Distance from Institution',
-                'weight' => 30,
-                'category' => 'geographical'
-            ],
-            (object)[
-                'id' => 2,
-                'name' => 'Rural Area',
-                'weight' => 20,
-                'category' => 'geographical'
-            ]
-        ];
+        // Fetch criteria from database and group by category
+        $geographicalCriteria = Criteria::where('category', 'geographical')->get();
+        $socialCriteria = Criteria::where('category', 'social')->get();
+        $academicCriteria = Criteria::where('category', 'academic')->get();
+        $physicalCriteria = Criteria::where('category', 'physical')->get();
+        $familyCriteria = Criteria::where('category', 'family')->get();
         
-        $socialCriteria = [
-            (object)[
-                'id' => 3,
-                'name' => 'Low Income',
-                'weight' => 25,
-                'category' => 'social'
-            ],
-            (object)[
-                'id' => 4,
-                'name' => 'Special Social Needs',
-                'weight' => 15,
-                'category' => 'social'
-            ]
-        ];
+        // Get category weights from the database
+        $categoryWeights = CategoryWeight::getAllWeights();
         
-        $academicCriteria = [
-            (object)[
-                'id' => 5,
-                'name' => 'Training Level',
-                'weight' => 20,
-                'category' => 'academic'
-            ],
-            (object)[
-                'id' => 6,
-                'name' => 'Academic Performance',
-                'weight' => 15,
-                'category' => 'academic'
-            ]
-        ];
-        
-        $physicalCriteria = [
-            (object)[
-                'id' => 7,
-                'name' => 'Disability Status',
-                'weight' => 25,
-                'category' => 'physical'
-            ]
-        ];
-        
-        $familyCriteria = [
-            (object)[
-                'id' => 8,
-                'name' => 'Family Structure',
-                'weight' => 20,
-                'category' => 'family'
-            ],
-            (object)[
-                'id' => 9,
-                'name' => 'Number of Siblings',
-                'weight' => 10,
-                'category' => 'family'
-            ]
-        ];
-        
-        $categoryWeights = [
-            'geographical' => 25,
-            'social' => 20,
-            'academic' => 20,
-            'physical' => 15,
-            'family' => 20
-        ];
+        // If no weights exist, create default ones
+        if (empty($categoryWeights)) {
+            $categoryWeights = [
+                'geographical' => 25,
+                'social' => 20,
+                'academic' => 20,
+                'physical' => 15,
+                'family' => 20
+            ];
+            
+            // Save default weights to the database
+            foreach ($categoryWeights as $category => $weight) {
+                CategoryWeight::create([
+                    'category' => $category,
+                    'weight' => $weight
+                ]);
+            }
+        }
         
         return view('criteria.index', compact(
             'geographicalCriteria',
@@ -119,13 +71,27 @@ class CriteriaController extends Controller
      */
     public function weights()
     {
-        $categoryWeights = [
-            'geographical' => 25,
-            'social' => 20,
-            'academic' => 20,
-            'physical' => 15,
-            'family' => 20
-        ];
+        // Get the current weights from the database
+        $categoryWeights = CategoryWeight::getAllWeights();
+        
+        // If no weights exist, create default ones
+        if (empty($categoryWeights)) {
+            $categoryWeights = [
+                'geographical' => 25,
+                'social' => 20,
+                'academic' => 20,
+                'physical' => 15,
+                'family' => 20
+            ];
+            
+            // Save default weights to the database
+            foreach ($categoryWeights as $category => $weight) {
+                CategoryWeight::create([
+                    'category' => $category,
+                    'weight' => $weight
+                ]);
+            }
+        }
         
         return view('criteria.weights', compact('categoryWeights'));
     }
@@ -138,7 +104,7 @@ class CriteriaController extends Controller
      */
     public function updateWeights(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'geographical' => 'required|integer|min:0|max:100',
             'social' => 'required|integer|min:0|max:100',
             'academic' => 'required|integer|min:0|max:100',
@@ -146,8 +112,8 @@ class CriteriaController extends Controller
             'family' => 'required|integer|min:0|max:100',
         ]);
         
-        // In a real application, you would save these values to the database
-        // For now, we'll just redirect back with a success message
+        // Save the weights to the database
+        CategoryWeight::updateWeights($validated);
         
         return redirect()->route('criteria.weights')
             ->with('success', 'Category weights updated successfully!');
@@ -191,8 +157,9 @@ class CriteriaController extends Controller
      * @param  \App\Models\Criteria  $criteria
      * @return \Illuminate\Http\Response
      */
-    public function edit(Criteria $criteria)
+    public function edit($criterion)
     {
+        $criteria = Criteria::findOrFail($criterion);
         return view('criteria.edit', compact('criteria'));
     }
 
@@ -203,7 +170,7 @@ class CriteriaController extends Controller
      * @param  \App\Models\Criteria  $criteria
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Criteria $criteria)
+    public function update(Request $request, $criterion)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -212,6 +179,7 @@ class CriteriaController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        $criteria = Criteria::findOrFail($criterion);
         $criteria->update($request->all());
 
         return redirect()->route('criteria.index')
@@ -224,11 +192,74 @@ class CriteriaController extends Controller
      * @param  \App\Models\Criteria  $criteria
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Criteria $criteria)
+    public function destroy($criterion)
     {
-        $criteria->delete();
+        try {
+            // Find the criteria by ID
+            $criteria = Criteria::findOrFail($criterion);
+            
+            // Log the incoming request data
+            \Log::info('DELETE Request Data', [
+                'method' => request()->method(),
+                'all' => request()->all(),
+                'headers' => request()->header(),
+                'route_parameters' => request()->route()->parameters(),
+                'criteria_id' => $criteria->id,
+                'criteria' => $criteria->toArray(),
+                'user_id' => auth()->id()
+            ]);
 
-        return redirect()->route('criteria.index')
-            ->with('success', 'Criteria deleted successfully.');
+            // Log the attempt to delete
+            \Log::info('Attempting to delete criteria', [
+                'criteria_id' => $criteria->id,
+                'name' => $criteria->name,
+                'category' => $criteria->category,
+                'user_id' => auth()->id()
+            ]);
+
+            // Delete the criteria
+            $deleted = $criteria->delete();
+            
+            if ($deleted) {
+                \Log::info('Successfully deleted criteria', [
+                    'criteria_id' => $criteria->id,
+                    'name' => $criteria->name
+                ]);
+                
+                if (request()->wantsJson() || request()->ajax()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Criteria deleted successfully.',
+                        'redirect' => route('criteria.index')
+                    ]);
+                }
+                
+                return redirect()->route('criteria.index')
+                    ->with('success', 'Criteria deleted successfully.');
+            } else {
+                $error = 'Failed to delete criteria. Please try again.';
+                \Log::error($error, [
+                    'criteria_id' => $criteria->id
+                ]);
+                
+                if (request()->wantsJson() || request()->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $error
+                    ], 500);
+                }
+                
+                return redirect()->back()
+                    ->with('error', $error);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error deleting criteria: ' . $e->getMessage(), [
+                'criteria_id' => $criterion ?? 'unknown',
+                'exception' => $e->getMessage()
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'An error occurred while deleting the criteria: ' . $e->getMessage());
+        }
     }
 }

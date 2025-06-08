@@ -2,9 +2,16 @@
 
 @section('content')
 <div class="container">
-    <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Adjust Category Weights</h1>
-        <p class="text-gray-600">Set the relative importance of each criteria category for candidate evaluation.</p>
+    <div class="flex justify-between items-start mb-6">
+        <h1 class="text-2xl font-semibold text-gray-800">Adjust Category Weights <span><p class="text-gray-600 text-sm">Set the relative importance of each criteria category for candidate evaluation.</p></span></h1>
+        <form action="{{ route('criteria.index') }}" method="GET">
+                <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Acceptance Criteria
+            </button>
+        </form>
     </div>
 
     @if(session('success'))
@@ -113,12 +120,13 @@
             </div>
 
             <div class="mt-8 flex justify-end">
-                <a href="{{ route('criteria.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md mr-2">
-                    Cancel
-                </a>
-                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md">
-                    Save Weights
-                </button>
+                    <a href="{{ route('criteria.index') }}" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md mr-2">
+                        Cancel
+                    </a>
+                    <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md">
+                        Save Weights
+                    </button>
+                </div>
             </div>
         </form>
     </div>

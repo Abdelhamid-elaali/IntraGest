@@ -104,6 +104,14 @@
                     @enderror
                 </div>
 
+                <div>
+                    <label for="nationality" class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+                    <input type="text" name="nationality" id="nationality" value="{{ old('nationality', $candidate->nationality) }}" placeholder="Enter candidate's nationality" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
+                    @error('nationality')
+                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- Geographical Criteria -->
                 <div>
                     <label for="distance" class="block text-sm font-medium text-gray-700 mb-1">Distance from Institution (km)</label>

@@ -138,10 +138,11 @@ class CandidateController extends Controller
             'first_name',
             'last_name',
             'distance',
-            'income_level',
-            'training_level',
+            'nationality',
+            'academic_year',
             'score',
-            'updated_at'
+            'updated_at',
+            'training_level' // Keep this for backward compatibility
         )
         ->where('status', 'accepted')
         ->latest()
@@ -203,9 +204,7 @@ class CandidateController extends Controller
         if (isset($candidateData['name'])) {
             unset($candidateData['name']);
         }
-        if (isset($candidateData['nationality'])) {
-            unset($candidateData['nationality']);
-        }
+        // Nationality is now saved
         if (isset($candidateData['distance'])) {
             // unset($candidateData['distance']);
         }
@@ -218,9 +217,7 @@ class CandidateController extends Controller
         if (isset($candidateData['training_level'])) {
             // unset($candidateData['training_level']);
         }
-        if (isset($candidateData['academic_year'])) {
-            unset($candidateData['academic_year']);
-        }
+        // Academic year is now saved
         if (isset($candidateData['specialization'])) {
             // unset($candidateData['specialization']);
         }
@@ -399,10 +396,12 @@ class CandidateController extends Controller
             'gender' => 'required|in:male,female',
             'birth_date' => 'required|date',
             'address' => 'required|string|max:255',
+            'nationality' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'distance' => 'required|numeric',
             'income_level' => 'required|string',
             'training_level' => 'required|string',
+            'academic_year' => 'required|string',
             'educational_level' => 'required|string',
             'specialization' => 'required|string',
             'physical_condition' => 'required|string',
@@ -506,42 +505,121 @@ class CandidateController extends Controller
      * @param  \App\Models\Candidate  $candidate
      * @return \Illuminate\Http\Response
      */
+    /**
+     * Check if a candidate is already in the trainee list
+     *
+     * @param  \App\Models\Candidate  $candidate
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function checkIfTrainee(Candidate $candidate)
+    {
+        // Check if a student with the same CIN or email already exists
+        $existingStudent = \App\Models\Student::where('cin', $candidate->cin)
+            ->orWhere('email', $candidate->email)
+            ->first();
+            
+        if ($existingStudent) {
+            return response()->json([
+                'exists' => true,
+                'student_id' => $existingStudent->id,
+                'student_name' => $existingStudent->first_name . ' ' . $existingStudent->last_name
+            ]);
+        }
+        
+        return response()->json(['exists' => false]);
+    }
+    
+    /**
+     * Convert an accepted candidate to a trainee
+     *
+     * @param  \App\Models\Candidate  $candidate
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse
+     */
     public function convertToTrainee(Candidate $candidate)
     {
-        // Check if candidate is already accepted
-        if ($candidate->status !== 'accepted') {
+        try {
+            // Check if candidate is already accepted
+            if ($candidate->status !== 'accepted') {
+                if (request()->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Only accepted candidates can be converted to trainees.'
+                    ], 422);
+                }
+                return redirect()->back()
+                    ->with('error', 'Only accepted candidates can be converted to trainees.');
+            }
+            
+            // Check if this candidate is already in the trainee list
+            $existingStudent = \App\Models\Student::where('cin', $candidate->cin)
+                ->orWhere('email', $candidate->email)
+                ->first();
+                
+            if ($existingStudent) {
+                $message = 'This candidate is already in the trainee list as ' . 
+                          $existingStudent->first_name . ' ' . $existingStudent->last_name . 
+                          ' (ID: ' . $existingStudent->id . ')';
+                
+                if (request()->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => $message
+                    ], 422);
+                }
+                
+                return redirect()->back()
+                    ->with('warning', $message);
+            }
+            
+            // Create a new student/trainee from the candidate data
+            $student = new \App\Models\Student();
+            $student->first_name = $candidate->first_name;
+            $student->last_name = $candidate->last_name;
+            $student->name = $candidate->first_name . ' ' . $candidate->last_name;
+            $student->email = $candidate->email;
+            $student->phone = $candidate->phone;
+            $student->address = $candidate->address;
+            $student->place_of_residence = $candidate->city; // Map city to place_of_residence
+            $student->date_of_birth = $candidate->birth_date;
+            $student->cin = $candidate->cin;
+            $student->enrollment_date = now();
+            $student->status = 'active';
+            
+            // Copy additional fields if they exist
+            if (isset($candidate->gender)) {
+                $student->gender = $candidate->gender;
+            }
+            
+            // Copy academic information with default values
+            $student->academic_year = $candidate->academic_year ?? 'First Year';
+            $student->specialization = $candidate->specialization ?? 'Not Specified';
+            $student->nationality = $candidate->nationality ?? 'Moroccan';
+            $student->educational_level = $candidate->educational_level ?? 'specialized_technician';
+            
+            // Save the new student
+            $student->save();
+            
+            // Update candidate status to indicate conversion
+            $candidate->status = 'converted';
+            $candidate->save();
+            
+            // Always redirect with a success message
+            return redirect()->route('candidates.accepted')
+                ->with('success', 'Candidate successfully converted to trainee and moved to Students.');
+                
+        } catch (\Exception $e) {
+            \Log::error('Error converting candidate to trainee: ' . $e->getMessage());
+            
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'An error occurred while converting the candidate.'
+                ], 500);
+            }
+            
             return redirect()->back()
-                ->with('error', 'Only accepted candidates can be converted to trainees.');
+                ->with('error', 'An error occurred while converting the candidate.');
         }
-        
-        // Create a new student/trainee from the candidate data
-        $student = new \App\Models\Student();
-        $student->first_name = $candidate->first_name;
-        $student->last_name = $candidate->last_name;
-        $student->name = $candidate->first_name . ' ' . $candidate->last_name;
-        $student->email = $candidate->email;
-        $student->phone = $candidate->phone;
-        $student->address = $candidate->address;
-        $student->place_of_residence = $candidate->city; // Map city to place_of_residence
-        $student->date_of_birth = $candidate->birth_date;
-        $student->cin = $candidate->cin;
-        $student->enrollment_date = now();
-        $student->status = 'active';
-        
-        // Copy additional fields if they exist
-        if (isset($candidate->gender)) {
-            $student->gender = $candidate->gender;
-        }
-        
-        // Save the new student
-        $student->save();
-        
-        // Update candidate status to indicate conversion
-        $candidate->status = 'converted';
-        $candidate->save();
-        
-        return redirect()->route('candidates.accepted')
-            ->with('success', 'Candidate successfully converted to trainee.');
     }
     
     /**
@@ -602,6 +680,14 @@ public function downloadDocument(CandidateDocument $document)
 
         $converted = 0;
         foreach (Candidate::whereIn('id', $candidateIds)->where('status', 'accepted')->get() as $candidate) {
+            // Check if a student with the same email already exists
+            $existingStudent = \App\Models\Student::where('email', $candidate->email)->first();
+
+            if ($existingStudent) {
+                // Skip conversion if a student with the same email exists
+                continue;
+            }
+
             $student = new \App\Models\Student();
             $student->first_name = $candidate->first_name;
             $student->last_name = $candidate->last_name;
@@ -614,11 +700,11 @@ public function downloadDocument(CandidateDocument $document)
             $student->cin = $candidate->cin;
             $student->enrollment_date = now();
             $student->status = 'active';
-            
+
             if (isset($candidate->gender)) {
                 $student->gender = $candidate->gender;
             }
-            
+
             $student->save();
             $candidate->status = 'converted';
             $candidate->save();
@@ -626,5 +712,26 @@ public function downloadDocument(CandidateDocument $document)
         }
 
         return redirect()->route('candidates.accepted')->with('success', $converted . ' candidates converted to trainees.');
+    }
+
+    /**
+     * Bulk reject selected accepted candidates.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function bulkReject(Request $request)
+    {
+        $candidateIds = $request->input('selected', []);
+
+        if (empty($candidateIds)) {
+            return redirect()->back()->with('error', 'No candidates selected for rejection.');
+        }
+
+        $rejectedCount = Candidate::whereIn('id', $candidateIds)
+                                ->where('status', 'accepted') // Only reject accepted candidates
+                                ->update(['status' => 'rejected']);
+
+        return redirect()->route('candidates.accepted')->with('success', $rejectedCount . ' candidates rejected successfully.');
     }
 }

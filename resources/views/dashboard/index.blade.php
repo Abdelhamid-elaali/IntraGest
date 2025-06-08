@@ -22,7 +22,7 @@
             </div>
             <div>
                 <div class="text-sm text-gray-500">Total Trainees</div>
-                <div class="text-2xl font-bold" x-text="stats.total_students">{{ $stats['total_students'] }}</div>
+                <div class="text-2xl font-bold">{{ $stats['total_students'] }}</div>
             </div>
         </div>
 
@@ -221,7 +221,124 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
+<script type="module">
+import TraineeCounter from '/js/trainee-counter.js';
+
+// Initialize with the server-side count
+TraineeCounter.init({{ $stats['total_students'] ?? 0 }});
+
+// Subscribe to count changes
+TraineeCounter.subscribe((count) => {
+    console.log('Trainee count updated:', count);
+    updateTraineeCountDisplay(count);
+});
+
+// Function to update the trainee count display
+function updateTraineeCountDisplay(count) {
+    // Update all elements that show the trainee count
+    const traineeCountElements = document.querySelectorAll('[x-text*="total_students"]');
+    
+    traineeCountElements.forEach(element => {
+        element.textContent = count;
+    });
+    
+    // Also update the Alpine.js store if it exists
+    if (window.Alpine && Alpine.store('dashboard')) {
+        Alpine.store('dashboard').stats.total_students = count;
+    }
+}
+
+// Function to fetch and update trainee count from the server
+async function updateTraineeCount() {
+    try {
+        console.log('Fetching trainee count...');
+        const response = await fetch('{{ route("dashboard.trainee-count") }}');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('Received trainee count:', data);
+        
+        if (data.success) {
+            // Update the shared counter
+            TraineeCounter.updateCount(data.count);
+        }
+    } catch (error) {
+        console.error('Error fetching trainee count:', error);
+    }
+}
+    // Function to fetch and update trainee count
+    function updateTraineeCount() {
+        console.log('Fetching trainee count...');
+        fetch('{{ route("dashboard.trainee-count") }}')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received trainee count:', data);
+                if (data.success) {
+                    // Update all elements that show the trainee count
+                    const traineeCountElements = document.querySelectorAll('[x-text*="total_students"]');
+                    console.log(`Found ${traineeCountElements.length} elements to update`);
+                    
+                    traineeCountElements.forEach(element => {
+                        console.log('Updating element:', element, 'with count:', data.count);
+                        element.textContent = data.count;
+                    });
+                    
+                    // Also update the Alpine.js store if it exists
+                    if (window.Alpine && Alpine.store('dashboard')) {
+                        console.log('Updating Alpine store with count:', data.count);
+                        Alpine.store('dashboard').stats.total_students = data.count;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching trainee count:', error);
+                console.log('Full error object:', error);
+            });
+    }
+    
+    // Function to update the trainee count display
+    function updateTraineeCountDisplay(count) {
+        // Update all elements that show the trainee count
+        const traineeCountElements = document.querySelectorAll('[x-text*="total_students"]');
+        
+        traineeCountElements.forEach(element => {
+            element.textContent = count;
+        });
+        
+        // Also update the Alpine.js store if it exists
+        if (window.Alpine && Alpine.store('dashboard')) {
+            Alpine.store('dashboard').stats.total_students = count;
+        }
+    }
+
+    // Update trainee count every 30 seconds and on trainee changes
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial update
+        updateTraineeCount();
+        
+        // Set up periodic updates every 30 seconds
+        setInterval(updateTraineeCount, 30000);
+        
+        // Listen for custom events when trainees are added or removed
+        window.addEventListener('trainee-added', function() {
+            console.log('Trainee added event received, updating count...');
+            updateTraineeCount();
+        });
+        
+        window.addEventListener('trainee-removed', function() {
+            console.log('Trainee removed event received, updating count...');
+            updateTraineeCount();
+        });
+    });
+    
+    // Make updateTraineeCount available globally so it can be called from other scripts
+    window.updateTraineeCount = updateTraineeCount;
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('expensesChart').getContext('2d');
         window.expensesChart = new Chart(ctx, {

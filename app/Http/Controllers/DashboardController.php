@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Room;
 use App\Models\Payment;
+use App\Models\Student;
 use App\Events\DashboardStatsUpdated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -157,6 +158,21 @@ class DashboardController extends Controller
             'stats' => $stats,
             'expenseStats' => $expenseStats,
             'recentTransactions' => $recentTransactions->toArray()
+        ]);
+    }
+    
+    /**
+     * Get the current count of trainees
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function getTraineeCount()
+    {
+        $count = \App\Models\Student::count();
+        
+        return response()->json([
+            'success' => true,
+            'count' => $count
         ]);
     }
 }

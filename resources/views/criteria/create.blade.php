@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">Add New Criterion</h1>
+        <h1 class="text-2xl font-semibold text-blue-800">Add New Criterion</h1>
         <p class="text-gray-600">Create a new acceptance criterion for candidate evaluation.</p>
     </div>
 
@@ -36,9 +36,16 @@
                 </div>
 
                 <div>
-                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Weight (%)</label>
-                    <input type="number" name="weight" id="weight" value="{{ old('weight', 10) }}" min="1" max="100" placeholder="Enter weight percentage (1-100)" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                    <p class="text-xs text-gray-500 mt-1">The importance of this criterion relative to others in the same category.</p>
+                    <label for="weight" class="block text-sm font-medium text-gray-700 mb-1">Score Points</label>
+                    <input type="number" 
+                           name="weight" 
+                           id="weight" 
+                           min="1" 
+                           max="100" 
+                           placeholder="Enter score points (1-100)" 
+                           class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" 
+                           required>
+                    <p class="text-xs text-gray-500 mt-1">The score points awarded for this criterion in the candidate selection process.</p>
                     @error('weight')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -63,6 +70,11 @@
             </div>
             
         </form>
+    </div>
+    
+    <!-- Criteria Information -->
+    <div class="mt-8 mb-6">
+        <x-criteria-info />
     </div>
 </div>
 @endsection

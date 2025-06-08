@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 
 class StudentController extends Controller
 {
@@ -14,7 +15,13 @@ class StudentController extends Controller
      */
     public function index()
     {
-        $students = Student::latest()->paginate(10);
+        $students = Student::select([
+            'id', 'name', 'first_name', 'last_name', 'email', 'phone', 'address', 
+            'place_of_residence', 'date_of_birth', 'enrollment_date', 'status',
+            'academic_year', 'specialization', 'nationality', 'educational_level', 'cin', 'gender',
+            'created_at', 'updated_at'
+        ])->latest()->paginate(10);
+        
         return view('students.index', compact('students'));
     }
 
@@ -57,9 +64,23 @@ class StudentController extends Controller
         $data['name'] = $request->first_name . ' ' . $request->last_name;
         
         Student::create($data);
+        $count = Student::count();
+
+        // Dispatch event for trainee added
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Trainee added successfully.',
+                'count' => $count
+            ]);
+        }
 
         return redirect()->route('students.index')
-            ->with('success', 'Trainee added successfully.');
+            ->with([
+                'success' => 'Trainee added successfully.',
+                'trainee_added' => true,
+                'trainee_count' => $count
+            ]);
     }
 
     /**
@@ -128,8 +149,51 @@ class StudentController extends Controller
     public function destroy(Student $student)
     {
         $student->delete();
+        $count = Student::count();
+
+        // Dispatch event for trainee removed
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Trainee deleted successfully.',
+                'count' => $count,
+                'redirect' => route('students.index')
+            ]);
+        }
 
         return redirect()->route('students.index')
-            ->with('success', 'Trainee deleted successfully.');
+            ->with([
+                'success' => 'Trainee deleted successfully.',
+                'trainee_removed' => true,
+                'trainee_count' => $count
+            ]);
+    }
+    
+    /**
+     * Remove multiple students from storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'selected' => 'required|array',
+            'selected.*' => 'exists:students,id'
+        ]);
+
+        $count = count($request->selected);
+        Student::whereIn('id', $request->selected)->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Successfully deleted {$count} " . str('trainee')->plural($count) . ".",
+                'redirect' => route('students.index')
+            ]);
+        }
+
+        return redirect()->route('students.index')
+            ->with('success', "Successfully deleted {$count} " . str('trainee')->plural($count) . ".");
     }
 }

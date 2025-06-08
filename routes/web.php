@@ -36,6 +36,7 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/stats', [DashboardController::class, 'getUpdatedStats'])->name('dashboard.stats');
+    Route::get('/dashboard/trainee-count', [DashboardController::class, 'getTraineeCount'])->name('dashboard.trainee-count');
 
     // Test Routes
     Route::prefix('test')->name('test.')->group(function () {
@@ -103,7 +104,14 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Intern Management
-    Route::resource('students', StudentController::class);
+    Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+    Route::get('/students/create', [StudentController::class, 'create'])->name('students.create');
+    Route::post('/students', [StudentController::class, 'store'])->name('students.store');
+    Route::get('/students/{student}', [StudentController::class, 'show'])->name('students.show');
+    Route::get('/students/{student}/edit', [StudentController::class, 'edit'])->name('students.edit');
+    Route::put('/students/{student}', [StudentController::class, 'update'])->name('students.update');
+    Route::delete('/students/{student}', [StudentController::class, 'destroy'])->name('students.destroy');
+    Route::post('/students/bulk-delete', [StudentController::class, 'bulkDestroy'])->name('students.bulk-destroy');
     
     Route::resource('criteria', CriteriaController::class);
     Route::get('criteria-weights', [CriteriaController::class, 'weights'])->name('criteria.weights');
@@ -112,6 +120,10 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('candidates')->name('candidates.')->group(function () {
         Route::get('/', [CandidateController::class, 'index'])->name('index');
         Route::get('/create', [CandidateController::class, 'create'])->name('create');
+        
+        // API endpoint to check if candidate is already a trainee
+        Route::get('/{candidate}/check-trainee', [CandidateController::class, 'checkIfTrainee'])
+            ->name('check-trainee');
         Route::post('/', [CandidateController::class, 'store'])->name('store');
         Route::get('/{candidate}', [CandidateController::class, 'show'])->name('show');
         Route::get('/{candidate}/edit', [CandidateController::class, 'edit'])->name('edit');
@@ -125,6 +137,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{candidate}/reject', [CandidateController::class, 'reject'])->name('reject');
         Route::delete('/documents/{document}', [CandidateController::class, 'deleteDocument'])->name('delete-document');
         Route::get('/{candidate}/download-documents', [CandidateController::class, 'downloadDocuments'])->name('download-documents');
+        Route::post('/bulk-reject', [CandidateController::class, 'bulkReject'])->name('bulk-reject');
     });
     
     // Document download route
@@ -201,6 +214,70 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/notifications/read-all', [ProfileController::class, 'markAllNotificationsAsRead'])->name('profile.notifications.readAll');
     Route::delete('/profile/notifications/{id}', [ProfileController::class, 'deleteNotification'])->name('profile.notifications.delete');
     Route::delete('/profile/notifications', [ProfileController::class, 'deleteAllNotifications'])->name('profile.notifications.deleteAll');
+});
+
+// Temporary route to check database columns (remove after use)
+Route::middleware(['auth'])->get('/temp/check-candidate', function () {
+    // Get the first candidate with all fields
+    $candidate = \App\Models\Candidate::first();
+    
+    // Get the table columns
+    $columns = \Schema::getColumnListing('candidates');
+    
+    return response()->json([
+        'candidate' => $candidate,
+        'columns' => $columns
+    ]);
+})->name('temp.candidate');
+
+// Temporary route to check database columns (remove after use)
+Route::middleware(['auth'])->get('/temp/check-columns', function () {
+    $columns = \DB::select('SHOW COLUMNS FROM students');
+    return response()->json($columns);
+})->name('temp.columns');
+
+// Another way to check columns
+Route::get('/check-columns', function () {
+    $columns = \Schema::getColumnListing('students');
+    return response()->json($columns);
+});
+
+// Temporary route to check student data in HTML format
+Route::get('/temp/student-info', function () {
+    // Get the first student
+    $student = \DB::table('students')->first();
+    
+    if (!$student) {
+        return "No students found in the database.";
+    }
+    
+    // Get table columns
+    $columns = \Schema::getColumnListing('students');
+    
+    // Start building HTML
+    $html = "<h1>Student Information</h1>";
+    $html .= "<h3>Table Structure:</h3>";
+    $html .= "<pre>" . print_r(\Schema::getColumnListing('students'), true) . "</pre>";
+    
+    $html .= "<h3>Student Data:</h3>";
+    $html .= "<table border='1' cellpadding='5' cellspacing='0'>";
+    $html .= "<tr><th>Field</th><th>Value</th></tr>";
+    
+    foreach ($student as $field => $value) {
+        $html .= "<tr>";
+        $html .= "<td><strong>" . e($field) . "</strong></td>";
+        $html .= "<td>" . e($value) . "</td>";
+    $html .= "</tr>";
+    }
+    
+    $html .= "</table>";
+    
+    // Check if academic_year and nationality are in fillable
+    $studentModel = new \App\Models\Student();
+    $html .= "<h3>Fillable Fields:</h3>";
+    $html .= "<pre>" . print_r($studentModel->getFillable(), true) . "</pre>";
+    
+    return $html;
 });
 
 // API Routes for Dynamic Data

@@ -33,17 +33,22 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('candidates', function (Blueprint $table) {
-            if (Schema::hasColumn('candidates', 'distance')) {
-                $table->dropColumn('distance');
-            }
-            if (Schema::hasColumn('candidates', 'income_level')) {
-                $table->dropColumn('income_level');
-            }
-            if (Schema::hasColumn('candidates', 'training_level')) {
-                $table->dropColumn('training_level');
-            }
-            if (Schema::hasColumn('candidates', 'score')) {
-                $table->dropColumn('score');
+            $columnsToDrop = [
+                'distance',
+                'income_level',
+                'training_level',
+                'score',
+                'specialization',
+                'family_status'
+            ];
+            
+            // Only drop columns that exist
+            $columnsToDrop = array_filter($columnsToDrop, function($column) {
+                return Schema::hasColumn('candidates', $column);
+            });
+            
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
             }
         });
     }

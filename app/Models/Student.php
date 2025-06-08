@@ -25,7 +25,8 @@ class Student extends Model
         'specialization',
         'educational_level',
         'nationality',
-        'cin'
+        'cin',
+        'gender'
     ];
 
     /**
