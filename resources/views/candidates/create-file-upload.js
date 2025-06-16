@@ -1,89 +1,121 @@
-// File upload handling for candidate documents
-document.addEventListener('DOMContentLoaded', function() {
-    // Get DOM elements
+// File upload handling for candidate documents (Optimized)
+(function() {
+    // Constants
+    const MAX_FILES = 5;
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+    const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'xls', 'xlsx', 'csv', 'zip'];
+    const ALLOWED_TYPES = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'image/jpeg',
+        'image/png',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'text/csv',
+        'application/zip'
+    ];
+
+    // Cache DOM elements
     const fileInput = document.getElementById('supporting_documents');
     const dropArea = document.getElementById('document-drop-area');
     const uploadPrompt = document.getElementById('document-upload-prompt');
     const previewContainer = document.getElementById('document-preview-container');
     const previewsGrid = document.getElementById('document-previews');
     const fileCountEl = document.getElementById('file-count');
-    
-    // Format file size to human-readable format
-    function formatFileSize(bytes) {
+
+    // State
+    let files = [];
+    let existingFiles = [];
+    let isDragging = false;
+
+    // File type icons mapping
+    const fileIcons = {
+        pdf: { icon: 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z', color: 'text-red-500' },
+        doc: { icon: 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z', color: 'text-blue-500' },
+        docx: { icon: 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z', color: 'text-blue-500' },
+        xls: { icon: 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z', color: 'text-green-500' },
+        xlsx: { icon: 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z', color: 'text-green-500' },
+        csv: { icon: 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z', color: 'text-green-500' },
+        jpg: { icon: 'M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z', color: 'text-purple-500' },
+        jpeg: { icon: 'M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z', color: 'text-purple-500' },
+        png: { icon: 'M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z', color: 'text-purple-500' },
+        zip: { icon: 'M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 2h8v2H6V6zm8 4H6v2h8v-2zm0 4H6v2h8v-2z', color: 'text-yellow-500' },
+        default: { icon: 'M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z', color: 'text-gray-500' }
+    };
+
+    // Helper functions
+    const formatFileSize = (bytes) => {
         if (bytes === 0) return '0 Bytes';
         const k = 1024;
         const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    }
-    
-    // Get file type from file name
-    function getFileType(filename) {
-        const ext = filename.split('.').pop().toLowerCase();
-        return ext;
-    }
-    
-    // Get appropriate icon for file type
-    function getFileIcon(fileType) {
-        let icon = '';
-        
-        switch(fileType) {
-            case 'pdf':
-                icon = '<svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>';
-                break;
-            case 'doc':
-            case 'docx':
-                icon = '<svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>';
-                break;
-            case 'xls':
-            case 'xlsx':
-            case 'csv':
-                icon = '<svg class="w-8 h-8 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>';
-                break;
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-                icon = '<svg class="w-8 h-8 text-purple-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"></path></svg>';
-                break;
-            case 'zip':
-                icon = '<svg class="w-8 h-8 text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 2h8v2H6V6zm8 4H6v2h8v-2zm0 4H6v2h8v-2z" clip-rule="evenodd"></path></svg>';
-                break;
-            default:
-                icon = '<svg class="w-8 h-8 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd"></path></svg>';
+        const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+        return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
+    };
+
+    const getFileExtension = (filename) => {
+        const match = /\.([0-9a-z]+)$/i.exec(filename);
+        return match ? match[1].toLowerCase() : '';
+    };
+
+    const isFileTypeAllowed = (file) => {
+        const ext = getFileExtension(file.name);
+        return ALLOWED_EXTENSIONS.includes(ext) || ALLOWED_TYPES.includes(file.type);
+    };
+
+    // UI Update functions
+    const updateFileCount = () => {
+        const totalFiles = files.length + existingFiles.length;
+        if (fileCountEl) {
+            fileCountEl.textContent = `${totalFiles}/${MAX_FILES} files`;
+            fileCountEl.className = totalFiles >= MAX_FILES ? 
+                'text-xs font-medium text-amber-600' : 'text-xs text-gray-500';
         }
-        
-        return icon;
-    }
-    
-    // Create preview element for a file
-    function createFilePreview(file, index) {
+    };
+
+    const toggleDropAreaState = (hasFiles) => {
+        if (hasFiles) {
+            previewContainer.classList.remove('hidden');
+            uploadPrompt.classList.add('hidden');
+            dropArea.classList.remove('h-32');
+            dropArea.classList.add('min-h-32');
+        } else {
+            previewContainer.classList.add('hidden');
+            uploadPrompt.classList.remove('hidden');
+            dropArea.classList.add('h-32');
+            dropArea.classList.remove('min-h-32');
+        }
+    };
+
+    // File handling
+    const createFilePreview = (file, index) => {
         const fileSize = formatFileSize(file.size);
-        const fileType = getFileType(file.name);
-        const fileIcon = getFileIcon(fileType);
+        const fileExt = getFileExtension(file.name);
+        const fileType = fileIcons[fileExt] || fileIcons.default;
         
-        // Create preview element
         const preview = document.createElement('div');
-        preview.className = 'bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex items-start';
+        preview.className = 'bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex items-start transition-colors duration-200 hover:bg-gray-50';
         preview.dataset.index = index;
         
-        // Create preview content
         preview.innerHTML = `
             <div class="flex-shrink-0 mr-3">
-                ${fileIcon}
+                <svg class="w-8 h-8 ${fileType.color}" fill="currentColor" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="${fileType.icon}" clip-rule="evenodd"></path>
+                </svg>
             </div>
             <div class="flex-grow min-w-0">
-                <p class="text-sm font-medium text-gray-900 truncate" title="${file.name}">${file.name}</p>
-                <p class="text-xs text-gray-500">${fileType.toUpperCase()} · ${fileSize}</p>
+                <p class="text-sm font-medium text-gray-900 truncate" title="${file.name.replace(/"/g, '&quot;')}">${file.name}</p>
+                <p class="text-xs text-gray-500">${fileExt.toUpperCase()} · ${fileSize}</p>
             </div>
             <div class="flex-shrink-0 ml-2 flex space-x-1">
-                <button type="button" class="text-gray-400 hover:text-gray-600" onclick="previewFile(${index})">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button type="button" class="text-gray-400 hover:text-blue-500 transition-colors" data-action="preview" data-index="${index}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                 </button>
-                <button type="button" class="text-gray-400 hover:text-red-600" onclick="removeFile(${index})">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" data-action="remove" data-index="${index}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                 </button>
@@ -91,104 +123,108 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         return preview;
-    }
-    
-    // Function to handle file selection
-    function handleFileSelect() {
-        // Check if files are selected
-        if (fileInput.files.length > 0) {
-            // Enforce maximum of 5 files
-            if (fileInput.files.length > 5) {
-                // Use x-alert component instead of basic alert
-                showXAlert('warning', 'File Limit Exceeded', 'You can upload a maximum of 5 files. Only the first 5 files will be used.');
-                
-                // Create a new FileList with only the first 5 files
-                const dt = new DataTransfer();
-                for (let i = 0; i < Math.min(5, fileInput.files.length); i++) {
-                    dt.items.add(fileInput.files[i]);
-                }
-                fileInput.files = dt.files;
-            }
-            
-            // Update file count display
-            fileCountEl.textContent = `${fileInput.files.length}/5 files`;
-            fileCountEl.className = fileInput.files.length === 5 ? 
-                'text-xs font-medium text-amber-600' : 'text-xs text-gray-500';
-            
-            // Show preview container and hide upload prompt if there are files
-            if (fileInput.files.length > 0) {
-                previewContainer.classList.remove('hidden');
-                uploadPrompt.classList.add('hidden');
-                
-                // Adjust drop area height for better display
-                dropArea.classList.remove('h-32');
-                dropArea.classList.add('min-h-32');
-            } else {
-                previewContainer.classList.add('hidden');
-                uploadPrompt.classList.remove('hidden');
-                dropArea.classList.add('h-32');
-                dropArea.classList.remove('min-h-32');
-            }
-            
-            // Clear previous previews
-            previewsGrid.innerHTML = '';
-            
-            // Create previews for each file
-            Array.from(fileInput.files).forEach((file, index) => {
-                const filePreview = createFilePreview(file, index);
-                previewsGrid.appendChild(filePreview);
-            });
-        } else {
-            // Hide preview container and show upload prompt
-            previewContainer.classList.add('hidden');
-            uploadPrompt.classList.remove('hidden');
-            dropArea.classList.add('h-32');
-            dropArea.classList.remove('min-h-32');
-            
-            // Update file count display
-            fileCountEl.textContent = '0/5 files';
-            fileCountEl.className = 'text-xs text-gray-500';
-        }
-    }
-    
-    // Function to remove a file from the input
-    function removeFile(index) {
-        if (fileInput.files.length > 0) {
-            const dt = new DataTransfer();
-            
-            // Add all files except the one to remove
-            Array.from(fileInput.files)
-                .filter((_, i) => i !== index)
-                .forEach(file => dt.items.add(file));
-            
-            // Update the file input
-            fileInput.files = dt.files;
-            
-            // Update the UI
-            handleFileSelect();
-            
-            // Show success message
-            showXAlert('success', 'File Removed', 'The file has been removed from the upload list.');
-        }
-    }
-    
-    // Function to preview a file
-    function previewFile(index) {
-        const file = fileInput.files[index];
-        if (!file) return;
+    };
+
+    const updatePreviews = () => {
+        previewsGrid.innerHTML = '';
         
-        // For images, create a preview in a modal
-        if (file.type.match('image.*')) {
+        // Add existing files first
+        existingFiles.forEach(doc => {
+            const preview = document.createElement('div');
+            preview.className = 'document-preview-item flex items-center justify-between p-2 bg-white border rounded-md';
+            preview.setAttribute('data-document-id', doc.id);
+            
+            const icon = fileIcons[getFileExtension(doc.original_filename).toLowerCase()] || fileIcons.default;
+            
+            preview.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-5 h-5 ${icon.color} mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span class="text-sm text-gray-700 truncate max-w-xs">${doc.original_filename}</span>
+                </div>
+                <div class="flex items-center">
+                    <a href="${doc.url}" class="text-blue-600 hover:text-blue-800 text-xs font-medium mr-3" download>Download</a>
+                    <button type="button" class="text-red-600 hover:text-red-800 text-xs font-medium remove-existing-document" data-document-id="${doc.id}">
+                        Remove
+                    </button>
+                    <input type="hidden" name="existing_documents[]" value="${doc.id}">
+                </div>
+            `;
+            
+            previewsGrid.appendChild(preview);
+        });
+        
+        // Add new files
+        files.forEach((file, index) => {
+            const preview = createFilePreview(file, index);
+            previewsGrid.appendChild(preview);
+        });
+        
+        const hasFiles = files.length > 0 || existingFiles.length > 0;
+        previewContainer.classList.toggle('hidden', !hasFiles);
+        uploadPrompt.classList.toggle('hidden', hasFiles);
+    };
+
+    // Event handlers
+    const handleFileSelect = (event) => {
+        const newFiles = Array.from(event.target.files);
+        const totalFiles = files.length + existingFiles.length + newFiles.length;
+        
+        // Filter out files that exceed max size or have invalid types
+        const validFiles = newFiles.filter(file => {
+            const isValid = file.size <= MAX_FILE_SIZE && isFileTypeAllowed(file);
+            if (!isValid) {
+                alert(`File ${file.name} was not added. Please ensure files are under ${MAX_FILE_SIZE / (1024 * 1024)}MB and have a valid file type.`);
+            }
+            return isValid;
+        });
+
+        // Check if adding these files would exceed max files
+        if (files.length + existingFiles.length + validFiles.length > MAX_FILES) {
+            alert(`You can only upload up to ${MAX_FILES} files.`);
+            return;
+        }
+
+        // Add files to the files array
+        files = [...files, ...validFiles];
+        
+        // Update the file input with the new files
+        const dataTransfer = new DataTransfer();
+        files.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+        
+        // Manually trigger a change event on the file input
+        const event = new Event('change', { bubbles: true });
+        fileInput.dispatchEvent(event);
+        
+        updatePreviews();
+        updateFileCount();
+        
+        // Reset the file input to allow selecting the same file again
+        fileInput.value = '';
+    };
+
+    const handleRemoveFile = (index) => {
+        files = files.filter((_, i) => i !== index);
+        updatePreviews();
+        updateFileCount();
+    };
+
+    const handlePreviewFile = (index) => {
+        const file = files[index];
+        if (!file) return;
+
+        if (file.type.startsWith('image/')) {
             const reader = new FileReader();
             
-            reader.onload = function(e) {
-                // Create modal with image preview
+            reader.onload = (e) => {
                 const modal = document.createElement('div');
                 modal.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
                 modal.innerHTML = `
                     <div class="relative bg-white rounded-lg max-w-3xl max-h-[90vh] overflow-auto p-4">
-                        <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600" onclick="this.parentElement.parentElement.remove()">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <button type="button" class="absolute top-2 right-2 text-gray-400 hover:text-gray-600" data-action="close-modal">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
@@ -199,152 +235,117 @@ document.addEventListener('DOMContentLoaded', function() {
                     </div>
                 `;
                 
-                document.body.appendChild(modal);
-                
-                // Close modal when clicking outside
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        modal.remove();
-                    }
+                modal.querySelector('[data-action="close-modal"]').addEventListener('click', () => {
+                    modal.remove();
                 });
+                
+                document.body.appendChild(modal);
+            };
+            
+            reader.onerror = () => {
+                alert('Error loading image preview.');
             };
             
             reader.readAsDataURL(file);
         } else {
-            // For non-images, just show info
-            showXAlert('info', 'File Preview', `Preview not available for ${file.name}. You can view this file after uploading.`);
+            alert('File preview is only available for images.');
         }
-    }
-    
-    // Function to show styled alerts
-    function showXAlert(type, title, message) {
-        // Generate a unique ID for the alert
-        const alertId = 'alert-' + Date.now();
-        
-        // Create the alert element
-        const alertElement = document.createElement('div');
-        alertElement.id = alertId;
-        alertElement.className = 'fixed bottom-4 right-4 z-50 max-w-md transition-opacity duration-500';
-        
-        // Get the appropriate icon for the alert type
-        let icon = '';
-        let colorClass = '';
-        
-        switch(type) {
-            case 'success':
-                icon = '<svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                colorClass = 'text-green-800 bg-green-50 border-green-200';
-                break;
-            case 'warning':
-                icon = '<svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>';
-                colorClass = 'text-yellow-800 bg-yellow-50 border-yellow-200';
-                break;
-            case 'error':
-                icon = '<svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                colorClass = 'text-red-800 bg-red-50 border-red-200';
-                break;
-            case 'info':
-            default:
-                icon = '<svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
-                colorClass = 'text-blue-800 bg-blue-50 border-blue-200';
+    };
+
+    // Event delegation for preview and remove buttons
+    const handlePreviewClick = (e) => {
+        if (e.target.classList.contains('remove-file')) {
+            const index = parseInt(e.target.getAttribute('data-index'));
+            if (!isNaN(index)) {
+                handleRemoveFile(index);
+            }
+        } else if (e.target.classList.contains('remove-existing-document')) {
+            e.preventDefault();
+            const docId = e.target.getAttribute('data-document-id');
+            if (docId) {
+                if (window.removeExistingDocument) {
+                    window.removeExistingDocument(docId);
+                    // Remove from existingFiles array
+                    existingFiles = existingFiles.filter(doc => doc.id != docId);
+                    updatePreviews();
+                    updateFileCount();
+                }
+            }
+        } else if (e.target.classList.contains('preview-file')) {
+            const index = parseInt(e.target.getAttribute('data-index'));
+            if (!isNaN(index)) {
+                handlePreviewFile(index);
+            }
         }
-        
-        // Set the alert content
-        alertElement.innerHTML = `
-            <div class="flex items-start p-4 border rounded-lg shadow-md ${colorClass}">
-                <div class="flex-shrink-0 mr-3">
-                    ${icon}
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-sm font-medium">${title}</h3>
-                    <div class="mt-1 text-sm opacity-90">${message}</div>
-                </div>
-                <button type="button" class="ml-4 text-gray-400 hover:text-gray-600" onclick="dismissAlert('${alertId}')">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        `;
-        
-        // Add the alert to the document
-        document.body.appendChild(alertElement);
-        
-        // Auto dismiss after 5 seconds
-        setTimeout(() => {
-            dismissAlert(alertId);
-        }, 5000);
-    }
-    
-    // Function to dismiss an alert
-    function dismissAlert(alertId) {
-        const alertElement = document.getElementById(alertId);
-        if (alertElement) {
-            // Add fade-out animation
-            alertElement.style.opacity = '0';
-            
-            // Remove from DOM after animation completes
-            setTimeout(() => {
-                alertElement.remove();
-            }, 500);
-        }
-    }
-    
-    // Make functions available globally
-    window.removeFile = removeFile;
-    window.previewFile = previewFile;
-    window.showXAlert = showXAlert;
-    window.dismissAlert = dismissAlert;
-    
-    // Handle file selection
-    fileInput.addEventListener('change', handleFileSelect);
-    
-    // Handle drag and drop
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, preventDefaults, false);
-    });
-    
-    function preventDefaults(e) {
+    };
+
+    // Drag and drop handlers
+    const preventDefaults = (e) => {
         e.preventDefault();
         e.stopPropagation();
-    }
-    
-    // Highlight drop area when dragging over it
-    ['dragenter', 'dragover'].forEach(eventName => {
-        dropArea.addEventListener(eventName, highlight, false);
-    });
-    
-    ['dragleave', 'drop'].forEach(eventName => {
-        dropArea.addEventListener(eventName, unhighlight, false);
-    });
-    
-    function highlight() {
-        dropArea.classList.add('bg-gray-100');
-        dropArea.classList.add('border-blue-500');
-    }
-    
-    function unhighlight() {
-        dropArea.classList.remove('bg-gray-100');
-        dropArea.classList.remove('border-blue-500');
-    }
-    
-    // Handle dropped files
-    dropArea.addEventListener('drop', handleDrop, false);
-    
-    function handleDrop(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
+    };
+
+    const highlight = () => {
+        dropArea.classList.add('border-blue-500', 'bg-blue-50');
+    };
+
+    const unhighlight = () => {
+        dropArea.classList.remove('border-blue-500', 'bg-blue-50');
+    };
+
+    const handleDrop = (e) => {
+        preventDefaults(e);
+        unhighlight();
         
-        // Update file input with dropped files
-        if (files.length > 0) {
-            // Create a new FileList with the dropped files (max 5)
-            const newDt = new DataTransfer();
-            for (let i = 0; i < Math.min(5, files.length); i++) {
-                newDt.items.add(files[i]);
-            }
-            
-            fileInput.files = newDt.files;
-            handleFileSelect();
+        const dt = e.dataTransfer;
+        const droppedFiles = dt.files;
+        
+        if (droppedFiles.length) {
+            fileInput.files = droppedFiles;
+            handleFileSelect({ target: { files: droppedFiles } });
+        }
+    };
+
+    // Initialize existing documents from the window object
+    function initializeExistingDocuments() {
+        if (window.existingDocuments && window.existingDocuments.length > 0) {
+            existingFiles = [...window.existingDocuments];
+            updatePreviews();
+            updateFileCount();
         }
     }
-});
+    
+    // Initialize
+    function init() {
+        // Event listeners for file input
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        // Drag and drop event listeners
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        dropArea.addEventListener('click', () => fileInput.click());
+        
+        // Event delegation for preview and remove buttons
+        document.addEventListener('click', handlePreviewClick);
+        
+        // Initialize UI
+        updateFileCount();
+        
+        // Initialize existing documents
+        initializeExistingDocuments();
+    }
+
+    // Start the application
+    init();
+})();

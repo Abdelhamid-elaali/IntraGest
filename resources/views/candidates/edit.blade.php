@@ -105,14 +105,7 @@
                     @enderror
                 </div>
 
-                <!-- Geographical Criteria -->
-                <div>
-                    <label for="distance" class="block text-sm font-medium text-gray-700 mb-1">Distance from Institution (km)</label>
-                    <input type="number" name="distance" id="distance" value="{{ old('distance', $candidate->distance) }}" min="0" step="0.1" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                    @error('distance')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
+
 
                 <!-- Academic Criteria -->
                 <div>
@@ -288,67 +281,45 @@
                 </div>
 
                 <!-- Supporting Documents Section -->
-                <h3 class="text-lg font-medium text-gray-900 mt-6 mb-4">Supporting Documents</h3>
-                <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
-                    <div class="mb-4">
-                        <label for="supporting_documents" class="block text-sm font-medium text-gray-700 mb-2">Upload Documents <span class="text-xs text-gray-500">(Maximum 5 files)</span></label>
-                        <div id="document-drop-area" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors duration-200">
-                            <div id="document-upload-prompt" class="flex flex-col items-center justify-center pt-5 pb-6">
-                                <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                                </svg>
-                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p class="text-xs text-gray-500">PDF, PNG, JPG, DOCX, XLS, ZIP (MAX. 10MB)</p>
-                            </div>
-                            <div id="document-preview-container" class="hidden w-full px-4 py-2">
-                                <div class="flex justify-between items-center mb-2">
-                                    <h4 class="text-sm font-medium text-gray-700">Selected Files</h4>
-                                    <span id="file-count" class="text-xs text-gray-500">0/5 files</span>
-                                </div>
-                                <div id="document-previews" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto"></div>
-                            </div>
-                            <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.zip" />
-                        </div>
-                        @error('supporting_documents')
-                            <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    
-                    <div class="mt-4">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Required Documents:</h4>
-                        <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
-                            <li>CIN Copy</li>
-                            <li>Proof of Residence</li>
-                            <li>Income Proof</li>
-                        </ul>
-                    </div>
-
-                    @if(isset($candidate->documents) && count($candidate->documents) > 0)
-                    <div class="mt-6 pt-4 border-t border-gray-200">
-                        <h4 class="text-sm font-medium text-gray-700 mb-2">Current Documents:</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            @foreach($candidate->documents as $document)
-                            <div class="flex items-center p-3 bg-white rounded-md border border-gray-200">
-                                <div class="flex-shrink-0 mr-3">
-                                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                <div class="mt-8 border-t pt-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Supporting Documents</h3>
+                    <div class="border border-gray-300 rounded-lg p-6 bg-gray-50">
+                        <div class="mb-4">
+                            <label for="supporting_documents" class="block text-sm font-medium text-gray-700 mb-2">Upload Documents <span class="text-xs text-gray-500">(Maximum 5 files)</span></label>
+                            <div id="document-drop-area" class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition-colors duration-200">
+                                <div id="document-upload-prompt" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <svg class="w-10 h-10 mb-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                                     </svg>
+                                    <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                    <p class="text-xs text-gray-500">PDF, PNG, JPG, DOCX, XLS, ZIP (MAX. 10MB)</p>
                                 </div>
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-medium text-gray-900 truncate">{{ $document->name }}</p>
-                                    <p class="text-xs text-gray-500">Uploaded: {{ $document->created_at->format('M d, Y') }}</p>
+                                <div id="document-preview-container" class="hidden w-full px-4 py-2">
+                                    <div class="flex justify-between items-center mb-2">
+                                        <h4 class="text-sm font-medium text-gray-700">Selected Files</h4>
+                                        <span id="file-count" class="text-xs text-gray-500">0/5 files</span>
+                                    </div>
+                                    <div id="document-previews" class="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
+                                        <!-- Existing documents will be populated by JavaScript -->
+                                    </div>
                                 </div>
-                            <div class="flex items-center">
-                                <a href="{{ route('documents.download', $document->id) }}" class="text-blue-600 hover:text-blue-800 text-xs font-medium mr-3">Download</a>
-                                <input type="checkbox" name="delete_documents[]" value="{{ $document->id }}" class="h-4 w-4 text-red-600 border-gray-300 rounded focus:ring-red-500">
-                                <label class="sr-only">Delete {{ $document->name }}</label>
+                                <input id="supporting_documents" name="supporting_documents[]" type="file" class="hidden" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx,.zip" />
                             </div>
+                            @error('supporting_documents')
+                                <p class="text-red-500 text-xs mt-2">{{ $message }}</p>
+                            @enderror
                         </div>
-                        @endforeach
+                        
+                        <div class="mt-4">
+                            <h4 class="text-sm font-medium text-gray-700 mb-2">Required Documents:</h4>
+                            <ul class="list-disc pl-5 text-sm text-gray-600 space-y-1">
+                                <li>CIN Copy</li>
+                                <li>Proof of Residence</li>
+                                <li>Income Proof</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                @endif
-            </div>
 
             <!-- Declaration of Truthfulness -->            
             <div class="mt-8 mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm">
@@ -380,36 +351,119 @@
     </div>
 </div>
 
+@push('scripts')
+@vite(['resources/views/candidates/create-file-upload.js'])
+@endpush
+
 <script>
-    // Pass the candidate's existing criteria to the dynamic criteria handler
-    window.candidateExistingCriteria = @json($candidate->criteria->map(function($criteria) {
+// Pass the candidate's existing criteria to the dynamic criteria handler
+@php
+    $criteriaData = $candidate->criteria->map(function($criteria) {
         return [
             'category' => $criteria->category,
-            'criteria_id' => $criteria->id,
+            'criteria_id' => (string) $criteria->id, // Ensure it's a string for comparison
             'score' => $criteria->pivot->score ?? null,
             'note' => $criteria->pivot->note ?? null
         ];
-    })->values()->toArray() ?? [];
+    })->values()->all();
 
-    // Pass the candidate's existing documents to the file upload handler
-    window.existingDocuments = @json($candidate->documents->map(function($document) {
+    $documentsData = $candidate->documents->map(function($document) {
         return [
             'id' => $document->id,
-            'name' => $document->original_filename,
+            'original_filename' => $document->original_filename,
             'url' => route('documents.download', $document->id),
-            'type' => $document->file_type,
-            'size' => $document->file_size
+            'file_type' => $document->file_type,
+            'file_size' => $document->file_size
         ];
-    })->values()->toArray());
+    })->values()->all();
+@endphp
+
+// Make data available to the file upload script
+window.candidateExistingCriteria = {!! json_encode($criteriaData) !!};
+window.existingDocuments = {!! json_encode($documentsData) !!};
+
+// Global function to handle removing existing documents
+window.removeExistingDocument = function(documentId) {
+    if (confirm('Are you sure you want to remove this document?')) {
+        // Create a hidden input to track removed documents
+        const removedInput = document.createElement('input');
+        removedInput.type = 'hidden';
+        removedInput.name = 'remove_documents[]';
+        removedInput.value = documentId;
+        document.getElementById('candidateForm').appendChild(removedInput);
+        
+        // Remove the document preview
+        const preview = document.querySelector(`[data-document-id="${documentId}"]`);
+        if (preview) {
+            preview.remove();
+        }
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'mb-4 p-3 text-sm text-green-700 bg-green-100 rounded-md';
+        alert.textContent = 'Document removed successfully';
+        document.querySelector('form').insertBefore(alert, document.querySelector('form').firstChild);
+        
+        // Remove the alert after 5 seconds
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+        
+        // Update file count
+            updateFileCount();
+        
+        // Show success message
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded relative';
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <span class="block sm:inline">Document will be removed when you save the form.</span>
+            <span class="absolute top-0 bottom-0 right-0 px-4 py-3" onclick="this.parentElement.remove()">
+                <svg class="fill-current h-6 w-6 text-green-500" role="button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <title>Close</title>
+                    <path d="M14.348 14.849a1.2 1.2 0 0 1-1.697 0L10 11.819l-2.651 3.029a1.2 1.2 0 1 1-1.697-1.697l2.758-3.15-2.759-3.152a1.2 1.2 0 1 1 1.697-1.697L10 8.183l2.651-3.031a1.2 1.2 0 1 1 1.697 1.697l-2.758 3.152 2.758 3.15a1.2 1.2 0 0 1 0 1.698z"/>
+                </svg>
+            </span>
+        `;
+        
+        // Insert the alert after the form
+        const form = document.getElementById('candidateForm');
+        form.parentNode.insertBefore(alertDiv, form.nextSibling);
+        
+        // Auto-remove the alert after 5 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+};
+
+    // Function to update the file count display
+    function updateFileCount() {
+        const existingPreviews = document.querySelectorAll('.document-preview-item[data-document-id]');
+        const newPreviews = document.querySelectorAll('.document-preview-item[data-index]');
+        const totalCount = existingPreviews.length + newPreviews.length;
+        
+        const fileCountEl = document.getElementById('file-count');
+        if (fileCountEl) {
+            fileCountEl.textContent = `${totalCount}/5 files`;
+            fileCountEl.className = totalCount === 5 ? 
+                'text-xs font-medium text-amber-600' : 'text-xs text-gray-500';
+        }
+    }
+    
+    // Initialize file count on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateFileCount();
+    });
 </script>
 
 <!-- Include the criteria handler JavaScript -->
 @vite(['resources/js/candidates/dynamic-criteria.js'])
 
-<!-- JavaScript for file upload preview -->
+@push('scripts')
 <script src="{{ asset('js/candidates/file-upload.js') }}"></script>
+@endpush
 
-<!-- Form submission handling -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('candidateForm');
@@ -417,39 +471,46 @@ document.addEventListener('DOMContentLoaded', function() {
     if (form) {
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            console.log('Form submission started');
             
-            // Show loading state
             const submitButton = form.querySelector('button[type="submit"]');
             const originalButtonText = submitButton ? submitButton.innerHTML : '';
             
+            // Show loading state on submit button
             if (submitButton) {
                 submitButton.disabled = true;
-                submitButton.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Updating...';
+                submitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Updating...
+                `;
+            }
+            
+            // Show loading state
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                `;
             }
             
             try {
-                // Create form data
                 const formData = new FormData(form);
-                
-                // Log form data for debugging
-                console.log('Form data:');
-                for (let [key, value] of formData.entries()) {
-                    console.log(key, value);
-                }
-                
-                // Submit the form using fetch
                 const response = await fetch(form.action, {
                     method: 'POST',
-                    body: formData,
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                         'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json'
-                    }
+                    },
+                    body: formData
                 });
                 
-                console.log('Response status:', response.status);
                 const data = await response.json().catch(() => ({}));
                 
                 if (!response.ok) {
@@ -457,7 +518,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 
                 // Redirect on success
-                window.location.href = '{{ route("candidates.index") }}';
+                window.location.href = data.redirect || '{{ route("candidates.index") }}';
                 
             } catch (error) {
                 console.error('Error details:', error);
@@ -470,35 +531,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Handle validation errors
                 if (error.errors) {
-                    // Clear previous error messages
-                    document.querySelectorAll('.validation-error').forEach(el => el.remove());
-                    
-                    // Show validation errors next to the fields
-                    for (const [field, messages] of Object.entries(error.errors)) {
-                        const input = form.querySelector(`[name^="${field}"]`);
-                        if (input) {
-                            input.classList.add('border-red-500');
-                            
-                            // Create error message element
-                            const errorDiv = document.createElement('div');
-                            errorDiv.className = 'validation-error text-red-500 text-xs mt-1';
-                            errorDiv.textContent = Array.isArray(messages) ? messages[0] : messages;
-                            
-                            // Insert after the input
-                            input.parentNode.insertBefore(errorDiv, input.nextSibling);
-                            
-                            // Remove error on input
-                            input.addEventListener('input', function() {
-                                this.classList.remove('border-red-500');
-                                const errorMsg = this.nextElementSibling;
-                                if (errorMsg && errorMsg.classList.contains('validation-error')) {
-                                    errorMsg.remove();
-                                }
-                            });
-                        }
-                    }
-                    
-                    // Show alert with all errors
                     let errorMessages = [];
                     for (const [field, messages] of Object.entries(error.errors)) {
                         const fieldLabel = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
@@ -520,143 +552,170 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 @push('scripts')
-
 <script>
     $(document).ready(function() {
         // Initialize Select2 for specialization dropdown
         $('.select2-specialization').select2({
             theme: 'bootstrap-5',
             width: '100%',
-            placeholder: 'Search or select a specialization',
+            placeholder: 'Select a specialization',
             allowClear: true,
-            dropdownParent: $('#specialization').parent(),
-            minimumResultsForSearch: 1
+            dropdownParent: $('#candidateForm')
         });
 
-        let criteriaCount = 0; // Initialize count for new groups
-        // Use candidate.criteria to get both category and id for pre-population
-        // Removed: const existingCriteriaData = @json($candidate->criteria->map(function($item) {
-        // Removed:     return ['category' => $item->category, 'id' => $item->id];
-        // Removed: })->values()->toArray());
+        // Document upload handling
+        const dropArea = document.getElementById('document-drop-area');
+        const fileInput = document.getElementById('supporting_documents');
+        const previewContainer = document.getElementById('document-preview-container');
+        const previews = document.getElementById('document-previews');
+        const uploadPrompt = document.getElementById('document-upload-prompt');
+        const fileCount = document.getElementById('file-count');
+        let files = [];
+        let existingFiles = [];
 
-        function generateCriteriaGroupHtml(index, selectedCategory = '', selectedType = '') {
-            const criteriaCategories = [
-                { value: '', text: 'Select a category' },
-                { value: 'geographical', text: 'Geographical' },
-                { value: 'social', text: 'Social' },
-                { value: 'academic', text: 'Academic' },
-                { value: 'physical', text: 'Physical' },
-                { value: 'family', text: 'Family' }
-            ];
+        // Load existing files from the preview container
+        document.querySelectorAll('.document-preview-item').forEach(item => {
+            const docId = item.getAttribute('data-document-id');
+            if (docId) {
+                existingFiles.push(docId);
+            }
+        });
 
-            let categoryOptions = '';
-            criteriaCategories.forEach(cat => {
-                categoryOptions += `<option value="${cat.value}" ${selectedCategory === cat.value ? 'selected' : ''}>${cat.text}</option>`;
-            });
-
-            return `
-                <div class="criteria-group bg-gray-50 p-4 rounded-md shadow-sm mb-4 border border-gray-200" data-index="${index}">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-md font-medium text-gray-800">Criterion #${index + 1}</h4>
-                        <button type="button" class="remove-criteria-group text-red-600 hover:text-red-900 focus:outline-none" title="Remove this criterion">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="criteria_category_${index}" class="block text-sm font-medium text-gray-700 mb-1">Criteria Category</label>
-                            <select name="criteria[${index}][category]" id="criteria_category_${index}" class="criteria-category w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                                ${categoryOptions}
-                            </select>
-                        </div>
-                        <div>
-                            <label for="criteria_type_${index}" class="block text-sm font-medium text-gray-700 mb-1">Criterion Type</label>
-                            <select name="criteria[${index}][type]" id="criteria_type_${index}" class="criteria-type w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                                <option value="">Select a criterion type</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            `;
+        // Show/hide upload prompt based on files
+        function updateUI() {
+            const totalFiles = files.length + existingFiles.length;
+            if (totalFiles > 0) {
+                uploadPrompt.classList.add('hidden');
+                previewContainer.classList.remove('hidden');
+            } else {
+                uploadPrompt.classList.remove('hidden');
+                previewContainer.classList.add('hidden');
+            }
+            fileCount.textContent = `${totalFiles}/5 files`;
         }
 
-        function attachCategoryChangeListener($categorySelect) {
-            $categorySelect.on('change', function() {
-                const selectedCategory = $(this).val();
-                const $criteriaTypeSelect = $(this).closest('.criteria-group').find('.criteria-type');
-                // Get previously selected criterion for this specific group
-                const selectedCriterionId = $criteriaTypeSelect.data('selected'); 
-
-                $criteriaTypeSelect.empty().append('<option value="">Select a criterion type</option>');
-
-                if (selectedCategory) {
-                    $.ajax({
-                        url: '/api/criteria',
-                        method: 'GET',
-                        data: { category: selectedCategory },
-                        success: function(response) {
-                            if (response.success && response.data.length > 0) {
-                                response.data.forEach(function(criterion) {
-                                    const isSelected = (selectedCriterionId && selectedCriterionId == criterion.id) ? 'selected' : '';
-                                    $criteriaTypeSelect.append(`<option value="${criterion.id}" ${isSelected}>${criterion.text}</option>`);
-                                });
-                            } else {
-                                $criteriaTypeSelect.append('<option value="">No criteria found for this category</option>');
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error fetching criteria:', error);
-                            $criteriaTypeSelect.append('<option value="">Error loading criteria</option>');
-                        }
-                    });
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            const newFiles = Array.from(e.target.files);
+            
+            // Check total files won't exceed limit
+            if (files.length + existingFiles.length + newFiles.length > 5) {
+                alert('You can upload a maximum of 5 files in total.');
+                return;
+            }
+            
+            // Add new files
+            newFiles.forEach(file => {
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                    return;
                 }
-            });
-        }
-
-        // Pre-populate existing criteria
-        if (existingCriteriaData.length > 0) {
-            let initialIndex = 0;
-            existingCriteriaData.forEach(function(criterionData) {
-                const newCriteriaGroup = $(generateCriteriaGroupHtml(initialIndex, criterionData.category));
-                $('#criteria-container').append(newCriteriaGroup);
                 
-                const $criteriaTypeSelect = newCriteriaGroup.find('.criteria-type');
-                $criteriaTypeSelect.data('selected', criterionData.id);
-
-                attachCategoryChangeListener(newCriteriaGroup.find('.criteria-category'));
-                newCriteriaGroup.find('.criteria-category').trigger('change'); // Trigger change to load types
-                initialIndex++;
+                files.push(file);
+                
+                const filePreview = document.createElement('div');
+                filePreview.className = 'document-preview-item flex items-center justify-between p-2 bg-white border rounded-md';
+                filePreview.innerHTML = `
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 text-gray-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <span class="text-sm text-gray-700 truncate max-w-xs">${file.name}</span>
+                    </div>
+                    <button type="button" class="text-red-600 hover:text-red-800 text-xs font-medium remove-file">
+                        Remove
+                    </button>
+                `;
+                
+                previews.appendChild(filePreview);
+                
+                // Add remove event listener
+                filePreview.querySelector('.remove-file').addEventListener('click', () => {
+                    const index = files.findIndex(f => f.name === file.name);
+                    if (index > -1) {
+                        files.splice(index, 1);
+                    }
+                    filePreview.remove();
+                    updateUI();
+                });
             });
-            criteriaCount = initialIndex;
-        } else {
-            // If no existing criteria, add one empty group
-            const initialGroup = $(generateCriteriaGroupHtml(0));
-            $('#criteria-container').append(initialGroup);
-            attachCategoryChangeListener(initialGroup.find('.criteria-category'));
-            criteriaCount = 1; // Set count to 1 for the initial group
+            
+            updateUI();
+            fileInput.value = ''; // Reset file input to allow selecting the same file again
+        });
+
+        // Handle remove document button clicks
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-document')) {
+                e.preventDefault();
+                const docId = e.target.getAttribute('data-document-id');
+                const docItem = e.target.closest('.document-preview-item');
+                // This is now handled by the global removeExistingDocument function
+                
+                if (confirm('Are you sure you want to remove this document?')) {
+                    // Remove from existing files array
+                    existingFiles = existingFiles.filter(id => id !== docId);
+                    
+                    // Create a hidden input to track removed documents
+                    const removedInput = document.createElement('input');
+                    removedInput.type = 'hidden';
+                    removedInput.name = 'removed_documents[]';
+                    removedInput.value = docId;
+                    document.getElementById('candidateForm').appendChild(removedInput);
+                    
+                    // Remove from DOM
+                    docItem.remove();
+                    updateUI();
+                }
+            }
+        });
+
+        // Drag and drop functionality
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
         }
 
-        // Handle adding more criteria groups
-        $('#add-more-criteria').on('click', function() {
-            const newCriteriaGroup = $(generateCriteriaGroupHtml(criteriaCount));
-            $('#criteria-container').append(newCriteriaGroup);
-            attachCategoryChangeListener(newCriteriaGroup.find('.criteria-category'));
-            criteriaCount++;
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
         });
 
-        // Handle removing criteria groups
-        $('#criteria-container').on('click', '.remove-criteria-group', function() {
-            $(this).closest('.criteria-group').remove();
-            // Re-index remaining criteria groups to maintain sequential array keys
-            $('.criteria-group').each(function(index) {
-                $(this).find('h4').text(`Criterion #${index + 1}`);
-                $(this).find('.criteria-category').attr({'name': `criteria[${index}][category]`, 'id': `criteria_category_${index}`});
-                $(this).find('.criteria-type').attr({'name': `criteria[${index}][type]`, 'id': `criteria_type_${index}`});
-            });
-            criteriaCount--;
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
         });
+
+        function highlight() {
+            dropArea.classList.add('border-blue-500', 'bg-blue-50');
+        }
+
+        function unhighlight() {
+            dropArea.classList.remove('border-blue-500', 'bg-blue-50');
+        }
+
+        // Handle dropped files
+        dropArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const droppedFiles = dt.files;
+            
+            if (droppedFiles.length > 0) {
+                const fileList = new DataTransfer();
+                Array.from(droppedFiles).forEach(file => fileList.items.add(file));
+                fileInput.files = fileList.files;
+                
+                // Trigger change event
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        }
+
+        // Initial UI update
+        updateUI();
     });
 </script>
 @endpush

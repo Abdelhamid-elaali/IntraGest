@@ -124,8 +124,7 @@
                 </td>
                 <td>
                     Applied: {{ $candidate->application_date ? $candidate->application_date->format('Y-m-d') : 'N/A' }}<br>
-                    Status: <strong>{{ ucfirst($candidate->status) }}</strong><br>
-                    Score: {{ $candidate->score ?? 'N/A' }}
+                    Status: <strong>{{ ucfirst($candidate->status) }}</strong>
                 </td>
             </tr>
             @endforeach

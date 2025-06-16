@@ -12,11 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('candidates', function (Blueprint $table) {
-            if (!Schema::hasColumn('candidates', 'distance')) {
-                $table->decimal('distance', 8, 2)->nullable()->after('city');
-            }
             if (!Schema::hasColumn('candidates', 'income_level')) {
-                $table->string('income_level')->nullable()->after('distance');
+                $table->string('income_level')->nullable()->after('city');
             }
             if (!Schema::hasColumn('candidates', 'training_level')) {
                 $table->string('training_level')->nullable()->after('income_level');
@@ -34,7 +31,6 @@ return new class extends Migration
     {
         Schema::table('candidates', function (Blueprint $table) {
             $columnsToDrop = [
-                'distance',
                 'income_level',
                 'training_level',
                 'score',

@@ -42,7 +42,6 @@ class CandidatesExport
             'guardian_phone',
             'application_date',
             'status',
-            'score',
             'created_at',
             'updated_at'
         )->get()->map(function ($candidate) {
@@ -72,7 +71,6 @@ class CandidatesExport
                 'Guardian Phone' => $candidate->guardian_phone,
                 'Application Date' => $candidate->application_date,
                 'Status' => $candidate->status,
-                'Score' => $candidate->score,
                 'Created At' => $candidate->created_at,
                 'Updated At' => $candidate->updated_at,
             ];

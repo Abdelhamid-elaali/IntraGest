@@ -138,12 +138,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/documents/{document}', [CandidateController::class, 'deleteDocument'])->name('delete-document');
         Route::get('/{candidate}/download-documents', [CandidateController::class, 'downloadDocuments'])->name('download-documents');
         Route::post('/bulk-reject', [CandidateController::class, 'bulkReject'])->name('bulk-reject');
-        
-        // Candidate Scores
-        Route::get('/{candidate}/scores/edit', [App\Http\Controllers\CandidateScoreController::class, 'edit'])
-            ->name('scores.edit');
-        Route::put('/{candidate}/scores', [App\Http\Controllers\CandidateScoreController::class, 'update'])
-            ->name('scores.update');
 
         // Export routes - Using simple names since they'll be prefixed with 'candidates.' automatically
         Route::prefix('export')->name('export.')->group(function () {

@@ -77,14 +77,6 @@
                 </div>
 
                 <div>
-                    <label for="distance" class="block text-sm font-medium text-gray-700 mb-1">Distance from Institute (km)</label>
-                    <input type="number" name="distance" id="distance" value="{{ old('distance') }}" placeholder="Enter distance in kilometers" min="0" step="0.1" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" required>
-                    @error('distance')
-                        <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                     <div class="mt-2 flex items-center space-x-6">
                         <div class="flex items-center">
@@ -369,7 +361,6 @@
 </div>
 
 @push('scripts')
-{{-- The dynamic criteria handling is now managed by resources/js/candidates/dynamic-criteria.js --}}
 <script>
     // Function to copy training_level value to academic_year field
     function updateAcademicYear() {
@@ -381,9 +372,76 @@
     document.addEventListener('DOMContentLoaded', function() {
         updateAcademicYear();
         
-        // Make sure the form has the academic year value before submission
-        document.getElementById('candidateForm').addEventListener('submit', function(e) {
+        const form = document.getElementById('candidateForm');
+        
+        // Handle form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Update academic year before submission
             updateAcademicYear();
+            
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton ? submitButton.innerHTML : '';
+            
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerHTML = `
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating...
+                `;
+            }
+            
+            try {
+                const formData = new FormData(form);
+                
+                // Add files to form data
+                const fileInput = document.getElementById('supporting_documents');
+                if (fileInput.files.length > 0) {
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        formData.append('supporting_documents[]', fileInput.files[i]);
+                    }
+                }
+                
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: formData
+                });
+                
+                const data = await response.json().catch(() => ({}));
+                
+                if (!response.ok) {
+                    throw data;
+                }
+                
+                // Redirect on success
+                window.location.href = data.redirect || '{{ route("candidates.index") }}';
+                
+            } catch (error) {
+                if (submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+                }
+                
+                if (error.errors) {
+                    // Show validation errors
+                    let errorMessages = [];
+                    for (const [field, messages] of Object.entries(error.errors)) {
+                        errorMessages = [...errorMessages, ...messages];
+                    }
+                    alert(`Please fix the following errors:\n\n${errorMessages.join('\n')}`);
+                } else {
+                    alert(`Error: ${error.message || 'An unknown error occurred'}`);
+                }
+            }
         });
     });
 </script>
@@ -391,4 +449,4 @@
 
 @endsection
 
-@vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/search.js', 'resources/js/candidates/dynamic-criteria.js'])
+@vite(['resources/css/app.css', 'resources/js/app.js', 'resources/js/search.js', 'resources/js/candidates/dynamic-criteria.js', 'resources/views/candidates/create-file-upload.js'])

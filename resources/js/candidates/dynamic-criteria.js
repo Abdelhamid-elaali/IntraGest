@@ -35,7 +35,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         <option value="">Select a category first</option>
                     </select>
                 </div>
-                <input type="hidden" name="criteria[${criteriaCount}][score]" value="0">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                     <textarea name="criteria[${criteriaCount}][note]" class="criteria-notes w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50" rows="2" placeholder="Add any notes about this criterion">${initialData?.note || ''}</textarea>
@@ -99,8 +98,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     // If there's an initial selected value, set it after options are loaded
                     const selectedVal = typeSelect.data('selected-value');
                     if (selectedVal) {
-                        typeSelect.val(selectedVal).trigger('change');
-                        typeSelect.data('selected-value', null); // Clear after setting
+                        // Set the value and trigger change after a small delay to ensure Select2 is initialized
+                        setTimeout(() => {
+                            typeSelect.val(selectedVal).trigger('change');
+                            typeSelect.removeData('selected-value'); // Clear after setting
+                        }, 100);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -178,33 +180,63 @@ document.addEventListener('DOMContentLoaded', function() {
     const isCreatePage = window.location.pathname.includes('/candidates/create');
     const isEditPage = window.location.pathname.match(/\/candidates\/\d+\/edit/);
 
-    if (isCreatePage) {
-        // On create page, add one empty criteria group by default
-        const defaultGroup = createCriteriaGroup();
-        criteriaContainer.appendChild(defaultGroup);
-    } else if (isEditPage) {
-        // On edit page, load existing criteria
-        // The existingCriteria data will be passed from the Blade template
-        if (window.candidateExistingCriteria && window.candidateExistingCriteria.length > 0) {
+    // Function to initialize criteria with a small delay to ensure DOM is ready
+    function initializeCriteria() {
+        if (isCreatePage) {
+            // On create page, add one empty criteria group by default
+            const defaultGroup = createCriteriaGroup();
+            criteriaContainer.appendChild(defaultGroup);
+        } else if (isEditPage && window.candidateExistingCriteria && window.candidateExistingCriteria.length > 0) {
+            // On edit page, load existing criteria
             window.candidateExistingCriteria.forEach(function(criterion) {
-                const group = createCriteriaGroup(criterion);
+                const group = createCriteriaGroup({
+                    category: criterion.category,
+                    criteria_id: criterion.criteria_id,
+                    score: criterion.score,
+                    note: criterion.note
+                });
                 criteriaContainer.appendChild(group);
 
-                // Set actual selected value after options are loaded
+                // Store the criteria ID to set after options are loaded
                 const typeSelect = group.querySelector('.criteria-type');
-                $(typeSelect).on('select2:open', function() { // Use select2:open to ensure options are loaded
-                    const selectedVal = $(this).data('selected-value');
-                    if (selectedVal) {
-                        $(this).val(selectedVal).trigger('change');
-                        $(this).data('selected-value', null); // Clear after setting
+                if (criterion.criteria_id) {
+                    // Ensure we're working with a string for comparison
+                    const criteriaIdStr = String(criterion.criteria_id);
+                    $(typeSelect).data('selected-value', criteriaIdStr);
+                    
+                    // Also set the value directly in case the category is already loaded
+                    if ($(categorySelect).val() === criterion.category) {
+                        // Small delay to ensure Select2 is initialized
+                        setTimeout(() => {
+                            const $typeSelect = $(typeSelect);
+                            if ($typeSelect.find(`option[value="${criteriaIdStr}"]`).length) {
+                                $typeSelect.val(criteriaIdStr).trigger('change');
+                            }
+                        }, 200);
                     }
-                });
+                }
+
+                // Set a timeout to ensure the category change event has time to process
+                setTimeout(() => {
+                    const categorySelect = group.querySelector('.criteria-category');
+                    if (categorySelect) {
+                        // Set the category and trigger change to load criteria types
+                        $(categorySelect).val(criterion.category).trigger('change');
+                    }
+                }, 100);
             });
-            criteriaCount = window.candidateExistingCriteria.length; // Set criteriaCount to existing number
-        } else {
-            // If no existing criteria on edit page, add one empty group
+        } else if (isEditPage) {
+            // If no existing criteria but we're on edit page, add one empty group
             const defaultGroup = createCriteriaGroup();
             criteriaContainer.appendChild(defaultGroup);
         }
     }
-}); 
+
+    // Initialize criteria after a short delay to ensure all scripts are loaded
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeCriteria);
+    } else {
+        // If DOM is already loaded, initialize immediately
+        setTimeout(initializeCriteria, 100);
+    }
+});

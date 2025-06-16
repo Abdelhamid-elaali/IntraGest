@@ -17,7 +17,6 @@ class Candidate extends Model
         'email',
         'phone',
         'nationality',
-        'distance',
         'gender',
         'birth_date',
         'address',
@@ -32,7 +31,6 @@ class Candidate extends Model
         'income_level',
         'has_disability',
         'family_status',
-        'score',
         'siblings_count',
         'guardian_first_name',
         'guardian_last_name',
@@ -47,11 +45,9 @@ class Candidate extends Model
         'birth_date' => 'date',
         'application_date' => 'date',
         'has_disability' => 'boolean',
-        'score' => 'float',
         'family_status' => 'array',
         'siblings_count' => 'integer',
         'guardian_dob' => 'date',
-        'distance' => 'float',
     ];
     
     /**
@@ -81,7 +77,7 @@ class Candidate extends Model
     public function criteria()
     {
         return $this->belongsToMany(Criteria::class, 'candidate_criteria')
-            ->withPivot('score')
+            ->withPivot(['score', 'note'])
             ->withTimestamps();
     }
 

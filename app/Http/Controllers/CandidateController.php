@@ -117,12 +117,31 @@ class CandidateController extends Controller
     /**
      * Display a listing of the candidates.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        $query = Candidate::query();
+        
+        // Handle search
+        if ($search = $request->input('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('city', 'like', "%{$search}%");
+            });
+        }
+        
+        // Handle status filter
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+        
         // Explicitly select the fields we need to ensure we're getting the correct data
-        $candidates = Candidate::select([
+        $candidates = $query->select([
                 'id', 
                 'first_name', 
                 'last_name', 
@@ -132,11 +151,11 @@ class CandidateController extends Controller
                 'application_date', 
                 'status', 
                 'income_level', 
-                'specialization',
-                'score' // Added score field
+                'specialization'
             ])
             ->latest()
-            ->paginate(10);
+            ->paginate(15)
+            ->withQueryString();
             
         return view('candidates.index', compact('candidates'));
     }
@@ -155,7 +174,6 @@ class CandidateController extends Controller
             'distance',
             'nationality',
             'academic_year',
-            'score',
             'updated_at',
             'training_level' // Keep this for backward compatibility
         )
@@ -191,18 +209,89 @@ class CandidateController extends Controller
             'email' => 'required|email|max:255|unique:candidates,email',
             'phone' => 'required|string|max:255',
             'nationality' => 'required|string|max:255',
-            'distance' => 'required|numeric|min:0',
             'gender' => 'required|in:male,female',
             'birth_date' => 'required|date',
             'address' => 'required|string|max:255',
             'city' => 'required|string|max:255',
             'training_level' => 'required|string',
             'specialization' => 'required|string',
+            'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx,zip|max:10240',
         ]);
 
+        // Set application date
         $validated['application_date'] = now()->format('Y-m-d');
 
-        \App\Models\Candidate::create($validated);
+        // Create the candidate
+        $candidate = \App\Models\Candidate::create($validated);
+
+        // Handle criteria if present
+        if ($request->has('criteria') && is_array($request->criteria)) {
+            $criteriaData = [];
+            
+            foreach ($request->criteria as $criterion) {
+                if (!empty($criterion['criteria_id'])) {
+                    $criteriaData[$criterion['criteria_id']] = [
+                        'note' => $criterion['note'] ?? null,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+            }
+            
+            if (!empty($criteriaData)) {
+                $candidate->criteria()->syncWithoutDetaching($criteriaData);
+            }
+        }
+
+        // Handle file uploads
+        if ($request->hasFile('supporting_documents')) {
+            \Log::info('Processing file uploads', [
+                'file_count' => count($request->file('supporting_documents')),
+                'files' => array_map(fn($file) => $file->getClientOriginalName(), $request->file('supporting_documents'))
+            ]);
+            
+            foreach ($request->file('supporting_documents') as $file) {
+                if ($file->isValid()) {
+                    try {
+                        $path = $file->store('candidate_documents', 'public');
+                        \Log::info('File stored successfully', [
+                            'original_name' => $file->getClientOriginalName(),
+                            'stored_path' => $path,
+                            'size' => $file->getSize(),
+                            'mime_type' => $file->getMimeType()
+                        ]);
+                        
+                        $document = $candidate->documents()->create([
+                            'filename' => $file->hashName(),
+                            'original_filename' => $file->getClientOriginalName(),
+                            'file_path' => $path,
+                            'file_type' => $file->getMimeType(),
+                            'file_size' => $file->getSize(),
+                        ]);
+                        
+                        \Log::info('Document record created', [
+                            'document_id' => $document->id,
+                            'candidate_id' => $candidate->id
+                        ]);
+                        
+                    } catch (\Exception $e) {
+                        \Log::error('Error processing file upload', [
+                            'file' => $file->getClientOriginalName(),
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                } else {
+                    \Log::warning('Invalid file in upload', [
+                        'file' => $file->getClientOriginalName(),
+                        'error' => $file->getError(),
+                        'error_message' => $file->getErrorMessage()
+                    ]);
+                }
+            }
+        } else {
+            \Log::info('No files were uploaded or files parameter is missing');
+        }
 
         return redirect()->route('candidates.index')->with('success', 'Candidate created successfully!');
     }
@@ -276,8 +365,17 @@ class CandidateController extends Controller
      */
     public function show(Candidate $candidate)
     {
-        // Eager load the documents relationship
-        $candidate->load('documents');
+        // Eager load the documents relationship with proper error handling
+        $candidate = $candidate->load(['documents' => function($query) {
+            $query->latest();
+        }]);
+        
+        // Log the documents for debugging
+        \Log::info('Candidate documents:', [
+            'candidate_id' => $candidate->id,
+            'documents_count' => $candidate->documents->count(),
+            'documents' => $candidate->documents->toArray()
+        ]);
         
         return view('candidates.show', compact('candidate'));
     }
@@ -312,8 +410,8 @@ class CandidateController extends Controller
         ]);
 
         $request->validate([
-            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÃ€-Ã¿\s'-]+$/u"],
-            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÃ€-Ã¿\s'-]+$/u"],
+            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
+            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
             'cin' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z]{1,2}[0-9]{1,9}$/'],
             'email' => 'required|email|unique:candidates,email,' . $candidate->id,
             'phone' => 'required|string|max:20|regex:/^[0-9+]*$/',
@@ -322,7 +420,7 @@ class CandidateController extends Controller
             'address' => 'required|string|max:255',
             'nationality' => 'required|string|max:255',
             'city' => 'required|string|max:255',
-            'distance' => 'required|numeric',
+            'distance' => 'nullable|numeric',
             'income_level' => 'required|string',
             'training_level' => 'required|string',
             'academic_year' => 'required|string',
@@ -397,18 +495,50 @@ class CandidateController extends Controller
         
         // Handle new document uploads
         if ($request->hasFile('supporting_documents')) {
+            \Log::info('Processing file uploads in update', [
+                'file_count' => count($request->file('supporting_documents')),
+                'files' => array_map(fn($file) => $file->getClientOriginalName(), $request->file('supporting_documents'))
+            ]);
+            
             foreach ($request->file('supporting_documents') as $file) {
-                $filename = $candidate->id . '_' . time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('candidates/documents', $filename, 'public');
-                $candidate->documents()->create([
-                    'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
-                    'filename' => $filename,
-                    'original_filename' => $file->getClientOriginalName(),
-                    'file_path' => $path,
-                    'file_type' => $file->getClientMimeType(),
-                    'file_size' => $file->getSize(),
-                    'document_type' => null,
-                ]);
+                if ($file->isValid()) {
+                    try {
+                        $path = $file->store('candidate_documents', 'public');
+                        
+                        \Log::info('File stored successfully in update', [
+                            'original_name' => $file->getClientOriginalName(),
+                            'stored_path' => $path,
+                            'size' => $file->getSize(),
+                            'mime_type' => $file->getMimeType()
+                        ]);
+                        
+                        $document = $candidate->documents()->create([
+                            'filename' => $file->hashName(),
+                            'original_filename' => $file->getClientOriginalName(),
+                            'file_path' => $path,
+                            'file_type' => $file->getMimeType(),
+                            'file_size' => $file->getSize(),
+                        ]);
+                        
+                        \Log::info('Document record created in update', [
+                            'document_id' => $document->id,
+                            'candidate_id' => $candidate->id
+                        ]);
+                        
+                    } catch (\Exception $e) {
+                        \Log::error('Error processing file upload in update', [
+                            'file' => $file->getClientOriginalName(),
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                } else {
+                    \Log::warning('Invalid file in upload during update', [
+                        'file' => $file->getClientOriginalName(),
+                        'error' => $file->getError(),
+                        'error_message' => $file->getErrorMessage()
+                    ]);
+                }
             }
         }
 
