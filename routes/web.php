@@ -114,8 +114,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/students/bulk-delete', [StudentController::class, 'bulkDestroy'])->name('students.bulk-destroy');
     
     Route::resource('criteria', CriteriaController::class);
-    Route::get('criteria-weights', [CriteriaController::class, 'weights'])->name('criteria.weights');
-    Route::put('criteria-weights', [CriteriaController::class, 'updateWeights'])->name('criteria.updateWeights');
+    Route::get('criteria-scores', [CriteriaController::class, 'scores'])->name('criteria.scores');
+    Route::put('criteria-scores', [CriteriaController::class, 'updateScores'])->name('criteria.updateScores');
     
     Route::prefix('candidates')->name('candidates.')->group(function () {
         Route::get('/', [CandidateController::class, 'index'])->name('index');
@@ -138,6 +138,19 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/documents/{document}', [CandidateController::class, 'deleteDocument'])->name('delete-document');
         Route::get('/{candidate}/download-documents', [CandidateController::class, 'downloadDocuments'])->name('download-documents');
         Route::post('/bulk-reject', [CandidateController::class, 'bulkReject'])->name('bulk-reject');
+        
+        // Candidate Scores
+        Route::get('/{candidate}/scores/edit', [App\Http\Controllers\CandidateScoreController::class, 'edit'])
+            ->name('scores.edit');
+        Route::put('/{candidate}/scores', [App\Http\Controllers\CandidateScoreController::class, 'update'])
+            ->name('scores.update');
+
+        // Export routes - Using simple names since they'll be prefixed with 'candidates.' automatically
+        Route::prefix('export')->name('export.')->group(function () {
+            Route::get('pdf', [App\Http\Controllers\CandidateController::class, 'exportPdf'])->name('pdf');
+            Route::get('excel', [App\Http\Controllers\CandidateController::class, 'exportExcel'])->name('excel');
+            Route::get('csv', [App\Http\Controllers\CandidateController::class, 'exportCsv'])->name('csv');
+        });
     });
     
     // Document download route
@@ -216,6 +229,59 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile/notifications', [ProfileController::class, 'deleteAllNotifications'])->name('profile.notifications.deleteAll');
 });
 
+// Test API routes (temporary, for development only)
+Route::get('/test/criteria-api', function () {
+    try {
+        // Test the API endpoint
+        $client = new \GuzzleHttp\Client();
+        $response = $client->get(url('/api/criteria'), [
+            'query' => ['category' => 'geographical'],
+            'headers' => [
+                'Accept' => 'application/json',
+                'X-Requested-With' => 'XMLHttpRequest'
+            ]
+        ]);
+        
+        return [
+            'status' => 'success',
+            'data' => json_decode($response->getBody()->getContents(), true)
+        ];
+    } catch (\Exception $e) {
+        return [
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ];
+    }
+});
+
+Route::get('/test-api', function () {
+    return response()->json([
+        'message' => 'API is working!',
+        'time' => now()->toDateTimeString(),
+        'status' => 'success'
+    ]);
+});
+
+Route::get('/test-criteria', function () {
+    // Test database connection and fetch some criteria
+    try {
+        $geographical = \App\Models\Criteria::where('category', 'geographical')->get();
+        $social = \App\Models\Criteria::where('category', 'social')->get();
+        
+        return [
+            'geographical' => $geographical,
+            'social' => $social,
+            'all_categories' => \App\Models\Criteria::select('category')->distinct()->get()->pluck('category')
+        ];
+    } catch (\Exception $e) {
+        return [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ];
+    }
+});
+
 // Temporary route to check database columns (remove after use)
 Route::middleware(['auth'])->get('/temp/check-candidate', function () {
     // Get the first candidate with all fields
@@ -290,3 +356,12 @@ Route::middleware(['auth'])->prefix('api')->name('api.')->group(function () {
 Route::get('/test/error/{code}', [ErrorController::class, 'show'])->name('test.error');
 
 Route::post('/candidates/bulk-convert', [App\Http\Controllers\CandidateController::class, 'bulkConvert'])->name('candidates.bulk-convert');
+
+// Temporary route to check category_scores table
+Route::get('/check-category-scores', function() {
+    $scores = \DB::table('category_scores')->get();
+    return response()->json([
+        'count' => $scores->count(),
+        'data' => $scores
+    ]);
+});

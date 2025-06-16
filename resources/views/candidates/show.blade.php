@@ -35,6 +35,12 @@
                         {{ ucfirst($candidate->status) }}
                     </span>
                     
+                    @if(!is_null($candidate->score))
+                    <div class="mt-3 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        Total Score: {{ number_format($candidate->score, 2) }}%
+                    </div>
+                    @endif
+                    
                     <div class="mt-6 flex space-x-2">
                         <a href="{{ route('candidates.edit', $candidate) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:border-indigo-900 focus:ring ring-indigo-300 disabled:opacity-25 transition">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -52,6 +58,12 @@
                                 Delete
                             </button>
                         </form>
+                        <a href="{{ route('candidates.scores.edit', $candidate) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-700 active:bg-blue-900 focus:outline-none focus:border-blue-900 focus:ring ring-blue-300 disabled:opacity-25 transition">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            Manage Scores
+                        </a>
                     </div>
                     
                     @if($candidate->status == 'pending')

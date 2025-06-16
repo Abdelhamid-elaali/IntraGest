@@ -16,6 +16,31 @@
                 </button>
             </form>
             <div class="flex space-x-2 bulk-actions opacity-0 transform transition-all duration-300 ease-in-out overflow-hidden translate-y-[-20px]" style="height: 0; max-height: 0;">
+                <!-- Export Buttons -->
+                <div class="flex space-x-2">
+                    <button type="button" onclick="exportCandidates('pdf')" class="inline-flex items-center px-3 py-1.5 bg-blue-100 border border-blue-300 rounded-md text-xs font-medium text-blue-800 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 transition-all duration-150 shadow-sm" title="Export as PDF">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"></path>
+                        </svg>
+                        PDF
+                    </button>
+                    <button type="button" 
+                            onclick="exportCandidates('excel')" 
+                            class="inline-flex items-center px-3 py-1.5 bg-green-200 border border-green-400 rounded-md text-xs font-medium text-green-900 hover:bg-green-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-600 transition-all duration-150 shadow-sm" 
+                            title="Export as Excel">
+                        <svg class="w-4 h-4 mr-1.5 text-green-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"></path>
+                        </svg>
+                        Excel
+                    </button>
+                    <button type="button" onclick="exportCandidates('csv')" class="inline-flex items-center px-3 py-1.5 bg-yellow-100 border border-yellow-300 rounded-md text-xs font-medium text-yellow-800 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-600 transition-all duration-150 shadow-sm" title="Export as CSV">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"></path>
+                        </svg>
+                        CSV
+                    </button>
+                </div>
+                
                 <button type="button" id="bulk-accept" class="inline-flex items-center px-3 py-1.5 bg-emerald-100 border border-emerald-300 rounded-md text-xs font-medium text-emerald-800 hover:bg-emerald-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-600 transition-all duration-150 shadow-sm" title="Accept selected candidates">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -48,10 +73,11 @@
                         <input type="checkbox" id="select-all" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50 h-4 w-4" title="Select all candidates">
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Income Level</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Academic Year</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Score</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
@@ -66,7 +92,7 @@
                         <div class="text-sm font-medium text-gray-900">{{ $candidate->getAttribute('first_name') }} {{ $candidate->getAttribute('last_name') }}</div>
                     </td>
                     <td class="px-3 py-4 whitespace-nowrap">
-                        <div class="text-sm text-gray-500">{{ $candidate->income_level ? ucfirst($candidate->income_level) : 'N/A' }}</div>
+                        <div class="text-sm text-gray-500">{{ $candidate->specialization ?: 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-500">{{ $candidate->phone ?: 'N/A' }}</div>
@@ -76,6 +102,13 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="text-sm text-gray-500">{{ $candidate->academic_year ?: 'First Year' }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">
+                            <span class="inline-flex items-center justify-center h-6 w-12 rounded-md bg-blue-50 text-blue-800 font-semibold">
+                                {{ number_format($candidate->score, 1) }}
+                            </span>
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -126,7 +159,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
+                    <td colspan="9" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">
                         No candidates found. <a href="{{ route('candidates.create') }}" class="text-blue-600 hover:text-blue-900">Add one now</a>.
                     </td>
                 </tr>
@@ -140,6 +173,116 @@
     </form>
     
     <script>
+    // Function to handle export operations
+    async function exportCandidates(format) {
+        // Show a loading message
+        const loadingMessage = `Preparing ${format.toUpperCase()} export...`;
+        
+        // Create a temporary alert element
+        const alertDiv = document.createElement('div');
+        alertDiv.className = 'fixed top-4 right-4 z-50 px-6 py-4 mb-4 text-sm text-blue-800 rounded-lg bg-blue-50 dark:bg-gray-800 dark:text-blue-400 flex items-center';
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-800 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <div>${loadingMessage}</div>
+        `;
+        
+        // Add the alert to the page
+        document.body.appendChild(alertDiv);
+        
+        // Determine the export URL and filename based on the format
+        let exportUrl = '';
+        let fileName = '';
+        let contentType = '';
+        
+        switch (format) {
+            case 'pdf':
+                exportUrl = '{{ route('candidates.export.pdf') }}';
+                fileName = 'candidates-export-' + new Date().toISOString().split('T')[0] + '.pdf';
+                contentType = 'application/pdf';
+                break;
+            case 'excel':
+                exportUrl = '{{ route('candidates.export.excel') }}';
+                fileName = 'candidates-export-' + new Date().toISOString().split('T')[0] + '.xlsx';
+                contentType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                break;
+            case 'csv':
+                exportUrl = '{{ route('candidates.export.csv') }}';
+                fileName = 'candidates-export-' + new Date().toISOString().split('T')[0] + '.csv';
+                contentType = 'text/csv';
+                break;
+            default:
+                console.error('Invalid export format:', format);
+                return;
+        }
+        
+        try {
+            // Add timestamp to prevent caching
+            const url = new URL(exportUrl);
+            url.searchParams.append('_', new Date().getTime());
+            
+            // Fetch the file
+            const response = await fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                credentials: 'same-origin'
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Get the blob from the response
+            const blob = await response.blob();
+            
+            // Create a download link and trigger the download
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            
+            // Clean up
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+            
+            // Show success message
+            const successMessage = `${format.toUpperCase()} export completed successfully!`;
+            alertDiv.innerHTML = `
+                <svg class="flex-shrink-0 inline w-5 h-5 mr-3 text-green-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
+                </svg>
+                <div>${successMessage}</div>
+            `;
+            alertDiv.className = 'fixed top-4 right-4 z-50 px-6 py-4 mb-4 text-sm text-green-700 bg-green-100 rounded-lg dark:bg-gray-800 dark:text-green-400 flex items-center';
+            
+        } catch (error) {
+            console.error('Export error:', error);
+            
+            // Show error message
+            alertDiv.innerHTML = `
+                <svg class="flex-shrink-0 inline w-5 h-5 mr-3 text-red-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414L11.414 10l2.293 2.293Z"/>
+                </svg>
+                <div>Error: Failed to generate export. Please try again.</div>
+            `;
+            alertDiv.className = 'fixed top-4 right-4 z-50 px-6 py-4 mb-4 text-sm text-red-700 bg-red-100 rounded-lg dark:bg-gray-800 dark:text-red-400 flex items-center';
+        }
+        
+        // Remove the alert after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+    
     document.addEventListener('DOMContentLoaded', function() {
         const selectAllCheckbox = document.getElementById('select-all');
         const candidateCheckboxes = document.querySelectorAll('.candidate-checkbox');

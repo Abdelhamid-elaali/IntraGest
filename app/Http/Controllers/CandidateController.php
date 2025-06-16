@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\Candidate;
@@ -7,6 +6,9 @@ use App\Models\CandidateDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Excel as ExcelFacade;
+use App\Exports\CandidatesExport;
 
 class CandidateController extends Controller
 {
@@ -120,9 +122,22 @@ class CandidateController extends Controller
     public function index()
     {
         // Explicitly select the fields we need to ensure we're getting the correct data
-        $candidates = Candidate::select('id', 'first_name', 'last_name', 'email', 'phone', 'city', 'application_date', 'status', 'income_level')
+        $candidates = Candidate::select([
+                'id', 
+                'first_name', 
+                'last_name', 
+                'email', 
+                'phone', 
+                'city', 
+                'application_date', 
+                'status', 
+                'income_level', 
+                'specialization',
+                'score' // Added score field
+            ])
             ->latest()
             ->paginate(10);
+            
         return view('candidates.index', compact('candidates'));
     }
 
@@ -169,127 +184,27 @@ class CandidateController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
-            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
-            'cin' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z]{1,2}[0-9]{1,9}$/'],
-            'email' => 'required|email|unique:candidates,email',
-            'phone' => 'required|string|max:20|regex:/^[0-9+]*$/',
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'cin' => 'required|string|max:255|unique:candidates,cin',
+            'email' => 'required|email|max:255|unique:candidates,email',
+            'phone' => 'required|string|max:255',
+            'nationality' => 'required|string|max:255',
+            'distance' => 'required|numeric|min:0',
             'gender' => 'required|in:male,female',
             'birth_date' => 'required|date',
             'address' => 'required|string|max:255',
-            'nationality' => 'required|string|max:255',
             'city' => 'required|string|max:255',
-            'distance' => 'required|numeric',
-            'income_level' => 'required|string',
             'training_level' => 'required|string',
-            'educational_level' => 'required|string',
             'specialization' => 'required|string',
-            'physical_condition' => 'required|string',
-            'family_status' => 'nullable|array',
-            'siblings_count' => 'required|integer',
-            'guardian_first_name' => 'required|string|max:255',
-            'guardian_last_name' => 'required|string|max:255',
-            'guardian_dob' => 'required|date',
-            'guardian_profession' => 'required|string|max:255',
-            'guardian_phone' => 'nullable|string|max:20|regex:/^[0-9+]*$/',
-            'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,txt,xls,xlsx,csv|max:10240',
         ]);
 
-        // Calculate score based on criteria
-        $score = $this->calculateScore($request);
-        
-        $candidateData = $request->all();
-        // Remove fields that don't exist in the database
-        if (isset($candidateData['name'])) {
-            unset($candidateData['name']);
-        }
-        // Nationality is now saved
-        if (isset($candidateData['distance'])) {
-            // unset($candidateData['distance']);
-        }
-        if (isset($candidateData['income_level'])) {
-            // unset($candidateData['income_level']);
-        }
-        if (isset($candidateData['has_disability'])) {
-            unset($candidateData['has_disability']);
-        }
-        if (isset($candidateData['training_level'])) {
-            // unset($candidateData['training_level']);
-        }
-        // Academic year is now saved
-        if (isset($candidateData['specialization'])) {
-            // unset($candidateData['specialization']);
-        }
-        if (isset($candidateData['family_status'])) {
-            // unset($candidateData['family_status']);
-        }
-        if (isset($candidateData['guardian_name'])) {
-            unset($candidateData['guardian_name']);
-        }
-        if (isset($candidateData['guardian_profession'])) {
-            unset($candidateData['guardian_profession']);
-        }
-        if (isset($candidateData['guardian_phone'])) {
-            unset($candidateData['guardian_phone']);
-        }
-        if (isset($candidateData['supporting_documents'])) {
-            unset($candidateData['supporting_documents']);
-        }
-        
-        // Ensure birth_date and guardian_dob are properly formatted
-        if (isset($candidateData['birth_date'])) {
-            $candidateData['birth_date'] = date('Y-m-d', strtotime($candidateData['birth_date']));
-        }
-        if (isset($candidateData['guardian_dob'])) {
-             $candidateData['guardian_dob'] = date('Y-m-d', strtotime($candidateData['guardian_dob']));
-        }
-        
-        // Implode family_status array if it exists
-        if (isset($candidateData['family_status']) && is_array($candidateData['family_status'])) {
-            $candidateData['family_status'] = implode(',', $candidateData['family_status']);
-        }
-        
-        $candidateData['status'] = 'pending';
-        
-        // Add default city value since it's required in the database but missing in the form
-        if (!isset($candidateData['city'])) {
-            $candidateData['city'] = 'Unknown';
-        }
-        
-        // Add default application_date value since it's required in the database but missing in the form
-        if (!isset($candidateData['application_date'])) {
-            $candidateData['application_date'] = now()->format('Y-m-d');
-        }
+        $validated['application_date'] = now()->format('Y-m-d');
 
-        // Create the candidate record
-        $candidate = Candidate::create($candidateData);
-        
-        // Handle document uploads
-        if ($request->hasFile('supporting_documents')) {
-            $documentPaths = [];
-            foreach ($request->file('supporting_documents') as $file) {
-                // Generate a unique filename with original extension
-                $filename = $candidate->id . '_' . time() . '_' . $file->getClientOriginalName();
-                
-                // Store the file in the public storage
-                $path = $file->storeAs('candidates/documents', $filename, 'public');
-                $documentPaths[] = $path;
-                
-                // Store document information using the CandidateDocument model
-                $candidate->documents()->create([
-                    'filename' => $filename,
-                    'original_filename' => $file->getClientOriginalName(),
-                    'file_path' => $path,
-                    'file_type' => $file->getClientMimeType(),
-                    'file_size' => $file->getSize(),
-                    'document_type' => null, // You can add document type detection logic here if needed
-                ]);
-            }
-        }
+        \App\Models\Candidate::create($validated);
 
-        return redirect()->route('candidates.index')
-            ->with('success', 'Candidate added successfully.');
+        return redirect()->route('candidates.index')->with('success', 'Candidate created successfully!');
     }
 
     /**
@@ -375,6 +290,7 @@ class CandidateController extends Controller
      */
     public function edit(Candidate $candidate)
     {
+        $candidate->load(['criteriaWeights']);
         return view('candidates.edit', compact('candidate'));
     }
 
@@ -387,9 +303,17 @@ class CandidateController extends Controller
      */
     public function update(Request $request, Candidate $candidate)
     {
+        // Debug logging
+        \Log::info('Update request received', [
+            'candidate_id' => $candidate->id,
+            'request_data' => $request->except(['_token', '_method']),
+            'files' => $request->hasFile('supporting_documents') ? 'Files present' : 'No files',
+            'remove_documents' => $request->input('remove_documents'),
+        ]);
+
         $request->validate([
-            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
-            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÀ-ÿ\s'-]+$/u"],
+            'first_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÃ€-Ã¿\s'-]+$/u"],
+            'last_name' => ['required', 'string', 'max:255', "regex:/^[a-zA-ZÃ€-Ã¿\s'-]+$/u"],
             'cin' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z]{1,2}[0-9]{1,9}$/'],
             'email' => 'required|email|unique:candidates,email,' . $candidate->id,
             'phone' => 'required|string|max:20|regex:/^[0-9+]*$/',
@@ -412,11 +336,19 @@ class CandidateController extends Controller
             'guardian_dob' => 'required|date',
             'guardian_profession' => 'required|string|max:255',
             'guardian_phone' => 'nullable|string|max:20|regex:/^[0-9+]*$/',
+            // Validation for dynamic criteria
+            'criteria' => 'nullable|array',
+            'criteria.*.category' => 'required|string|in:geographical,social,academic,physical,family',
+            'criteria.*.criteria_id' => 'required|integer|exists:criterias,id',
+            'criteria.*.score' => 'nullable|numeric|min:0|max:100',
+            'criteria.*.note' => 'nullable|string|max:500',
             'declaration' => 'required',
             'supporting_documents.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,xls,xlsx,zip|max:10240',
+            'remove_documents' => 'nullable|array',
+            'remove_documents.*' => 'exists:candidate_documents,id',
         ]);
 
-        $candidateData = $request->except(['_token', '_method', 'supporting_documents', 'declaration']);
+        $candidateData = $request->except(['_token', '_method', 'supporting_documents', 'declaration', 'remove_documents', 'criteria']);
         
         // Ensure birth_date and guardian_dob are properly formatted
         if (isset($candidateData['birth_date'])) {
@@ -431,8 +363,39 @@ class CandidateController extends Controller
         }
 
         $candidate->update($candidateData);
-
-        // Handle document uploads
+        
+        // Sync criteria with the pivot table
+        if ($request->has('criteria') && is_array($request->criteria)) {
+            $criteriaToSync = [];
+            foreach ($request->criteria as $criterion) {
+                if (isset($criterion['criteria_id'])) {
+                    $criteriaToSync[$criterion['criteria_id']] = [
+                        'score' => $criterion['score'] ?? null,
+                        'note' => $criterion['note'] ?? null,
+                    ];
+                }
+            }
+            $candidate->criteria()->sync($criteriaToSync);
+        } else {
+            // If no criteria are submitted, detach all existing criteria
+            $candidate->criteria()->detach();
+        }
+        
+        // Handle document removals
+        if ($request->has('remove_documents')) {
+            $documentsToRemove = $candidate->documents()->whereIn('id', $request->remove_documents)->get();
+            
+            foreach ($documentsToRemove as $document) {
+                // Delete the actual file from storage
+                if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
+                    Storage::disk('public')->delete($document->file_path);
+                }
+                // Delete the document record from the database
+                $document->delete();
+            }
+        }
+        
+        // Handle new document uploads
         if ($request->hasFile('supporting_documents')) {
             foreach ($request->file('supporting_documents') as $file) {
                 $filename = $candidate->id . '_' . time() . '_' . $file->getClientOriginalName();
@@ -449,24 +412,9 @@ class CandidateController extends Controller
             }
         }
 
-        // Handle document deletions
-        if ($request->has('delete_documents')) {
-            $documentIdsToDelete = $request->input('delete_documents');
-            $documentsToDelete = $candidate->documents()->whereIn('id', $documentIdsToDelete)->get();
-
-            foreach ($documentsToDelete as $document) {
-                // Delete the actual file from storage
-                if ($document->file_path && Storage::disk('public')->exists($document->file_path)) {
-                    Storage::disk('public')->delete($document->file_path);
-                }
-                // Delete the document record from the database
-                $document->delete();
-            }
-        }
-
         // Redirect to Candidates List page with success message
-        return redirect()->route('candidates.index')
-            ->with('success', 'Candidate updated successfully.');
+            return redirect()->route('candidates.index')
+                ->with('success', 'Candidate updated successfully.');
     }
 
     /**
@@ -538,17 +486,17 @@ class CandidateController extends Controller
     public function convertToTrainee(Candidate $candidate)
     {
         try {
-            // Check if candidate is already accepted
-            if ($candidate->status !== 'accepted') {
+        // Check if candidate is already accepted
+        if ($candidate->status !== 'accepted') {
                 if (request()->wantsJson()) {
                     return response()->json([
                         'success' => false,
                         'message' => 'Only accepted candidates can be converted to trainees.'
                     ], 422);
                 }
-                return redirect()->back()
-                    ->with('error', 'Only accepted candidates can be converted to trainees.');
-            }
+            return redirect()->back()
+                ->with('error', 'Only accepted candidates can be converted to trainees.');
+        }
             
             // Check if this candidate is already in the trainee list
             $existingStudent = \App\Models\Student::where('cin', $candidate->cin)
@@ -569,42 +517,42 @@ class CandidateController extends Controller
                 
                 return redirect()->back()
                     ->with('warning', $message);
-            }
-            
-            // Create a new student/trainee from the candidate data
-            $student = new \App\Models\Student();
-            $student->first_name = $candidate->first_name;
-            $student->last_name = $candidate->last_name;
+        }
+        
+        // Create a new student/trainee from the candidate data
+        $student = new \App\Models\Student();
+        $student->first_name = $candidate->first_name;
+        $student->last_name = $candidate->last_name;
             $student->name = $candidate->first_name . ' ' . $candidate->last_name;
-            $student->email = $candidate->email;
-            $student->phone = $candidate->phone;
-            $student->address = $candidate->address;
+        $student->email = $candidate->email;
+        $student->phone = $candidate->phone;
+        $student->address = $candidate->address;
             $student->place_of_residence = $candidate->city; // Map city to place_of_residence
             $student->date_of_birth = $candidate->birth_date;
             $student->cin = $candidate->cin;
             $student->enrollment_date = now();
             $student->status = 'active';
-            
-            // Copy additional fields if they exist
-            if (isset($candidate->gender)) {
-                $student->gender = $candidate->gender;
-            }
+        
+        // Copy additional fields if they exist
+        if (isset($candidate->gender)) {
+            $student->gender = $candidate->gender;
+        }
             
             // Copy academic information with default values
             $student->academic_year = $candidate->academic_year ?? 'First Year';
             $student->specialization = $candidate->specialization ?? 'Not Specified';
             $student->nationality = $candidate->nationality ?? 'Moroccan';
             $student->educational_level = $candidate->educational_level ?? 'specialized_technician';
-            
-            // Save the new student
-            $student->save();
-            
-            // Update candidate status to indicate conversion
-            $candidate->status = 'converted';
-            $candidate->save();
-            
+        
+        // Save the new student
+        $student->save();
+        
+        // Update candidate status to indicate conversion
+        $candidate->status = 'converted';
+        $candidate->save();
+        
             // Always redirect with a success message
-            return redirect()->route('candidates.accepted')
+        return redirect()->route('candidates.accepted')
                 ->with('success', 'Candidate successfully converted to trainee and moved to Students.');
                 
         } catch (\Exception $e) {
@@ -636,37 +584,6 @@ class CandidateController extends Controller
         return redirect()->route('candidates.accepted')
             ->with('success', 'Candidate rejected successfully.');
     }
-
-// Removed duplicate methods - these are already defined earlier in the controller
-// 
-/**
- * Download a specific document.
- *
- * @param  \App\Models\CandidateDocument  $document
- * @return \Illuminate\Http\Response
- */
-public function downloadDocument(CandidateDocument $document)
-{
-    $filePath = storage_path('app/public/' . $document->file_path);
-    
-    if (file_exists($filePath)) {
-        // Set appropriate headers for download
-        $headers = [
-            'Content-Type' => mime_content_type($filePath),
-            'Content-Disposition' => 'attachment; filename="' . $document->original_filename . '"',
-            'Content-Length' => filesize($filePath),
-            'Cache-Control' => 'no-cache, no-store, must-revalidate',
-            'Pragma' => 'no-cache',
-            'Expires' => '0'
-        ];
-        
-        // Return the file as a download response
-        return response()->file($filePath, $headers);
-    } else {
-        return redirect()->back()
-            ->with('error', 'Document file not found.');
-    }
-}
 
     /**
      * Bulk convert selected accepted candidates to trainees.
@@ -723,15 +640,64 @@ public function downloadDocument(CandidateDocument $document)
     public function bulkReject(Request $request)
     {
         $candidateIds = $request->input('selected', []);
-
         if (empty($candidateIds)) {
             return redirect()->back()->with('error', 'No candidates selected for rejection.');
         }
 
-        $rejectedCount = Candidate::whereIn('id', $candidateIds)
-                                ->where('status', 'accepted') // Only reject accepted candidates
-                                ->update(['status' => 'rejected']);
+        $count = Candidate::whereIn('id', $candidateIds)
+            ->where('status', 'accepted')
+            ->update(['status' => 'rejected']);
 
-        return redirect()->route('candidates.accepted')->with('success', $rejectedCount . ' candidates rejected successfully.');
+        return redirect()->route('candidates.accepted')
+            ->with('success', $count . ' candidates rejected successfully.');
+    }
+
+    /**
+     * Export candidates to PDF
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportPdf()
+    {
+        try {
+            $candidates = Candidate::all();
+            $pdf = Pdf::loadView('exports.candidates-pdf', compact('candidates'));
+            return $pdf->download('candidates-list-' . now()->format('Y-m-d') . '.pdf');
+        } catch (\Exception $e) {
+            \Log::error('PDF Export Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to generate PDF: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export candidates to Excel
+     * 
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportExcel()
+    {
+        try {
+            $export = new \App\Exports\CandidatesExport();
+            return $export->exportToExcel();
+        } catch (\Exception $e) {
+            \Log::error('Excel Export Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to generate Excel file: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export candidates to CSV
+     * 
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
+     */
+    public function exportCsv()
+    {
+        try {
+            $export = new \App\Exports\CandidatesExport();
+            return $export->exportToCsv();
+        } catch (\Exception $e) {
+            \Log::error('CSV Export Error: ' . $e->getMessage());
+            return back()->with('error', 'Failed to generate CSV file: ' . $e->getMessage());
+        }
     }
 }

@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             RoleSeeder::class,
             HelpContentSeeder::class,
+            CriteriaTableSeeder::class,
             // DepartmentSeeder removed
         ]);
     }

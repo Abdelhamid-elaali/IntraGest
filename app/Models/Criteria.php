@@ -17,8 +17,17 @@ class Criteria extends Model
     protected $fillable = [
         'name',
         'category',
-        'weight',
+        'score',
         'description',
+    ];
+    
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'score' => 'float',
     ];
 
     /**
@@ -42,5 +51,27 @@ class Criteria extends Model
     public function getCategoryNameAttribute()
     {
         return self::$categories[$this->category] ?? ucfirst($this->category);
+    }
+    
+    /**
+     * Scope a query to only include criteria of a given category.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  string  $category
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeByCategory($query, $category)
+    {
+        return $query->where('category', $category);
+    }
+    
+    /**
+     * Get the candidates associated with this criteria.
+     */
+    public function candidates()
+    {
+        return $this->belongsToMany(Candidate::class, 'candidate_criteria')
+            ->withPivot('score')
+            ->withTimestamps();
     }
 }

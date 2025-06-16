@@ -7,7 +7,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/js/search.js'
+                'resources/js/search.js',
+                // 'resources/js/candidates/criteria-handler.js',
+                'resources/js/candidates/dynamic-criteria.js'
             ],
             refresh: true,
         }),
@@ -16,6 +18,11 @@ export default defineConfig({
         alias: {
             '@': '/resources/js',
             '~': '/resources/css',
+            'jquery': 'jquery/dist/jquery.min.js',
+            'select2': 'select2/dist/js/select2.min.js',
         },
     },
+    optimizeDeps: {
+        include: ['jquery', 'select2']
+    }
 });

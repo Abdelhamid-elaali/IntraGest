@@ -13,21 +13,23 @@ class Candidate extends Model
     protected $fillable = [
         'first_name',
         'last_name',
-        'birth_date',
+        'cin',
         'email',
         'phone',
+        'nationality',
+        'distance',
+        'gender',
+        'birth_date',
         'address',
         'city',
+        'training_level',
+        'specialization',
         'status',
         'notes',
         'application_date',
         'user_id',
         'academic_year',
-        'specialization',
-        'nationality',
-        'distance',
         'income_level',
-        'training_level',
         'has_disability',
         'family_status',
         'score',
@@ -37,6 +39,8 @@ class Candidate extends Model
         'guardian_dob',
         'guardian_profession',
         'guardian_phone',
+        'physical_condition',
+        'educational_level',
     ];
 
     protected $casts = [
@@ -47,7 +51,15 @@ class Candidate extends Model
         'family_status' => 'array',
         'siblings_count' => 'integer',
         'guardian_dob' => 'date',
+        'distance' => 'float',
     ];
+    
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [];
 
     // Relationships
     public function user()
@@ -61,6 +73,24 @@ class Candidate extends Model
     public function documents()
     {
         return $this->hasMany(CandidateDocument::class);
+    }
+    
+    /**
+     * Get the criteria associated with the candidate (many-to-many relationship).
+     */
+    public function criteria()
+    {
+        return $this->belongsToMany(Criteria::class, 'candidate_criteria')
+            ->withPivot('score')
+            ->withTimestamps();
+    }
+
+    /**
+     * Get the category weights for this candidate.
+     */
+    public function criteriaWeights()
+    {
+        return $this->hasMany(CandidateCategoryWeight::class);
     }
 
     // Helper methods
@@ -86,24 +116,6 @@ class Candidate extends Model
 
     public function getAge()
     {
-        return $this->birth_date->age;
-    }
-    
-    // Accessors for fields that don't exist in the database but are displayed in the view
-    public function getNameAttribute()
-    {
-        // Directly access the attributes array to bypass any potential overrides
-        $firstName = $this->getAttributeFromArray('first_name');
-        $lastName = $this->getAttributeFromArray('last_name');
-        
-        if (!empty($firstName) && !empty($lastName)) {
-            return $firstName . ' ' . $lastName;
-        } elseif (!empty($firstName)) {
-            return $firstName;
-        } elseif (!empty($lastName)) {
-            return $lastName;
-        } else {
-            return 'Unnamed Candidate';
-        }
+        return $this->birth_date ? $this->birth_date->age : null;
     }
 }

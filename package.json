@@ -22,9 +22,11 @@
         "@heroicons/react": "^2.1.1",
         "alpinejs": "^3.14.8",
         "chart.js": "^4.4.1",
+        "jquery": "^3.7.1",
         "laravel-echo": "^2.1.4",
         "pusher-js": "^8.4.0",
         "react-chartjs-2": "^5.2.0",
+        "select2": "^4.1.0-rc.0",
         "vue": "^3.5.16"
     }
 }

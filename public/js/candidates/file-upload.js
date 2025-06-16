@@ -17,6 +17,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Only initialize if we have the necessary elements
     if (!fileInput || !dropArea) return;
 
+    // Load existing documents if any
+    if (window.existingDocuments && window.existingDocuments.length > 0) {
+        // Show preview container and hide upload prompt
+        previewContainer.classList.remove('hidden');
+        uploadPrompt.classList.add('hidden');
+        
+        // Adjust drop area height for better display
+        dropArea.classList.remove('h-32');
+        dropArea.classList.add('min-h-32');
+        
+        // Create previews for existing documents
+        window.existingDocuments.forEach(doc => {
+            const docPreview = createExistingDocumentPreview(doc);
+            previewsGrid.appendChild(docPreview);
+        });
+        
+        // Update file count display
+        fileCountEl.textContent = `${window.existingDocuments.length}/5 files`;
+        fileCountEl.className = window.existingDocuments.length === 5 ? 
+            'text-xs font-medium text-amber-600' : 'text-xs text-gray-500';
+    }
+
     // Format file size to human-readable format
     function formatFileSize(bytes) {
         if (bytes === 0) return '0 Bytes';
@@ -102,62 +124,88 @@ document.addEventListener('DOMContentLoaded', function() {
         return preview;
     }
 
+    // Create preview element for an existing document
+    function createExistingDocumentPreview(doc) {
+        const fileType = doc.type || getFileType(doc.name);
+        const fileIcon = getFileIcon(fileType);
+        
+        // Create preview element
+        const preview = document.createElement('div');
+        preview.className = 'bg-white rounded-lg shadow-sm border border-gray-200 p-3 flex items-start';
+        preview.dataset.documentId = doc.id;
+        
+        // Create preview content
+        preview.innerHTML = `
+            <div class="flex-shrink-0 mr-3">
+                ${fileIcon}
+            </div>
+            <div class="flex-grow min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate" title="${doc.name}">${doc.name}</p>
+                <p class="text-xs text-gray-500">${fileType.toUpperCase()} · ${formatFileSize(doc.size)}</p>
+            </div>
+            <div class="flex-shrink-0 ml-2 flex space-x-1">
+                <a href="${doc.url}" target="_blank" class="text-gray-400 hover:text-gray-600" title="Download">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                </a>
+                <button type="button" class="text-gray-400 hover:text-red-600" onclick="removeExistingDocument(${doc.id})" title="Remove">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            </div>
+        `;
+        
+        return preview;
+    }
+
     // Function to handle file selection
     function handleFileSelect() {
-        // Check if files are selected
-        if (fileInput.files.length > 0) {
-            // Enforce maximum of 5 files
-            if (fileInput.files.length > 5) {
-                // Use x-alert component instead of basic alert
-                showXAlert('warning', 'File Limit Exceeded', 'You can upload a maximum of 5 files. Only the first 5 files will be used.');
-                
-                // Create a new FileList with only the first 5 files
-                const dt = new DataTransfer();
-                for (let i = 0; i < Math.min(5, fileInput.files.length); i++) {
-                    dt.items.add(fileInput.files[i]);
-                }
-                fileInput.files = dt.files;
+        const existingCount = window.existingDocuments ? window.existingDocuments.length : 0;
+        const newCount = fileInput.files.length;
+        const totalCount = existingCount + newCount;
+
+        // Check if total files exceed limit
+        if (totalCount > 5) {
+            showXAlert('warning', 'File Limit Exceeded', 'You can upload a maximum of 5 files in total. Only the first ' + (5 - existingCount) + ' new files will be used.');
+            
+            // Create a new FileList with only the allowed number of files
+            const dt = new DataTransfer();
+            for (let i = 0; i < Math.min(5 - existingCount, fileInput.files.length); i++) {
+                dt.items.add(fileInput.files[i]);
             }
-            
-            // Update file count display
-            fileCountEl.textContent = `${fileInput.files.length}/5 files`;
-            fileCountEl.className = fileInput.files.length === 5 ? 
-                'text-xs font-medium text-amber-600' : 'text-xs text-gray-500';
-            
-            // Show preview container and hide upload prompt if there are files
-            if (fileInput.files.length > 0) {
-                previewContainer.classList.remove('hidden');
-                uploadPrompt.classList.add('hidden');
-                
-                // Adjust drop area height for better display
-                dropArea.classList.remove('h-32');
-                dropArea.classList.add('min-h-32');
-            } else {
-                previewContainer.classList.add('hidden');
-                uploadPrompt.classList.remove('hidden');
-                dropArea.classList.add('h-32');
-                dropArea.classList.remove('min-h-32');
-            }
-            
-            // Clear previous previews
-            previewsGrid.innerHTML = '';
-            
-            // Create previews for each file
-            Array.from(fileInput.files).forEach((file, index) => {
-                const filePreview = createFilePreview(file, index);
-                previewsGrid.appendChild(filePreview);
-            });
+            fileInput.files = dt.files;
+        }
+        
+        // Update file count display
+        const finalCount = Math.min(5, existingCount + fileInput.files.length);
+        fileCountEl.textContent = `${finalCount}/5 files`;
+        fileCountEl.className = finalCount === 5 ? 
+            'text-xs font-medium text-amber-600' : 'text-xs text-gray-500';
+        
+        // Show/hide preview container and upload prompt
+        if (finalCount > 0) {
+            previewContainer.classList.remove('hidden');
+            uploadPrompt.classList.add('hidden');
+            dropArea.classList.remove('h-32');
+            dropArea.classList.add('min-h-32');
         } else {
-            // Hide preview container and show upload prompt
             previewContainer.classList.add('hidden');
             uploadPrompt.classList.remove('hidden');
             dropArea.classList.add('h-32');
             dropArea.classList.remove('min-h-32');
-            
-            // Update file count display
-            fileCountEl.textContent = '0/5 files';
-            fileCountEl.className = 'text-xs text-gray-500';
         }
+        
+        // Clear previous new file previews (but keep existing document previews)
+        const newFilePreviews = previewsGrid.querySelectorAll('[data-index]');
+        newFilePreviews.forEach(preview => preview.remove());
+        
+        // Create previews for new files
+        Array.from(fileInput.files).forEach((file, index) => {
+            const filePreview = createFilePreview(file, index);
+            previewsGrid.appendChild(filePreview);
+        });
     }
 
     // Handle file selection
@@ -275,6 +323,25 @@ document.addEventListener('DOMContentLoaded', function() {
             // For non-images, just show info
             showXAlert('info', 'File Preview', `Preview not available for ${file.name}. You can view this file after uploading.`);
         }
+    };
+    
+    // Function to remove an existing document
+    window.removeExistingDocument = function(documentId) {
+        // Add a hidden input to track documents to be removed
+        const removeInput = document.createElement('input');
+        removeInput.type = 'hidden';
+        removeInput.name = 'remove_documents[]';
+        removeInput.value = documentId;
+        document.querySelector('form').appendChild(removeInput);
+
+        // Remove the preview element
+        const preview = document.querySelector(`[data-document-id="${documentId}"]`);
+        if (preview) {
+            preview.remove();
+        }
+
+        // Show success message
+        showXAlert('success', 'Document Removed', 'The document will be removed when you save the form.');
     };
     
     // Function to show styled alerts

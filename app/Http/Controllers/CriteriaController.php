@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Criteria;
-use App\Models\CategoryWeight;
+use App\Models\CategoryScore;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CriteriaController extends Controller
 {
@@ -13,8 +14,64 @@ class CriteriaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    /**
+     * Get criteria by category for API
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    /**
+     * Get criteria by category for API
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getByCategory(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'category' => 'required|string|in:geographical,social,academic,physical,family'
+            ]);
+            
+            $criteria = Criteria::byCategory($validated['category'])
+                ->orderBy('name')
+                ->select(['id', 'name as text', 'score', 'description'])
+                ->get();
+                
+            return response()->json([
+                'success' => true,
+                'data' => $criteria
+            ]);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error fetching criteria by category: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while fetching criteria.',
+                'error' => config('app.debug') ? $e->getMessage() : null
+            ], 500);
+        }
+    }
+    
     public function index()
     {
+        // Get the authenticated user
+        $user = auth()->user();
+        
+        // Get the candidate associated with the user (if any)
+        $candidate = null;
+        if ($user && $user->candidate) {
+            $candidate = $user->candidate;
+        }
+        
         // Fetch criteria from database and group by category
         $geographicalCriteria = Criteria::where('category', 'geographical')->get();
         $socialCriteria = Criteria::where('category', 'social')->get();
@@ -22,36 +79,76 @@ class CriteriaController extends Controller
         $physicalCriteria = Criteria::where('category', 'physical')->get();
         $familyCriteria = Criteria::where('category', 'family')->get();
         
-        // Get category weights from the database
-        $categoryWeights = CategoryWeight::getAllWeights();
+        // If we have a candidate, load their criteria scores
+        if ($candidate) {
+            $candidateCriteria = $candidate->criteria->pluck('pivot.score', 'id')->toArray();
+            
+            // Add scores to each criterion
+            $geographicalCriteria->each(function($criterion) use ($candidateCriteria) {
+                $criterion->candidate_score = $candidateCriteria[$criterion->id] ?? null;
+            });
+            
+            $socialCriteria->each(function($criterion) use ($candidateCriteria) {
+                $criterion->candidate_score = $candidateCriteria[$criterion->id] ?? null;
+            });
+            
+            $academicCriteria->each(function($criterion) use ($candidateCriteria) {
+                $criterion->candidate_score = $candidateCriteria[$criterion->id] ?? null;
+            });
+            
+            $physicalCriteria->each(function($criterion) use ($candidateCriteria) {
+                $criterion->candidate_score = $candidateCriteria[$criterion->id] ?? null;
+            });
+            
+            $familyCriteria->each(function($criterion) use ($candidateCriteria) {
+                $criterion->candidate_score = $candidateCriteria[$criterion->id] ?? null;
+            });
+        }
         
-        // If no weights exist, create default ones
-        if (empty($categoryWeights)) {
-            $categoryWeights = [
-                'geographical' => 25,
+        // Get category scores from the database
+        $categoryScores = CategoryScore::getAllScores();
+        
+        // Define default categories
+        $categories = ['geographical', 'social', 'academic', 'physical', 'family'];
+        
+        // If no scores exist, create default ones
+        if ($categoryScores->isEmpty()) {
+            $defaultWeights = [
+                'geographical' => 20,
                 'social' => 20,
                 'academic' => 20,
-                'physical' => 15,
+                'physical' => 20,
                 'family' => 20
             ];
             
-            // Save default weights to the database
-            foreach ($categoryWeights as $category => $weight) {
-                CategoryWeight::create([
+            // Save default scores to the database
+            foreach ($defaultWeights as $category => $weight) {
+                CategoryScore::create([
                     'category' => $category,
-                    'weight' => $weight
+                    'weight' => $weight,
+                    'score' => 0
                 ]);
             }
+            
+            // Refresh the scores
+            $categoryScores = CategoryScore::getAllScores();
         }
         
-        return view('criteria.index', compact(
-            'geographicalCriteria',
-            'socialCriteria',
-            'academicCriteria',
-            'physicalCriteria',
-            'familyCriteria',
-            'categoryWeights'
-        ));
+        // Convert to array format for the view
+        $categoryScoresArray = [];
+        foreach ($categoryScores as $category => $score) {
+            $categoryScoresArray[$category] = $score->weight ?? 0;
+        }
+        
+        return view('criteria.index', [
+            'geographicalCriteria' => $geographicalCriteria,
+            'socialCriteria' => $socialCriteria,
+            'academicCriteria' => $academicCriteria,
+            'physicalCriteria' => $physicalCriteria,
+            'familyCriteria' => $familyCriteria,
+            'categoryScores' => $categoryScoresArray,
+            'categoryScoresData' => $categoryScores // Pass the full collection to the view
+        ]);
     }
 
     /**
@@ -69,53 +166,83 @@ class CriteriaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function weights()
+    /**
+     * Display the form to adjust category weights and scores.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function scores()
     {
-        // Get the current weights from the database
-        $categoryWeights = CategoryWeight::getAllWeights();
+        // Get the current scores from the database
+        $categoryScores = CategoryScore::getAllScores();
         
-        // If no weights exist, create default ones
-        if (empty($categoryWeights)) {
-            $categoryWeights = [
-                'geographical' => 25,
+        // Define default categories
+        $categories = ['geographical', 'social', 'academic', 'physical', 'family'];
+        
+        // If no scores exist, create default ones
+        if ($categoryScores->isEmpty()) {
+            $defaultWeights = [
+                'geographical' => 20,
                 'social' => 20,
                 'academic' => 20,
-                'physical' => 15,
+                'physical' => 20,
                 'family' => 20
             ];
             
-            // Save default weights to the database
-            foreach ($categoryWeights as $category => $weight) {
-                CategoryWeight::create([
+            // Save default scores to the database
+            foreach ($defaultWeights as $category => $weight) {
+                CategoryScore::create([
                     'category' => $category,
-                    'weight' => $weight
+                    'weight' => $weight,
+                    'score' => 0
                 ]);
             }
+            
+            // Refresh the scores
+            $categoryScores = CategoryScore::getAllScores();
         }
         
-        return view('criteria.weights', compact('categoryWeights'));
+        return view('criteria.scores', [
+            'scores' => $categoryScores,
+            'categories' => $categories
+        ]);
     }
     
     /**
-     * Update the category weights.
+     * Update the category weights and scores.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function updateWeights(Request $request)
+    public function updateScores(Request $request)
     {
         $validated = $request->validate([
-            'geographical' => 'required|integer|min:0|max:100',
-            'social' => 'required|integer|min:0|max:100',
-            'academic' => 'required|integer|min:0|max:100',
-            'physical' => 'required|integer|min:0|max:100',
-            'family' => 'required|integer|min:0|max:100',
+            'scores' => 'required|array',
+            'scores.*.weight' => 'required|numeric|min:0|max:100',
         ]);
-        
-        // Save the weights to the database
-        CategoryWeight::updateWeights($validated);
-        
-        return redirect()->route('criteria.weights')
+
+        // Calculate total weight
+        $totalWeight = collect($validated['scores'])->sum(function($item) {
+            return $item['weight'];
+        });
+
+        // Allow for floating point imprecision
+        if (abs($totalWeight - 100) > 0.01) {
+            return back()->withErrors(['scores' => 'The sum of all weights must be exactly 100%. Current total: ' . round($totalWeight, 2) . '%']);
+        }
+
+        // Update the weights in the database
+        foreach ($validated['scores'] as $category => $data) {
+            CategoryScore::updateOrCreate(
+                ['category' => $category],
+                [
+                    'weight' => $data['weight'],
+                    'score' => 0 // Keep score as 0 since we're not using it
+                ]
+            );
+        }
+
+        return redirect()->route('criteria.index')
             ->with('success', 'Category weights updated successfully!');
     }
 
@@ -127,17 +254,55 @@ class CriteriaController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'category' => 'required|string|in:geographical,social,academic,physical,family',
-            'weight' => 'required|integer|min:1|max:100',
-            'description' => 'nullable|string',
+        $validated = $request->validate([
+            'criteria' => 'required|array|min:1',
+            'criteria.*.name' => 'required|string|max:255',
+            'criteria.*.category' => 'required|string|in:geographical,social,academic,physical,family',
+            'criteria.*.score' => 'required|integer|min:1|max:100',
+            'criteria.*.description' => 'nullable|string',
         ]);
-
-        Criteria::create($request->all());
-
-        return redirect()->route('criteria.index')
-            ->with('success', 'Criterion added successfully.');
+        
+        // Calculate total score
+        $totalScore = collect($validated['criteria'])->sum('score');
+        if ($totalScore > 100) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'The total score points cannot exceed 100. Current total: ' . $totalScore);
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            $created = [];
+            
+            foreach ($validated['criteria'] as $criterion) {
+                $criteria = Criteria::create([
+                    'name' => $criterion['name'],
+                    'category' => $criterion['category'],
+                    'score' => $criterion['score'],
+                    'description' => $criterion['description'] ?? null,
+                ]);
+                
+                $created[] = $criteria;
+            }
+            
+            DB::commit();
+            
+            if (count($created) === 1) {
+                return redirect()->route('criteria.index')
+                    ->with('success', 'Criterion created successfully!');
+            } else {
+                return redirect()->route('criteria.index')
+                    ->with('success', count($created) . ' criteria created successfully!');
+            }
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error creating criteria: ' . $e->getMessage());
+            
+            return back()->withInput()
+                ->with('error', 'An error occurred while creating the criteria. Please try again.');
+        }
     }
 
     /**
@@ -175,12 +340,25 @@ class CriteriaController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'category' => 'required|string|in:geographical,social,academic,physical,family',
-            'weight' => 'required|integer|min:1|max:100',
+            'score' => 'required|integer|min:1|max:100',
             'description' => 'nullable|string',
         ]);
 
         $criteria = Criteria::findOrFail($criterion);
-        $criteria->update($request->all());
+        $criteria->update([
+            'name' => $request->name,
+            'category' => $request->category,
+            'score' => $request->score,
+            'description' => $request->description,
+        ]);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'redirect' => route('criteria.index'),
+                'message' => 'Criterion updated successfully.'
+            ]);
+        }
 
         return redirect()->route('criteria.index')
             ->with('success', 'Criterion updated successfully.');

@@ -34,7 +34,7 @@
     <x-alert type="success" :auto-dismiss="true" :dismiss-after="4000" class="mb-4">
         {{ session('success') }}
     </x-alert>
-    @endif  
+    @endif
 
     <form id="bulk-action-form" method="POST" class="bg-white rounded-lg shadow overflow-hidden">
         @csrf
@@ -86,15 +86,15 @@
                                 </svg>
                             </a>
                             <button onclick="convertCandidate(event, '{{ $candidate->id }}')" class="text-green-600 hover:text-green-900 p-1 rounded-full hover:bg-green-100" title="Convert to trainee">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                </svg>
-                            </button>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                </button>
                             <button onclick="rejectCandidate(event, '{{ $candidate->id }}')" class="text-red-600 hover:text-red-900 p-1 rounded-full hover:bg-red-100" title="Reject candidate">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
                         </div>
                     </td>
                 </tr>
@@ -393,4 +393,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+</div>
+@endif
 @endsection
